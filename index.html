@@ -81,8 +81,10 @@ a.btn{display:inline-block;background:#1b2838;color:#fff;text-decoration:none;bo
 </div></div>
 
 <div class="ov" id="lbov"><div class="box lbbox">
-  <h2>Рейтинг</h2><p>Сколько раз игрок прошёл игру целиком (все уровни)</p>
-  <div class="lbwrap"><table class="lb"><thead><tr><th>#</th><th>Игрок</th><th>Прошёл</th></tr></thead><tbody id="lbb"></tbody></table></div>
+  <h2>Рейтинг</h2>
+  <div class="row" style="margin-bottom:10px"><button id="tabc">По прохождениям</button><button class="alt" id="tabs">По скорости</button></div>
+  <p id="lbdesc"></p>
+  <div class="lbwrap"><table class="lb"><thead><tr><th>#</th><th>Игрок</th><th id="lbh">Прошёл</th></tr></thead><tbody id="lbb"></tbody></table></div>
   <p id="lbmsg"></p>
   <button id="lbclose">Закрыть</button>
 </div></div>
@@ -295,6 +297,7 @@ function win(){
     }
     var m=j.code?(j.received?'Промокод уже получен ранее. Он сохранён за вашим аккаунтом и слева на экране.':'Вы получили промокод для магазина. Он сохранён за вашим аккаунтом и слева на экране.'):'За этот уровень промокода нет.';
     if(last&&j.count)m+=' Прохождение засчитано в рейтинге: '+j.count+'.';
+    if(last&&j.time)m+=' Ваше время: '+fmtMs(j.time)+(j.record?' — новый личный рекорд!':'. Лучшее: '+fmtMs(j.best)+'.');
     done(m);
   }).catch(function(e){done('Не удалось получить награду: '+((e&&e.error)||'ошибка сети')+'.')});
 }
@@ -339,10 +342,16 @@ function startRun(){
   runTok=null;if(!tok)return;
   api('/api/start',{}).then(function(j){runTok=j.run}).catch(function(){});
 }
-function openLb(){
+var lbMode='count';
+function fmtMs(ms){var s=Math.round(ms/1000),h=Math.floor(s/3600),m=Math.floor(s%3600/60),r=s%60;return (h?h+':'+('0'+m).slice(-2):m)+':'+('0'+r).slice(-2)}
+function openLb(){running=false;$('lbov').classList.add('show');loadLb(lbMode)}
+function loadLb(mode){
+  lbMode=mode;
   var body=$('lbb'),msg=$('lbmsg');body.innerHTML='';msg.textContent='Загрузка…';
-  running=false;$('lbov').classList.add('show');
-  api('/api/leaderboard').then(function(j){
+  $('tabc').classList.toggle('alt',mode!=='count');$('tabs').classList.toggle('alt',mode!=='speed');
+  $('lbh').textContent=mode==='speed'?'Время':'Прошёл';
+  $('lbdesc').textContent=mode==='speed'?'Лучшее время прохождения всех уровней подряд':'Сколько раз игрок прошёл игру целиком';
+  api(mode==='speed'?'/api/speed':'/api/leaderboard').then(function(j){
     msg.textContent=j.players.length?'':'Пока никто не прошёл все уровни.';
     j.players.forEach(function(p,i){
       var tr=document.createElement('tr');if(me&&p.id===me.sid)tr.className='me';
@@ -350,12 +359,14 @@ function openLb(){
       var c2=document.createElement('td');
       if(p.a&&p.a.indexOf('https://')===0){var im=document.createElement('img');im.className='av';im.src=p.a;im.alt='';c2.appendChild(im)}
       var a=document.createElement('a');a.textContent=p.n;a.href='https://steamcommunity.com/profiles/'+p.id;a.target='_blank';a.rel='noopener';c2.appendChild(a);
-      var c3=document.createElement('td');c3.textContent=p.c;
+      var c3=document.createElement('td');c3.textContent=mode==='speed'?fmtMs(p.ms):p.c;
       tr.appendChild(c1);tr.appendChild(c2);tr.appendChild(c3);body.appendChild(tr);
     });
   }).catch(function(){msg.textContent='Не удалось загрузить рейтинг. Проверьте адрес сервера в начале скрипта.'});
 }
 $('lb').onclick=openLb;
+$('tabc').onclick=function(){loadLb('count')};
+$('tabs').onclick=function(){loadLb('speed')};
 $('lbclose').onclick=function(){$('lbov').classList.remove('show');running=!$('ov').classList.contains('show')};
 function loadPromos(){
   if(!tok)return;
