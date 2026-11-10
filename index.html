@@ -1,4 +1,4 @@
-<!DOCTYPE html> 
+<!DOCTYPE html>
 <html lang="ru">
 <head>
 <meta charset="utf-8">
@@ -20,7 +20,7 @@ button{font:inherit;background:var(--rust);color:#fff;border:0;border-radius:8px
 button.alt{background:var(--panel);border:1px solid var(--line);color:var(--text)}
 button:disabled{opacity:.5;cursor:default}
 button:focus-visible{outline:3px solid var(--text);outline-offset:2px}
-#stage{position:absolute;left:0;right:0;top:96px;bottom:0;display:flex;align-items:center;justify-content:center}
+#stage{position:absolute;z-index:1;left:0;right:0;top:96px;bottom:0;display:flex;align-items:center;justify-content:center}
 #board{position:relative}
 .tile{position:absolute;background:linear-gradient(145deg,#f1e8cf,var(--face));border-radius:9px;
   box-shadow:3px 4px 0 var(--edge),5px 7px 8px rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;
@@ -36,7 +36,7 @@ button:focus-visible{outline:3px solid var(--text);outline-offset:2px}
 .card small{color:var(--muted);display:block;margin-bottom:3px}
 .card code{display:block;font:700 .95rem Consolas,Menlo,monospace;word-break:break-all;margin-bottom:6px;color:var(--rustHi)}
 .card button{padding:5px 10px;font-size:.85rem;width:100%}
-.ov{position:fixed;inset:0;background:rgba(0,0,0,.7);display:none;align-items:center;justify-content:center;z-index:50;padding:16px}
+.ov{position:fixed;inset:0;background:rgba(0,0,0,.7);display:none;align-items:center;justify-content:center;z-index:1000;padding:16px}
 .ov.show{display:flex}
 .box{background:var(--panel);border:1px solid var(--line);border-top:5px solid var(--rust);border-radius:12px;padding:22px;max-width:380px;width:100%;text-align:center}
 .box h2{margin:0 0 8px;font:700 1.5rem Impact,"Arial Narrow",sans-serif;letter-spacing:.03em}
