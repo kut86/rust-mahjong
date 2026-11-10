@@ -62,7 +62,7 @@ a.btn{display:inline-block;background:#1b2838;color:#fff;text-decoration:none;bo
 <body>
 <header>
   <h1>RUST МАДЖОНГ</h1>
-  <span class="stat">Уровень <b id="lv">1</b> из 3</span>
+  <span class="stat">Уровень <b id="lv">1</b> из <b id="lvt">3</b></span>
   <span class="stat">Осталось пар: <b id="left">0</b></span>
   <span class="stat">Время: <b id="tm">0:00</b></span>
   <button class="alt" id="shuf">Перемешать (<span id="sl">1</span>)</button>
@@ -81,7 +81,7 @@ a.btn{display:inline-block;background:#1b2838;color:#fff;text-decoration:none;bo
 </div></div>
 
 <div class="ov" id="lbov"><div class="box lbbox">
-  <h2>Рейтинг</h2><p>Сколько раз игрок прошёл все 3 уровня</p>
+  <h2>Рейтинг</h2><p>Сколько раз игрок прошёл игру целиком (все уровни)</p>
   <div class="lbwrap"><table class="lb"><thead><tr><th>#</th><th>Игрок</th><th>Прошёл</th></tr></thead><tbody id="lbb"></tbody></table></div>
   <p id="lbmsg"></p>
   <button id="lbclose">Закрыть</button>
@@ -92,22 +92,45 @@ a.btn{display:inline-block;background:#1b2838;color:#fff;text-decoration:none;bo
 // Адрес вашего сервера (Cloudflare Worker), см. README.md
 var API='https://rust-mahjong-api.rust-pve.workers.dev';
 
+// На каких уровнях показывать промокод. Номера уровней через запятую, например [3] или [2,4,5].
+// Пустой список [] — промокодов нет совсем.
+var REWARD_LEVELS=[1,2,3,4,5];
+function hasReward(n){return REWARD_LEVELS.indexOf(n)!==-1}
+
 // Предметы на плитках. Вместо эмодзи можно указать свою картинку: img:'data:image/png;base64,...'
 var ICONS=[
  {n:'Камень',e:'🪨'},{n:'Топор',e:'🪓'},{n:'Автомат',e:'🔫'},{n:'Дерево',e:'🪵'},
  {n:'Лом',e:'⚙️'},{n:'Костёр',e:'🔥'},{n:'Бочка',e:'🛢️'},{n:'Ключ',e:'🔑'},
  {n:'Взрывчатка',e:'💣'},{n:'Лук',e:'🏹'},{n:'Консервы',e:'🥫'},{n:'Броня',e:'🛡️'},
- {n:'Стена',e:'🧱'},{n:'Дверь',e:'🚪'},{n:'Фонарь',e:'🔦'},{n:'Аптечка',e:'🧪'}
+ {n:'Стена',e:'🧱'},{n:'Дверь',e:'🚪'},{n:'Фонарь',e:'🔦'},{n:'Аптечка',e:'🧪'},
+ {n:'Молоток',e:'🔨'},{n:'Кирка',e:'⛏️'},{n:'Пила',e:'🪚'},{n:'Гаечный ключ',e:'🔧'},
+ {n:'Болт',e:'🔩'},{n:'Мясо',e:'🍖'},{n:'Рыба',e:'🐟'},{n:'Яблоко',e:'🍎'},
+ {n:'Гриб',e:'🍄'},{n:'Кактус',e:'🌵'},{n:'Ёлка',e:'🌲'},{n:'Волк',e:'🐺'},
+ {n:'Медведь',e:'🐻'},{n:'Кабан',e:'🐗'},{n:'Олень',e:'🦌'},{n:'Череп',e:'💀'},
+ {n:'Молния',e:'⚡'},{n:'Бинт',e:'🩹'},{n:'Шприц',e:'💉'},{n:'Вертолёт',e:'🚁'},
+ {n:'Лодка',e:'🚤'},{n:'Лампа',e:'💡'},{n:'Рация',e:'📻'},{n:'Рюкзак',e:'🎒'},
+ {n:'Карта',e:'🗺️'},{n:'Компас',e:'🧭'},{n:'Кинжал',e:'🗡️'},{n:'Ракета',e:'🚀'},
+ {n:'Батарея',e:'🔋'},{n:'Золото',e:'💰'},{n:'Бутылка',e:'🍾'},{n:'Корона',e:'👑'}
 ];
 
-// Уровни. time — секунды на уровень, types — число разных предметов.
+// Сколько плиток приходится на один тип предмета.
+// Чем больше плиток на уровне, тем больше разных эмодзи (типов = плитки / TILES_PER_TYPE).
+// Меньше число — больше разных предметов и сложнее уровень.
+var TILES_PER_TYPE=5;
+function typesFor(L,count){
+  var n=L.types||Math.round(count/TILES_PER_TYPE);
+  return Math.max(2,Math.min(n,ICONS.length,count/2));
+}
+
+// Уровни. time — секунды на уровень.
+// types — число разных предметов (необязательно: если не указано, считается автоматически по числу плиток).
 // Блок слоя: [столбцов, строк, смещение x, смещение y, номер слоя 0-3] в размерах плитки.
 var LEVELS=[
- {types:8, time:60,layers:[[6,4,0,0,0],[4,3,1,.5,1],[2,2,2,1,2],[2,1,2,1.5,3]]},
- {types:8, time:60,layers:[[6,4,0,0,0],[4,3,1,.5,1],[2,2,2,1,2],[2,1,2,1.5,3]]},
- {types:10,time:120,layers:[[1,2,0,1,0],[8,4,1,0,0],[1,2,9,1,0],[6,3,2,.5,1],[4,2,2.5,1,2],[2,1,3.5,1.5,3]]},
- {types:14,time:180,layers:[[1,2,0,1.5,0],[8,6,1,0,0],[1,2,9,1.5,0],[6,4,2,.5,1],[4,3,3,1.5,2],[2,2,4,2,3]]},
- {types:18,time:300,layers:[[1,2,0,1.5,0],[8,6,1,0,0],[1,2,9,1.5,0],[6,4,2,.5,1],[4,3,3,1.5,2],[2,2,4,2,3]]}
+ {time:60,layers:[[6,4,0,0,0],[4,3,1,.5,1],[2,2,2,1,2],[2,1,2,1.5,3]]},
+ {time:60,layers:[[6,4,0,0,0],[4,3,1,.5,1],[2,2,2,1,2],[2,1,2,1.5,3]]},
+ {time:120,layers:[[1,2,0,1,0],[8,4,1,0,0],[1,2,9,1,0],[6,3,2,.5,1],[4,2,2.5,1,2],[2,1,3.5,1.5,3]]},
+ {time:180,layers:[[1,2,0,1.5,0],[8,6,1,0,0],[1,2,9,1.5,0],[6,4,2,.5,1],[4,3,3,1.5,2],[2,2,4,2,3]]},
+ {time:300,layers:[[1,2,0,1.5,0],[8,6,1,0,0],[1,2,9,1.5,0],[6,4,2,.5,1],[4,3,3,1.5,2],[2,2,4,2,3]]}
 ];
 
 // ====== Звуки (синтезируются, файлов не нужно) ======
@@ -178,6 +201,7 @@ function build(){
     }
     W=Math.max(W,ly[2]+ly[0]);H=Math.max(H,ly[3]+ly[1]);
   });
+  L.types=typesFor(L,tiles.length);
   assign(tiles,L.types);
   var aw=Math.min(window.innerWidth-(window.innerWidth>700?250:24),980),ah=window.innerHeight-96-20-(window.innerWidth>700?0:132);
   tw=Math.floor(Math.max(30,Math.min(aw/W,ah/(H*1.2),74)));th=Math.round(tw*1.2);
@@ -190,7 +214,7 @@ function build(){
     d.onclick=function(){click(t)};
     t.el=d;board.appendChild(d);paint(t);
   });
-  $('lv').textContent=lvl+1;shufLeft=1;$('sl').textContent=1;if(lvl===0)startRun();startTimer();refresh();
+  $('lv').textContent=lvl+1;$('lvt').textContent=LEVELS.length;shufLeft=1;$('sl').textContent=1;if(lvl===0)startRun();startTimer();refresh();
 }
 function paint(t){
   var ic=ICONS[t.t];t.el.title=ic.n;
@@ -264,11 +288,12 @@ function win(){
   if(!runTok){done('Сервер не принял начало прохождения. Нажмите «Играть снова» и пройдите игру с 1 уровня.');return}
   api('/api/complete',{run:runTok,level:n}).then(function(j){
     if(last)runTok=null;
+    if(!hasReward(n))j.code=null;
     if(j.code){
       setCard(n,j.code);$('oc').value=j.code;$('oc').style.display='';$('ocopy').style.display='';
       $('ocopy').onclick=function(){copy(j.code,$('ocopy'))};$('oc').onclick=function(){this.select()};
     }
-    var m=j.code?(j.received?'Промокод уже получен ранее. Он сохранён за вашим аккаунтом и слева на экране.':'Вы получили промокод для магазина. Он сохранён за вашим аккаунтом и слева на экране.'):'Для этого уровня сейчас нет промокода.';
+    var m=j.code?(j.received?'Промокод уже получен ранее. Он сохранён за вашим аккаунтом и слева на экране.':'Вы получили промокод для магазина. Он сохранён за вашим аккаунтом и слева на экране.'):'За этот уровень промокода нет.';
     if(last&&j.count)m+=' Прохождение засчитано в рейтинге: '+j.count+'.';
     done(m);
   }).catch(function(e){done('Не удалось получить награду: '+((e&&e.error)||'ошибка сети')+'.')});
@@ -334,7 +359,7 @@ $('lb').onclick=openLb;
 $('lbclose').onclick=function(){$('lbov').classList.remove('show');running=!$('ov').classList.contains('show')};
 function loadPromos(){
   if(!tok)return;
-  api('/api/promos').then(function(j){for(var n=1;n<=LEVELS.length;n++)if(j.promos[n])setCard(n,j.promos[n])}).catch(function(){});
+  api('/api/promos').then(function(j){for(var n=1;n<=LEVELS.length;n++)if(hasReward(n)&&j.promos[n])setCard(n,j.promos[n])}).catch(function(){});
 }
 loadSession();renderAuth();loadPromos();
 build();
