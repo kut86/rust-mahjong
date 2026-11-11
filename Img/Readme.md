@@ -1,1 +1,0 @@
-img game icon mahjong
