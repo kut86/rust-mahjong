@@ -104,11 +104,13 @@ function hasReward(n){return REWARD_LEVELS.indexOf(n)!==-1}
 // Свои картинки лежат в папке img/ рядом с index.html (в репозитории GitHub Pages).
 // Формат: квадратные PNG с прозрачным фоном, около 128x128 пикселей.
 // Имя файла у каждого предмета указано в поле f ниже: для Камня это img/stone.png.
-// Загрузили файл в папку img/ — допишите его имя (без .png) в IMAGES через запятую.
-// Предмет, которого нет в IMAGES, показывается эмодзи. Если файл не открылся, тоже эмодзи.
+// Файлы, которые есть в папке img/, игра находит сама при запуске (AUTO_IMAGES=true).
+// Предмет без файла показывается эмодзи. Если файл не открылся, тоже эмодзи.
+// Если AUTO_IMAGES=false, используются только имена из списка IMAGES (через запятую, без .png).
 // Заменили картинку на новую с тем же именем — увеличьте IMG_VER, чтобы браузеры не держали старую.
 var IMG_DIR='img/',IMG_EXT='png',IMG_VER='1';
 var IMAGES='';
+var AUTO_IMAGES=true;
 
 // Предметы на плитках: n — название, e — запасной эмодзи, f — имя файла картинки.
 var ICONS=[
@@ -125,12 +127,23 @@ var ICONS=[
  {n:'Карта',e:'🗺️',f:'map'},{n:'Компас',e:'🧭',f:'compass'},{n:'Кинжал',e:'🗡️',f:'dagger'},{n:'Ракета',e:'🚀',f:'rocket'},
  {n:'Батарея',e:'🔋',f:'battery'},{n:'Золото',e:'💰',f:'gold'},{n:'Бутылка',e:'🍾',f:'bottle'},{n:'Корона',e:'👑',f:'crown'}
 ];
-// Связываем предметы с загруженными файлами и заранее подгружаем их, чтобы плитки не мигали пустыми
-var HAVE={};IMAGES.split(',').forEach(function(x){x=x.trim();if(x)HAVE[x]=1});
-ICONS.forEach(function(ic){
-  if(!ic.img&&ic.f&&HAVE[ic.f])ic.img=IMG_DIR+ic.f+'.'+IMG_EXT+'?v='+IMG_VER;
-  if(ic.img){var pre=new Image();pre.src=ic.img}
-});
+// Находит картинки: сначала из списка IMAGES, затем (если AUTO_IMAGES) проверяет остальные файлы в папке img/.
+// Когда проверка закончена (или прошло 4 секунды), вызывает done. Картинка, загрузившаяся позже, появится на следующем уровне.
+function imgUrl(ic){return IMG_DIR+ic.f+'.'+IMG_EXT+'?v='+IMG_VER}
+function probeImages(done){
+  var HAVE={};IMAGES.split(',').forEach(function(x){x=x.trim();if(x)HAVE[x]=1});
+  ICONS.forEach(function(ic){if(!ic.img&&ic.f&&HAVE[ic.f])ic.img=imgUrl(ic)});
+  var todo=AUTO_IMAGES?ICONS.filter(function(ic){return !ic.img&&ic.f}):[],left=todo.length,fin=false;
+  function end(){if(!fin){fin=true;done()}}
+  if(!left)return end();
+  setTimeout(end,4000);
+  todo.forEach(function(ic){
+    var im=new Image();
+    im.onload=function(){ic.img=imgUrl(ic);if(--left===0)end()};
+    im.onerror=function(){if(--left===0)end()};
+    im.src=imgUrl(ic);
+  });
+}
 
 // Сколько плиток приходится на один тип предмета, если types на уровне не указан.
 var TILES_PER_TYPE=3;
@@ -404,7 +417,7 @@ function loadPromos(){
   api('/api/promos').then(function(j){for(var n=1;n<=LEVELS.length;n++)if(hasReward(n)&&j.promos[n])setCard(n,j.promos[n])}).catch(function(){});
 }
 loadSession();renderAuth();loadPromos();
-build();
+probeImages(build);
 </script>
 </body>
 </html>
