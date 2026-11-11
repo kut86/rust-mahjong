@@ -100,21 +100,37 @@ var API='https://rust-mahjong-api.rust-pve.workers.dev';
 var REWARD_LEVELS=[1,2,3,4,5];
 function hasReward(n){return REWARD_LEVELS.indexOf(n)!==-1}
 
-// Предметы на плитках. Вместо эмодзи можно указать свою картинку: img:'data:image/png;base64,...'
+// ====== КАРТИНКИ ПРЕДМЕТОВ ======
+// Свои картинки лежат в папке img/ рядом с index.html (в репозитории GitHub Pages).
+// Формат: квадратные PNG с прозрачным фоном, около 128x128 пикселей.
+// Имя файла у каждого предмета указано в поле f ниже: для Камня это img/stone.png.
+// Загрузили файл в папку img/ — допишите его имя (без .png) в IMAGES через запятую.
+// Предмет, которого нет в IMAGES, показывается эмодзи. Если файл не открылся, тоже эмодзи.
+// Заменили картинку на новую с тем же именем — увеличьте IMG_VER, чтобы браузеры не держали старую.
+var IMG_DIR='img/',IMG_EXT='png',IMG_VER='1';
+var IMAGES='';
+
+// Предметы на плитках: n — название, e — запасной эмодзи, f — имя файла картинки.
 var ICONS=[
- {n:'Камень',e:'🪨'},{n:'Топор',e:'🪓'},{n:'Автомат',e:'🔫'},{n:'Дерево',e:'🪵'},
- {n:'Лом',e:'⚙️'},{n:'Костёр',e:'🔥'},{n:'Бочка',e:'🛢️'},{n:'Ключ',e:'🔑'},
- {n:'Взрывчатка',e:'💣'},{n:'Лук',e:'🏹'},{n:'Консервы',e:'🥫'},{n:'Броня',e:'🛡️'},
- {n:'Стена',e:'🧱'},{n:'Дверь',e:'🚪'},{n:'Фонарь',e:'🔦'},{n:'Аптечка',e:'🧪'},
- {n:'Молоток',e:'🔨'},{n:'Кирка',e:'⛏️'},{n:'Пила',e:'🪚'},{n:'Гаечный ключ',e:'🔧'},
- {n:'Болт',e:'🔩'},{n:'Мясо',e:'🍖'},{n:'Рыба',e:'🐟'},{n:'Яблоко',e:'🍎'},
- {n:'Гриб',e:'🍄'},{n:'Кактус',e:'🌵'},{n:'Ёлка',e:'🌲'},{n:'Волк',e:'🐺'},
- {n:'Медведь',e:'🐻'},{n:'Кабан',e:'🐗'},{n:'Олень',e:'🦌'},{n:'Череп',e:'💀'},
- {n:'Молния',e:'⚡'},{n:'Бинт',e:'🩹'},{n:'Шприц',e:'💉'},{n:'Вертолёт',e:'🚁'},
- {n:'Лодка',e:'🚤'},{n:'Лампа',e:'💡'},{n:'Рация',e:'📻'},{n:'Рюкзак',e:'🎒'},
- {n:'Карта',e:'🗺️'},{n:'Компас',e:'🧭'},{n:'Кинжал',e:'🗡️'},{n:'Ракета',e:'🚀'},
- {n:'Батарея',e:'🔋'},{n:'Золото',e:'💰'},{n:'Бутылка',e:'🍾'},{n:'Корона',e:'👑'}
+ {n:'Камень',e:'🪨',f:'stone'},{n:'Топор',e:'🪓',f:'axe'},{n:'Автомат',e:'🔫',f:'rifle'},{n:'Дерево',e:'🪵',f:'wood'},
+ {n:'Лом',e:'⚙️',f:'crowbar'},{n:'Костёр',e:'🔥',f:'campfire'},{n:'Бочка',e:'🛢️',f:'barrel'},{n:'Ключ',e:'🔑',f:'key'},
+ {n:'Взрывчатка',e:'💣',f:'explosives'},{n:'Лук',e:'🏹',f:'bow'},{n:'Консервы',e:'🥫',f:'canned'},{n:'Броня',e:'🛡️',f:'armor'},
+ {n:'Стена',e:'🧱',f:'wall'},{n:'Дверь',e:'🚪',f:'door'},{n:'Фонарь',e:'🔦',f:'flashlight'},{n:'Аптечка',e:'🧪',f:'medkit'},
+ {n:'Молоток',e:'🔨',f:'hammer'},{n:'Кирка',e:'⛏️',f:'pickaxe'},{n:'Пила',e:'🪚',f:'saw'},{n:'Гаечный ключ',e:'🔧',f:'wrench'},
+ {n:'Болт',e:'🔩',f:'bolt'},{n:'Мясо',e:'🍖',f:'meat'},{n:'Рыба',e:'🐟',f:'fish'},{n:'Яблоко',e:'🍎',f:'apple'},
+ {n:'Гриб',e:'🍄',f:'mushroom'},{n:'Кактус',e:'🌵',f:'cactus'},{n:'Ёлка',e:'🌲',f:'tree'},{n:'Волк',e:'🐺',f:'wolf'},
+ {n:'Медведь',e:'🐻',f:'bear'},{n:'Кабан',e:'🐗',f:'boar'},{n:'Олень',e:'🦌',f:'deer'},{n:'Череп',e:'💀',f:'skull'},
+ {n:'Молния',e:'⚡',f:'lightning'},{n:'Бинт',e:'🩹',f:'bandage'},{n:'Шприц',e:'💉',f:'syringe'},{n:'Вертолёт',e:'🚁',f:'helicopter'},
+ {n:'Лодка',e:'🚤',f:'boat'},{n:'Лампа',e:'💡',f:'lamp'},{n:'Рация',e:'📻',f:'radio'},{n:'Рюкзак',e:'🎒',f:'backpack'},
+ {n:'Карта',e:'🗺️',f:'map'},{n:'Компас',e:'🧭',f:'compass'},{n:'Кинжал',e:'🗡️',f:'dagger'},{n:'Ракета',e:'🚀',f:'rocket'},
+ {n:'Батарея',e:'🔋',f:'battery'},{n:'Золото',e:'💰',f:'gold'},{n:'Бутылка',e:'🍾',f:'bottle'},{n:'Корона',e:'👑',f:'crown'}
 ];
+// Связываем предметы с загруженными файлами и заранее подгружаем их, чтобы плитки не мигали пустыми
+var HAVE={};IMAGES.split(',').forEach(function(x){x=x.trim();if(x)HAVE[x]=1});
+ICONS.forEach(function(ic){
+  if(!ic.img&&ic.f&&HAVE[ic.f])ic.img=IMG_DIR+ic.f+'.'+IMG_EXT+'?v='+IMG_VER;
+  if(ic.img){var pre=new Image();pre.src=ic.img}
+});
 
 // Сколько плиток приходится на один тип предмета, если types на уровне не указан.
 var TILES_PER_TYPE=3;
@@ -186,10 +202,17 @@ function isFree(t,set){
   return !(l&&r);
 }
 
+// Выбирает nTypes предметов: сначала те, у которых есть картинка, потом остальные (с эмодзи)
+function pickPool(n){
+  var ids=shuffle(ICONS.map(function(_,i){return i}));
+  var withImg=ids.filter(function(i){return ICONS[i].img}),rest=ids.filter(function(i){return !ICONS[i].img});
+  return withImg.concat(rest).slice(0,n);
+}
+
 // Раздаёт типы так, чтобы уровень всегда можно было пройти (разбираем с конца)
 function assign(list,nTypes){
   for(var tries=0;tries<50;tries++){
-    var rem=list.slice(),pairs=list.length/2,pool=shuffle(ICONS.map(function(_,i){return i})).slice(0,nTypes),k=0,ok=true;
+    var rem=list.slice(),pairs=list.length/2,pool=pickPool(nTypes),k=0,ok=true;
     while(rem.length){
       var fr=rem.filter(function(t){return isFree(t,rem)});
       if(fr.length<2){ok=false;break}
@@ -225,8 +248,10 @@ function build(){
   $('lv').textContent=lvl+1;$('lvt').textContent=LEVELS.length;shufLeft=1;$('sl').textContent=1;if(lvl===0)startRun();startTimer();refresh();
 }
 function paint(t){
-  var ic=ICONS[t.t];t.el.title=ic.n;
-  t.el.innerHTML=ic.img?'<img src="'+ic.img+'" alt="'+ic.n+'">':'<span style="font-size:'+Math.round(tw*.58)+'px">'+ic.e+'</span>';
+  var ic=ICONS[t.t];t.el.title=ic.n;t.el.innerHTML='';
+  function emoji(){t.el.innerHTML='';var sp=document.createElement('span');sp.style.fontSize=Math.round(tw*.58)+'px';sp.textContent=ic.e;t.el.appendChild(sp)}
+  if(ic.img){var im=document.createElement('img');im.alt=ic.n;im.onerror=function(){ic.img=null;emoji()};im.src=ic.img;t.el.appendChild(im)}
+  else emoji();
 }
 function refresh(){
   var left=0,free=[];
