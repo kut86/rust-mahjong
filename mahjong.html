@@ -307,17 +307,26 @@ function copy(text,btn){
   if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(text).then(done,fb);else fb();
 }
 var cards={};
-function setCard(n,code){
+function untilText(exp){
+  if(!exp)return '';
+  var left=exp-Date.now();if(left<=0)return 'Срок действия закончился';
+  var d=new Date(exp-1+5*3600000),p=function(v){return ('0'+v).slice(-2)};
+  var t='Действует до '+p(d.getUTCDate())+'.'+p(d.getUTCMonth()+1)+'.'+d.getUTCFullYear(),days=Math.ceil(left/86400000);
+  if(left<86400000)t+=' · осталось меньше суток';else if(days<=3)t+=' · осталось '+days+' дн.';
+  return t;
+}
+function setCard(n,code,exp){
   var c=cards[n];
   if(!c){
     c=document.createElement('div');c.className='card';
-    c.innerHTML='<small></small><code></code><button class="alt">Копировать</button>';
+    c.innerHTML='<small></small><code></code><small class="until"></small><button class="alt">Копировать</button>';
     cards[n]=c;
     var ref=null;for(var k=n+1;k<=LEVELS.length;k++)if(cards[k]&&cards[k].parentNode){ref=cards[k];break}
     $('codes').insertBefore(c,ref);
   }
   c.querySelector('small').textContent='Уровень '+n+': промокод';
   c.querySelector('code').textContent=code;
+  var un=c.querySelector('.until');un.textContent=untilText(exp);un.style.display=exp?'':'none';
   var b=c.querySelector('button');b.onclick=function(){copy(code,b)};
 }
 function clearCards(){cards={};$('codes').innerHTML=''}
@@ -337,10 +346,11 @@ function win(){
     if(last)runTok=null;
     if(!hasReward(n))j.code=null;
     if(j.code){
-      setCard(n,j.code);$('oc').value=j.code;$('oc').style.display='';$('ocopy').style.display='';
+      setCard(n,j.code,j.exp);$('oc').value=j.code;$('oc').style.display='';$('ocopy').style.display='';
       $('ocopy').onclick=function(){copy(j.code,$('ocopy'))};$('oc').onclick=function(){this.select()};
     }
-    var m=j.code?(j.received?'Промокод уже получен ранее. Он сохранён за вашим аккаунтом и слева на экране.':'Вы получили промокод для магазина. Он сохранён за вашим аккаунтом и слева на экране.'):'За этот уровень промокода нет.';
+    var m=j.expired?'Срок действия промокода за этот уровень закончился.':j.code?(j.received?'Промокод уже получен ранее. Он сохранён за вашим аккаунтом и слева на экране.':'Вы получили промокод для магазина. Он сохранён за вашим аккаунтом и слева на экране.'):'За этот уровень промокода нет.';
+    if(j.code&&j.exp)m+=' '+untilText(j.exp)+'.';
     if(last&&j.count)m+=' Прохождение засчитано в рейтинге: '+j.count+'.';
     if(last&&j.time)m+=' Ваше время: '+fmtMs(j.time)+(j.record?' — новый личный рекорд!':'. Лучшее: '+fmtMs(j.best)+'.');
     done(m);
@@ -416,7 +426,7 @@ $('tabs').onclick=function(){loadLb('speed')};
 $('lbclose').onclick=function(){$('lbov').classList.remove('show');running=!$('ov').classList.contains('show')};
 function loadPromos(){
   if(!tok)return;
-  api('/api/promos').then(function(j){for(var n=1;n<=LEVELS.length;n++)if(hasReward(n)&&j.promos[n])setCard(n,j.promos[n])}).catch(function(){});
+  api('/api/promos').then(function(j){for(var n=1;n<=LEVELS.length;n++)if(hasReward(n)&&j.promos[n])setCard(n,j.promos[n],j.exp&&j.exp[n])}).catch(function(){});
 }
 loadSession();renderAuth();loadPromos();
 probeImages(build);
