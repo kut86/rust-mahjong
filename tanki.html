@@ -63,7 +63,7 @@ const svs=()=>{try{localStorage.setItem('tk',JSON.stringify(sv))}catch(e){}};
 
 /* ===== вход через Steam (общий с меню и маджонгом) и рейтинг волн ===== */
 const API='https://rust-mahjong-api.rust-pve.workers.dev';
-let tok=null,me=null,runTok=null;
+let tok=null,me=null,runTok=null,bosses=0;
 function b64d(s){s=s.replace(/-/g,'+').replace(/_/g,'/');const b=atob(s),u=new Uint8Array(b.length);for(let i=0;i<b.length;i++)u[i]=b.charCodeAt(i);return new TextDecoder().decode(u)}
 try{const t=localStorage.getItem('rm-token');if(t){const q=JSON.parse(b64d(t.split('.')[0]));if(q.k==='s'&&q.exp>Date.now()){tok=t;me=q}else localStorage.removeItem('rm-token')}}catch(e){}
 function api(path,body){const o={method:body?'POST':'GET',headers:{}};if(tok)o.headers.Authorization='Bearer '+tok;if(body){o.headers['Content-Type']='application/json';o.body=JSON.stringify(body)}
@@ -75,7 +75,7 @@ function renderAuth(){const a=$('#au');a.innerHTML='';
   const o=document.createElement('a');o.href='#';o.className='sm';o.textContent='Выйти';o.onclick=e=>{e.preventDefault();logout()};a.appendChild(o)}
  else{const l=document.createElement('a');l.className='lk';l.textContent='Войти через Steam для рейтинга';l.href=API+'/auth/steam';l.onclick=()=>{try{sessionStorage.setItem('rm-back','tanki.html')}catch(e){}};a.appendChild(l)}}
 function startRun(){runTok=null;if(!tok)return;api('/api/start',{game:'tk'}).then(j=>{runTok=j.run}).catch(()=>{})}
-function report(w,sc){if(tok&&runTok)api('/api/tank',{run:runTok,wave:w,score:sc}).catch(()=>{})}
+function report(w,sc){if(tok&&runTok)api('/api/tank',{run:runTok,wave:w,score:sc,bosses}).catch(()=>{})}
 
 function resize(){const d=Math.min(devicePixelRatio||1,2);W=innerWidth;H=innerHeight;S=Math.min(W,H)/14;GW=Math.round(Math.max(S*52,W*1.6));GH=Math.round(Math.max(S*28,H*1.6));OK=GW*GH/(S*S*392);cv.width=W*d;cv.height=H*d;x.setTransform(d,0,0,d,0,0);const gs=Math.min(1,Math.sqrt(6e6/(GW*GH)));gr.width=Math.round(GW*gs);gr.height=Math.round(GH*gs);g.setTransform(gs,0,0,gs,0,0);paintGround()}
 function paintGround(){g.fillStyle='#2b3328';g.fillRect(0,0,GW,GH);const n=Math.round(GW*GH/640);for(let i=0;i<n;i++){g.fillStyle=Math.random()<.5?'rgba(255,255,255,.035)':'rgba(0,0,0,.07)';g.fillRect(R(GW),R(GH),R(2,S*.7),R(2,S*.7))}}
@@ -112,7 +112,7 @@ function spawnPos(r){const mg=S*1.5;
  return[p.x<GW/2?GW-r:r,p.y<GH/2?GH-r:r]}
 function mk(t){const d=TY[t],r=d.r*S,s=R(4)|0;const[px,py]=spawnPos(r);
  const H_=Math.ceil(d.hp*(1+.012*(sv.lv-1)+Math.min(.5,.025*wave))),bv=((wave/5|0)-1)%3;return{type:t,hp:H_,mh:H_,bv,sp:d.sp,c:t=='B'?['#8c1f1f','#a0501a','#1f5a8c'][bv]:d.c,r:d.r,pts:d.pts,cdMax:d.cd,x:px,y:py,a:PI/2,t:PI/2,cd:R(1,2),ph:R(6),w:0,rc:0,fl:0,tr:0}}
-function reset(){startRun();up={sp:0,hp:0,rt:0};p={x:GW/2,y:GH/2,a:-PI/2,t:-PI/2,r:.55,sp:5,hp:100,mhp:100,rate:.22,dbl:0,sh:0,cd:0,rc:0,fl:0,tr:0,c:SK[sv.sel].c};pk=[];pause=0;rpN=0;setPause(0);$('#up').classList.add('h');applyUp();p.hp=p.mhp;p.dm=1+.1*sv.tr.fi;al=[];mn=[];en=[];bl=[];pt=[];rg=[];queue=[];score=0;wave=0;over=false;waitT=-1;spawnT=0;hurt=0;paintGround();ob=[];
+function reset(){startRun();bosses=0;up={sp:0,hp:0,rt:0};p={x:GW/2,y:GH/2,a:-PI/2,t:-PI/2,r:.55,sp:5,hp:100,mhp:100,rate:.22,dbl:0,sh:0,cd:0,rc:0,fl:0,tr:0,c:SK[sv.sel].c};pk=[];pause=0;rpN=0;setPause(0);$('#up').classList.add('h');applyUp();p.hp=p.mhp;p.dm=1+.1*sv.tr.fi;al=[];mn=[];en=[];bl=[];pt=[];rg=[];queue=[];score=0;wave=0;over=false;waitT=-1;spawnT=0;hurt=0;paintGround();ob=[];
  const NO=Math.round(14*OK),NS=Math.round(4*OK);for(let i=0;i<NO;i++){const st_=i<NS,w=st_?S*2:S*1.1,h=st_?S*1.2:S*1.1;let px,py,n=0;
   do{px=R(S,GW-S-w);py=R(S,GH-S-h)}while(n++<40&&(Math.hypot(px+w/2-GW/2,py+h/2-GH/2)<S*3.5||ob.some(o=>!(px>o.x+o.w+S||px+w<o.x-S||py>o.y+o.h+S||py+h<o.y-S))));
   ob.push({x:px,y:py,w,h,hp:st_?1e9:3,steel:st_})}
@@ -124,7 +124,7 @@ function moveT(e,dx,dy,dt){const r=e.r*S,px=e.x,py=e.y;e.x=C(e.x+dx*e.sp*S*dt,r,
  e.tr+=Math.hypot(e.x-px,e.y-py);if(e.tr>S*.5){e.tr=0;g.save();g.translate(e.x,e.y);g.rotate(e.a);g.fillStyle='rgba(12,15,9,.22)';g.fillRect(-r*.3,-r*.8,r*.35,r*.4);g.fillRect(-r*.3,r*.4,r*.35,r*.4);g.restore()}}
 function shoot(e,own,spread,q){const a=e.t+R(-spread,spread),r=e.r*S,mx=e.x+Math.cos(e.t)*r*1.3,my=e.y+Math.sin(e.t)*r*1.3,sp=own?17*S:9*S;
  const pw=e===p,W_=pw?WP[sv.wp]:WA,np=own?W_.pel:1;for(let i=0;i<np;i++){const aa=own?e.t+R(-W_.spr,W_.spr):a,vm=own?W_.v:1;for(const o of pw&&p.dbl>0?[-.28,.28]:[0])bl.push({x:mx-Math.sin(e.t)*o*S,y:my+Math.cos(e.t)*o*S,vx:Math.cos(aa)*sp*vm,vy:Math.sin(aa)*sp*vm,own,life:own?W_.life:1.3,dm:own?p.dm*W_.d*(pw?1+.2*(sv.wl[sv.wp]||0):1):1})}if(!q){e.rc=r*.35;muzzle(mx,my,e.t,own);sfx(own?0:1)}}
-function kill(e){const rs=e.type!='B'&&al.length<3&&Math.random()<(sv.tr.nc?.03+.015*(sv.tr.nc-1):0);if(rs){P(e.x,e.y,0,0,.5,S*4,'g','80,255,200');spark(e.x,e.y);al.push({x:e.x,y:e.y,a:e.a,t:e.t,r:e.r*.9,sp:4.2,c:e.c,hp:1,cd:.4,rc:0,fl:0,tr:0,life:18})}else boom(e.x,e.y,e.type=='B'?2.8:e.type=='h'?1.7:1);score+=e.pts;e.dead=1;sv.xp+=Math.ceil(e.pts/10);while(sv.lv<MAXLV&&sv.xp>=XN(sv.lv)){sv.xp-=XN(sv.lv);sv.lv++;banner('Уровень '+sv.lv+'!')}if(sv.lv>=MAXLV)sv.xp=0;sv.co+=Math.ceil(e.pts/50);svs();if(e.type=='B'||Math.random()<.2)pk.push({x:e.x,y:e.y,t:'rds'[R(3)|0],l:12});g.save();g.translate(e.x,e.y);g.rotate(e.a);g.fillStyle='rgba(10,10,8,.85)';const r=e.r*S;g.fillRect(-r*.8,-r*.7,r*1.6,r*1.4);g.restore()}
+function kill(e){const rs=e.type!='B'&&al.length<3&&Math.random()<(sv.tr.nc?.03+.015*(sv.tr.nc-1):0);if(rs){P(e.x,e.y,0,0,.5,S*4,'g','80,255,200');spark(e.x,e.y);al.push({x:e.x,y:e.y,a:e.a,t:e.t,r:e.r*.9,sp:4.2,c:e.c,hp:1,cd:.4,rc:0,fl:0,tr:0,life:18})}else boom(e.x,e.y,e.type=='B'?2.8:e.type=='h'?1.7:1);score+=e.pts;e.dead=1;sv.xp+=Math.ceil(e.pts/10);while(sv.lv<MAXLV&&sv.xp>=XN(sv.lv)){sv.xp-=XN(sv.lv);sv.lv++;banner('Уровень '+sv.lv+'!')}if(sv.lv>=MAXLV)sv.xp=0;sv.co+=Math.ceil(e.pts/50);svs();if(e.type=='B'){bosses++;report(wave-1,score)}if(e.type=='B'||Math.random()<.2)pk.push({x:e.x,y:e.y,t:'rds'[R(3)|0],l:12});g.save();g.translate(e.x,e.y);g.rotate(e.a);g.fillStyle='rgba(10,10,8,.85)';const r=e.r*S;g.fillRect(-r*.8,-r*.7,r*1.6,r*1.4);g.restore()}
 function vec(s){const dx=s.x-s.ox,dy=s.y-s.oy,h=Math.hypot(dx,dy)||1,m=Math.min(1,h/(S*2.2));return{x:dx/h*m,y:dy/h*m,m}}
 
 function update(dt){camUpd();
