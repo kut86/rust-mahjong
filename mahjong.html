@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Rust Маджонг</title>
+<link rel="icon" type="image/x-icon" href="favicon.ico">
+<style>
+:root{
+  box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+  --bg:#16181a;--panel:#23272a;--line:#3a4044;--text:#e9e4d8;--muted:#9aa3a8;--rust:#c2511f;--rustHi:#e8743a;
+  --face:#e6dbbf;--edge:#a89a74;--ok:#7fb069;color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{background:var(--bg);color:var(--text);font-family:"Trebuchet MS",Verdana,sans-serif;user-select:none;-webkit-user-select:none;overflow:hidden}
+header{display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center;justify-content:center;padding:10px 12px}
+h1{margin:0;font:700 1.35rem Impact,"Arial Narrow",sans-serif;letter-spacing:.04em;color:var(--rustHi)}
+.stat{color:var(--muted);font-size:.95rem}.stat b{color:var(--text)}
+button{font:inherit;background:var(--rust);color:#fff;border:0;border-radius:8px;padding:8px 14px;cursor:pointer}
+button.alt{background:var(--panel);border:1px solid var(--line);color:var(--text)}
+button:disabled{opacity:.5;cursor:default}
+button:focus-visible{outline:3px solid var(--text);outline-offset:2px}
+#stage{position:absolute;z-index:1;left:0;right:0;top:96px;bottom:0;display:flex;align-items:center;justify-content:center}
+#board{position:relative}
+.tile{position:absolute;background:linear-gradient(145deg,#f1e8cf,var(--face));border-radius:9px;
+  box-shadow:3px 4px 0 var(--edge),5px 7px 8px rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;
+  cursor:pointer;transition:filter .15s,transform .15s,opacity .2s}
+.tile.blocked{filter:brightness(.62);cursor:not-allowed}
+.tile.sel{outline:3px solid var(--rustHi);transform:translateY(-3px)}
+.tile.gone{opacity:0;transform:scale(.6);pointer-events:none}
+.tile span{line-height:1;pointer-events:none}.tile img{width:76%;height:76%;object-fit:contain;pointer-events:none}
+#codes{position:fixed;left:10px;top:76px;width:min(210px,44vw);display:flex;flex-direction:column;gap:8px;z-index:20;max-height:calc(100% - 90px);overflow:auto}
+.card{background:var(--panel);border:1px solid var(--line);border-left:4px solid var(--rust);border-radius:8px;padding:8px 10px;
+  box-shadow:0 4px 14px rgba(0,0,0,.45);animation:in .35s ease-out}
+@keyframes in{from{transform:translateX(-30px);opacity:0}to{transform:none;opacity:1}}
+.card small{color:var(--muted);display:block;margin-bottom:3px}
+.card code{display:block;font:700 .95rem Consolas,Menlo,monospace;word-break:break-all;margin-bottom:6px;color:var(--rustHi)}
+.card button{padding:5px 10px;font-size:.85rem;width:100%}
+.ov{position:fixed;inset:0;background:rgba(0,0,0,.7);display:none;align-items:center;justify-content:center;z-index:1000;padding:16px}
+.ov.show{display:flex}
+.box{background:var(--panel);border:1px solid var(--line);border-top:5px solid var(--rust);border-radius:12px;padding:22px;max-width:380px;width:100%;text-align:center}
+.box h2{margin:0 0 8px;font:700 1.5rem Impact,"Arial Narrow",sans-serif;letter-spacing:.03em}
+.box p{margin:0 0 12px;color:var(--muted);line-height:1.4}
+.box input{width:100%;font:700 1.1rem Consolas,Menlo,monospace;text-align:center;background:var(--bg);color:var(--rustHi);
+  border:1px solid var(--line);border-radius:8px;padding:12px;margin-bottom:12px}
+.row{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+@media (max-width:700px){#codes{top:auto;bottom:10px;max-height:none;flex-direction:row;width:calc(100% - 20px);overflow-x:auto;overflow-y:hidden}.card{min-width:150px;flex:none}#stage{top:128px;bottom:100px}}
+.user{display:flex;align-items:center;gap:8px;font-size:.9rem}
+.user img{width:28px;height:28px;border-radius:50%;border:2px solid var(--rust)}
+a.btn{display:inline-block;background:#1b2838;color:#fff;text-decoration:none;border-radius:8px;padding:8px 14px;border:1px solid #3d5a7a}
+.lbbox{max-width:460px}
+.lbwrap{max-height:55vh;overflow:auto;margin-bottom:12px}
+.lb{width:100%;border-collapse:collapse;text-align:left}
+.lb td,.lb th{padding:7px 6px;border-bottom:1px solid var(--line);font-size:.95rem}
+.lb th{color:var(--muted);font-weight:400}
+.lb tr.me td{color:var(--rustHi);font-weight:700}
+.lb .av{width:22px;height:22px;border-radius:50%;vertical-align:middle;margin-right:8px}
+.lb a{color:inherit;text-decoration:none}
+@media (max-width:700px){header{gap:6px 10px}header button,a.btn{padding:6px 10px;font-size:.9rem}h1{font-size:1.1rem}}
+</style>
+</head>
+<body>
+<header>
+  <button class="alt" id="tomenu">☰ Меню</button>
+  <h1>RUST AMIGOS МАДЖОНГ</h1>
+  <span class="stat">Уровень <b id="lv">1</b> из <b id="lvt">3</b></span>
+  <span class="stat">Осталось пар: <b id="left">0</b></span>
+  <span class="stat">Время: <b id="tm">0:00</b></span>
+  <button class="alt" id="shuf">Перемешать (<span id="sl">1</span>)</button>
+  <button class="alt" id="rest">Заново</button>
+  <button class="alt" id="mute" aria-label="Звук">🔊</button>
+  <button class="alt" id="lb">Рейтинг</button>
+  <span id="auth" class="user"></span>
+</header>
+<div id="stage"><div id="board"></div></div>
+<div id="codes" aria-live="polite"></div>
+
+<div class="ov" id="ov"><div class="box">
+  <h2 id="ot"></h2><p id="op"></p>
+  <input id="oc" readonly aria-label="Промокод">
+  <div class="row"><button id="ocopy">Копировать</button><button class="alt" id="onext"></button></div>
+</div></div>
+
+<div class="ov" id="lbov"><div class="box lbbox">
+  <h2>Рейтинг</h2>
+  <div class="row" style="margin-bottom:10px"><button id="tabc">По прохождениям</button><button class="alt" id="tabs">По скорости</button></div>
+  <p id="lbdesc"></p>
+  <div class="lbwrap"><table class="lb"><thead><tr><th>#</th><th>Игрок</th><th id="lbh">Прошёл</th></tr></thead><tbody id="lbb"></tbody></table></div>
+  <p id="lbmsg"></p>
+  <button id="lbclose">Закрыть</button>
+</div></div>
+
+<script>
+// ====== НАСТРОЙКИ ======
+// Адрес вашего сервера (Cloudflare Worker), см. README.md
+var API='https://rust-mahjong-api.rust-pve.workers.dev';
+
+// На каких уровнях показывать промокод. Номера уровней через запятую, например [3] или [2,4,5].
+// Пустой список [] — промокодов нет совсем.
+var REWARD_LEVELS=[1,2,3,4,5];
+function hasReward(n){return REWARD_LEVELS.indexOf(n)!==-1}
+
+// ====== КАРТИНКИ ПРЕДМЕТОВ ======
+// Свои картинки лежат в папке img/ рядом с index.html (в репозитории GitHub Pages).
+// Формат: квадратные PNG с прозрачным фоном, около 128x128 пикселей.
+// Имя файла у каждого предмета указано в поле f ниже: для Камня это img/stone.png.
+// Файлы, которые есть в папке img/, игра находит сама при запуске (AUTO_IMAGES=true).
+// Предмет без файла показывается эмодзи. Если файл не открылся, тоже эмодзи.
+// Если AUTO_IMAGES=false, используются только имена из списка IMAGES (через запятую, без .png).
+// Заменили картинку на новую с тем же именем — увеличьте IMG_VER, чтобы браузеры не держали старую.
+var IMG_DIR='img/',IMG_EXT='png',IMG_VER='1';
+var IMAGES='';
+var AUTO_IMAGES=true;
+
+// Предметы на плитках: n — название, e — запасной эмодзи, f — имя файла картинки.
+var ICONS=[
+ {n:'Камень',e:'🪨',f:'stone'},{n:'Топор',e:'🪓',f:'axe'},{n:'Автомат',e:'🔫',f:'rifle'},{n:'Дерево',e:'🪵',f:'wood'},
+ {n:'Лом',e:'⚙️',f:'crowbar'},{n:'Костёр',e:'🔥',f:'campfire'},{n:'Бочка',e:'🛢️',f:'barrel'},{n:'Ключ',e:'🔑',f:'key'},
+ {n:'Взрывчатка',e:'💣',f:'explosives'},{n:'Лук',e:'🏹',f:'bow'},{n:'Консервы',e:'🥫',f:'canned'},{n:'Броня',e:'🛡️',f:'armor'},
+ {n:'Стена',e:'🧱',f:'wall'},{n:'Дверь',e:'🚪',f:'door'},{n:'Фонарь',e:'🔦',f:'flashlight'},{n:'Аптечка',e:'🧪',f:'medkit'},
+ {n:'Молоток',e:'🔨',f:'hammer'},{n:'Кирка',e:'⛏️',f:'pickaxe'},{n:'Пила',e:'🪚',f:'saw'},{n:'Гаечный ключ',e:'🔧',f:'wrench'},
+ {n:'Болт',e:'🔩',f:'bolt'},{n:'Мясо',e:'🍖',f:'meat'},{n:'Рыба',e:'🐟',f:'fish'},{n:'Яблоко',e:'🍎',f:'apple'},
+ {n:'Гриб',e:'🍄',f:'mushroom'},{n:'Кактус',e:'🌵',f:'cactus'},{n:'Ёлка',e:'🌲',f:'tree'},{n:'Волк',e:'🐺',f:'wolf'},
+ {n:'Медведь',e:'🐻',f:'bear'},{n:'Кабан',e:'🐗',f:'boar'},{n:'Олень',e:'🦌',f:'deer'},{n:'Череп',e:'💀',f:'skull'},
+ {n:'Молния',e:'⚡',f:'lightning'},{n:'Бинт',e:'🩹',f:'bandage'},{n:'Шприц',e:'💉',f:'syringe'},{n:'Вертолёт',e:'🚁',f:'helicopter'},
+ {n:'Лодка',e:'🚤',f:'boat'},{n:'Лампа',e:'💡',f:'lamp'},{n:'Рация',e:'📻',f:'radio'},{n:'Рюкзак',e:'🎒',f:'backpack'},
+ {n:'Карта',e:'🗺️',f:'map'},{n:'Компас',e:'🧭',f:'compass'},{n:'Кинжал',e:'🗡️',f:'dagger'},{n:'Ракета',e:'🚀',f:'rocket'},
+ {n:'Батарея',e:'🔋',f:'battery'},{n:'Золото',e:'💰',f:'gold'},{n:'Бутылка',e:'🍾',f:'bottle'},{n:'Корона',e:'👑',f:'crown'}
+];
+// Находит картинки: сначала из списка IMAGES, затем (если AUTO_IMAGES) проверяет остальные файлы в папке img/.
+// Когда проверка закончена (или прошло 4 секунды), вызывает done. Картинка, загрузившаяся позже, появится на следующем уровне.
+function imgUrl(ic){return IMG_DIR+ic.f+'.'+IMG_EXT+'?v='+IMG_VER}
+function probeImages(done){
+  var HAVE={};IMAGES.split(',').forEach(function(x){x=x.trim();if(x)HAVE[x]=1});
+  ICONS.forEach(function(ic){if(!ic.img&&ic.f&&HAVE[ic.f])ic.img=imgUrl(ic)});
+  var todo=AUTO_IMAGES?ICONS.filter(function(ic){return !ic.img&&ic.f}):[],left=todo.length,fin=false;
+  function end(){if(!fin){fin=true;done()}}
+  if(!left)return end();
+  setTimeout(end,4000);
+  todo.forEach(function(ic){
+    var im=new Image();
+    im.onload=function(){ic.img=imgUrl(ic);if(--left===0)end()};
+    im.onerror=function(){if(--left===0)end()};
+    im.src=imgUrl(ic);
+  });
+}
+
+// Сколько плиток приходится на один тип предмета, если types на уровне не указан.
+var TILES_PER_TYPE=3;
+function typesFor(L,count){
+  var n=L.types||Math.round(count/TILES_PER_TYPE);
+  return Math.max(2,Math.min(n,ICONS.length,count/2));
+}
+
+// Уровни от простого к сложному. Растут число плиток, площадь поля и число слоёв со сдвигом на пол-плитки
+// (такая плитка закрывает сразу две нижние). Одинаковых эмодзи не больше 4 на уровне,
+// а на маленьких уровнях ещё меньше: там больше разных предметов на меньшее число плиток.
+// time — секунды на уровень, types — число разных предметов.
+// Блок слоя: [столбцов, строк, смещение x, смещение y, номер слоя 0-3] в размерах плитки.
+var LEVELS=[
+ // 1: 30 плиток, каждый предмет ровно по паре
+ {time:90, types:15,layers:[[6,3,0,0,0],[1,2,6,.5,0],[3,2,1.5,.5,1],[2,1,2,1,2],[2,1,2,1,3]]},
+ // 2: 48 плиток
+ {time:130,types:18,layers:[[7,4,0,0,0],[1,2,7,1,0],[5,2,1.5,1,1],[3,2,2.5,1,2],[2,1,3,1.5,3]]},
+ // 3: 64 плитки
+ {time:170,types:22,layers:[[8,4,1,0,0],[1,2,0,1,0],[1,2,9,1,0],[6,3,2,.5,1],[4,2,3.5,1,2],[2,1,4.5,1.5,3]]},
+ // 4: 84 плитки
+ {time:220,types:24,layers:[[8,5,1,0,0],[1,2,0,1.5,0],[1,2,9,1.5,0],[6,4,2,.5,1],[4,3,3.5,1,2],[2,2,4.5,1.5,3]]},
+ // 5: 104 плитки, каждый предмет по 4 штуки
+ {time:270,types:26,layers:[[8,6,1,0,0],[1,4,0,1,0],[1,4,9,1,0],[6,5,2,.5,1],[4,3,3.5,1.5,2],[2,3,4.5,1.5,3]]}
+];
+
+// ====== Звуки (синтезируются, файлов не нужно) ======
+var AC=null,muted=false;
+function snd(){if(muted)return null;try{if(!AC)AC=new (window.AudioContext||window.webkitAudioContext)();if(AC.state==='suspended')AC.resume();return AC}catch(e){return null}}
+function tone(f,d,type,v,delay,f2){var a=snd();if(!a)return;var t=a.currentTime+(delay||0),o=a.createOscillator(),g=a.createGain();
+  o.type=type||'sine';o.frequency.setValueAtTime(f,t);if(f2)o.frequency.exponentialRampToValueAtTime(f2,t+d);
+  g.gain.setValueAtTime(v||.15,t);g.gain.exponentialRampToValueAtTime(.0001,t+d);o.connect(g);g.connect(a.destination);o.start(t);o.stop(t+d+.02)}
+var SFX={
+ sel:function(){tone(520,.08,'triangle',.14)},
+ bad:function(){tone(180,.18,'sawtooth',.1,0,110)},
+ block:function(){tone(110,.07,'square',.06)},
+ match:function(){tone(660,.1,'triangle',.16);tone(990,.16,'triangle',.16,.08)},
+ shuf:function(){for(var i=0;i<6;i++)tone(300+i*70,.07,'square',.06,i*.05)},
+ win:function(){[523,659,784,1047].forEach(function(f,i){tone(f,.28,'triangle',.18,i*.12)})},
+ lose:function(){[392,330,262,196].forEach(function(f,i){tone(f,.3,'sawtooth',.1,i*.16)})},
+ tick:function(){tone(1000,.04,'square',.05)}
+};
+
+// ====== Таймер ======
+var tleft=0,tick=null,running=false;
+function fmt(s){return Math.floor(s/60)+':'+('0'+s%60).slice(-2)}
+function drawTime(){var e=$('tm');e.textContent=fmt(tleft);e.style.color=tleft<=30?'var(--rustHi)':''}
+function startTimer(){tleft=LEVELS[lvl].time;running=true;clearInterval(tick);tick=setInterval(onTick,1000);drawTime()}
+function onTick(){if(!running)return;tleft--;drawTime();if(tleft<=10&&tleft>0)SFX.tick();if(tleft<=0){clearInterval(tick);timeUp()}}
+function timeUp(){running=false;SFX.lose();
+  $('ot').textContent='Время вышло';$('op').textContent='Не успели убрать все плитки. Попробуйте ещё раз.';
+  $('oc').style.display='none';$('ocopy').style.display='none';
+  $('onext').textContent='Попробовать снова';$('onext').onclick=function(){hide();build()};show()}
+
+var $=function(i){return document.getElementById(i)};
+var board=$('board'),tiles=[],sel=null,lvl=0,codes=[],tw=60,th=72;
+
+function shuffle(a){for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t}return a}
+
+function isFree(t,set){
+  var l=false,r=false;
+  for(var i=0;i<set.length;i++){var o=set[i];if(o===t||o.gone)continue;
+    if(o.z===t.z+1&&Math.abs(o.x-t.x)<2&&Math.abs(o.y-t.y)<2)return false;
+    if(o.z===t.z&&Math.abs(o.y-t.y)<2){
+      if(o.x<t.x&&t.x-o.x<=2)l=true;
+      if(o.x>t.x&&o.x-t.x<=2)r=true;
+    }
+  }
+  return !(l&&r);
+}
+
+// Выбирает nTypes предметов: сначала те, у которых есть картинка, потом остальные (с эмодзи)
+function pickPool(n){
+  var ids=shuffle(ICONS.map(function(_,i){return i}));
+  var withImg=ids.filter(function(i){return ICONS[i].img}),rest=ids.filter(function(i){return !ICONS[i].img});
+  return withImg.concat(rest).slice(0,n);
+}
+
+// Раздаёт типы так, чтобы уровень всегда можно было пройти (разбираем с конца)
+function assign(list,nTypes){
+  for(var tries=0;tries<50;tries++){
+    var rem=list.slice(),pairs=list.length/2,pool=pickPool(nTypes),k=0,ok=true;
+    while(rem.length){
+      var fr=rem.filter(function(t){return isFree(t,rem)});
+      if(fr.length<2){ok=false;break}
+      shuffle(fr);var ty=pool[k++%pool.length];fr[0].t=ty;fr[1].t=ty;
+      rem.splice(rem.indexOf(fr[0]),1);rem.splice(rem.indexOf(fr[1]),1);
+    }
+    if(ok)return;
+  }
+}
+
+function build(){
+  board.innerHTML='';tiles=[];sel=null;
+  var L=LEVELS[lvl],W=0,H=0;
+  L.layers.forEach(function(ly){
+    for(var c=0;c<ly[0];c++)for(var r=0;r<ly[1];r++){
+      tiles.push({x:(ly[2]+c)*2,y:(ly[3]+r)*2,z:ly[4],t:0,gone:false});
+    }
+    W=Math.max(W,ly[2]+ly[0]);H=Math.max(H,ly[3]+ly[1]);
+  });
+  L.types=typesFor(L,tiles.length);
+  assign(tiles,L.types);
+  var aw=Math.min(window.innerWidth-(window.innerWidth>700?250:24),980),ah=window.innerHeight-96-20-(window.innerWidth>700?0:132);
+  tw=Math.floor(Math.max(30,Math.min(aw/W,ah/(H*1.2),74)));th=Math.round(tw*1.2);
+  board.style.width=(W*tw+16)+'px';board.style.height=(H*th+16)+'px';
+  tiles.forEach(function(t){
+    var d=document.createElement('div');d.className='tile';
+    d.style.width=tw+'px';d.style.height=th+'px';
+    d.style.left=(t.x/2*tw+t.z*4)+'px';d.style.top=(t.y/2*th-t.z*4)+'px';d.style.zIndex=t.z*100+t.y;
+    d.title=ICONS[0]&&'';
+    d.onclick=function(){click(t)};
+    t.el=d;board.appendChild(d);paint(t);
+  });
+  $('lv').textContent=lvl+1;$('lvt').textContent=LEVELS.length;shufLeft=1;$('sl').textContent=1;if(lvl===0)startRun();startTimer();refresh();
+}
+function paint(t){
+  var ic=ICONS[t.t];t.el.title=ic.n;t.el.innerHTML='';
+  function emoji(){t.el.innerHTML='';var sp=document.createElement('span');sp.style.fontSize=Math.round(tw*.58)+'px';sp.textContent=ic.e;t.el.appendChild(sp)}
+  if(ic.img){var im=document.createElement('img');im.alt=ic.n;im.onerror=function(){ic.img=null;emoji()};im.src=ic.img;t.el.appendChild(im)}
+  else emoji();
+}
+function refresh(){
+  var left=0,free=[];
+  tiles.forEach(function(t){if(t.gone)return;left++;var f=isFree(t,tiles);t.free=f;t.el.classList.toggle('blocked',!f);if(f)free.push(t)});
+  $('left').textContent=left/2;
+  if(!left)return win();
+  var seen={},ok=false;free.forEach(function(t){if(seen[t.t])ok=true;seen[t.t]=1});
+  if(!ok)showNoMoves();
+}
+function click(t){
+  if(t.gone)return;
+  if(!t.free){SFX.block();return}
+  if(!sel){sel=t;t.el.classList.add('sel');SFX.sel();return}
+  if(sel===t){t.el.classList.remove('sel');sel=null;return}
+  if(sel.t===t.t){
+    [sel,t].forEach(function(x){x.gone=true;x.el.classList.remove('sel');x.el.classList.add('gone')});
+    sel=null;SFX.match();refresh();
+  }else{sel.el.classList.remove('sel');sel=t;t.el.classList.add('sel');SFX.bad()}
+}
+var shufLeft=1;
+function reshuffle(){
+  if(shufLeft<=0){SFX.bad();return}
+  shufLeft--;$('sl').textContent=shufLeft;
+  var rem=tiles.filter(function(t){return !t.gone});
+  if(sel){sel.el.classList.remove('sel');sel=null}
+  assign(rem,LEVELS[lvl].types);rem.forEach(paint);SFX.shuf();refresh();
+}
+function showNoMoves(){
+  SFX.bad();$('ot').textContent='Нет доступных пар';$('op').textContent='Плитки можно перемешать — уровень останется проходимым.';
+  $('oc').style.display='none';$('ocopy').style.display='none';
+  if(shufLeft>0){$('onext').textContent='Перемешать';$('onext').onclick=function(){hide();reshuffle()}}
+  else{$('op').textContent='Перемешивание на этом уровне уже использовано. Начните уровень заново.';$('onext').textContent='Начать заново';$('onext').onclick=function(){hide();build()}}
+  show();
+}
+function copy(text,btn){
+  function done(){var o=btn.textContent;btn.textContent='Скопировано ✓';setTimeout(function(){btn.textContent=o},1500)}
+  function fb(){var a=document.createElement('textarea');a.value=text;a.style.position='fixed';a.style.opacity='0';document.body.appendChild(a);a.select();
+    try{document.execCommand('copy');done()}catch(e){}document.body.removeChild(a)}
+  if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(text).then(done,fb);else fb();
+}
+var cards={};
+function setCard(n,code){
+  var c=cards[n];
+  if(!c){
+    c=document.createElement('div');c.className='card';
+    c.innerHTML='<small></small><code></code><button class="alt">Копировать</button>';
+    cards[n]=c;
+    var ref=null;for(var k=n+1;k<=LEVELS.length;k++)if(cards[k]&&cards[k].parentNode){ref=cards[k];break}
+    $('codes').insertBefore(c,ref);
+  }
+  c.querySelector('small').textContent='Уровень '+n+': промокод';
+  c.querySelector('code').textContent=code;
+  var b=c.querySelector('button');b.onclick=function(){copy(code,b)};
+}
+function clearCards(){cards={};$('codes').innerHTML=''}
+function win(){
+  var n=lvl+1,last=lvl===LEVELS.length-1,nb=$('onext');
+  running=false;clearInterval(tick);SFX.win();
+  $('ot').textContent=last?'Все уровни пройдены!':'Уровень '+n+' пройден!';
+  $('oc').style.display='none';$('ocopy').style.display='none';
+  $('op').textContent='Проверяем награду…';
+  nb.textContent=last?'Играть снова':'Следующий уровень';nb.disabled=true;
+  nb.onclick=function(){hide();if(last)lvl=0;else lvl++;build()};
+  show();
+  function done(m){$('op').textContent=m;nb.disabled=false}
+  if(!tok){done('Войдите через Steam, чтобы получать промокоды и попадать в рейтинг.');return}
+  if(!runTok){done('Сервер не принял начало прохождения. Нажмите «Играть снова» и пройдите игру с 1 уровня.');return}
+  api('/api/complete',{run:runTok,level:n}).then(function(j){
+    if(last)runTok=null;
+    if(!hasReward(n))j.code=null;
+    if(j.code){
+      setCard(n,j.code);$('oc').value=j.code;$('oc').style.display='';$('ocopy').style.display='';
+      $('ocopy').onclick=function(){copy(j.code,$('ocopy'))};$('oc').onclick=function(){this.select()};
+    }
+    var m=j.code?(j.received?'Промокод уже получен ранее. Он сохранён за вашим аккаунтом и слева на экране.':'Вы получили промокод для магазина. Он сохранён за вашим аккаунтом и слева на экране.'):'За этот уровень промокода нет.';
+    if(last&&j.count)m+=' Прохождение засчитано в рейтинге: '+j.count+'.';
+    if(last&&j.time)m+=' Ваше время: '+fmtMs(j.time)+(j.record?' — новый личный рекорд!':'. Лучшее: '+fmtMs(j.best)+'.');
+    done(m);
+  }).catch(function(e){done('Не удалось получить награду: '+((e&&e.error)||'ошибка сети')+'.')});
+}
+function show(){running=false;$('ov').classList.add('show')}
+function hide(){running=true;$('ov').classList.remove('show')}
+$('shuf').onclick=reshuffle;
+$('tomenu').onclick=function(){location.href='index.html'};
+$('mute').onclick=function(){muted=!muted;this.textContent=muted?'🔇':'🔊'};
+$('rest').onclick=function(){hide();build()};
+// ====== Steam-вход и рейтинг ======
+var tok=null,me=null,runTok=null;
+function b64d(s){s=s.replace(/-/g,'+').replace(/_/g,'/');var b=atob(s),u=new Uint8Array(b.length);for(var i=0;i<b.length;i++)u[i]=b.charCodeAt(i);return new TextDecoder().decode(u)}
+function setTok(t){
+  try{var p=JSON.parse(b64d(t.split('.')[0]));if(p.k!=='s'||p.exp<Date.now())throw 0;tok=t;me=p}
+  catch(e){tok=null;me=null;try{localStorage.removeItem('rm-token')}catch(x){}}
+}
+function loadSession(){
+  var m=location.hash.match(/[#&]t=([^&]+)/);
+  if(m){setTok(m[1]);if(tok){try{localStorage.setItem('rm-token',tok)}catch(e){}}history.replaceState(null,'',location.pathname+location.search)}
+  else{try{var t=localStorage.getItem('rm-token');if(t)setTok(t)}catch(e){}}
+}
+function api(path,body){
+  var o={method:body?'POST':'GET',headers:{}};
+  if(tok)o.headers.Authorization='Bearer '+tok;
+  if(body){o.headers['Content-Type']='application/json';o.body=JSON.stringify(body)}
+  return fetch(API+path,o).then(function(r){
+    if(r.status===401)logout();
+    return r.json().then(function(j){if(!r.ok)throw j;return j});
+  });
+}
+function logout(){tok=null;me=null;runTok=null;try{localStorage.removeItem('rm-token')}catch(e){}renderAuth();clearCards()}
+function renderAuth(){
+  var a=$('auth');a.innerHTML='';
+  if(me){
+    if(me.a&&me.a.indexOf('https://')===0){var im=document.createElement('img');im.src=me.a;im.alt='';a.appendChild(im)}
+    var n=document.createElement('span');n.textContent=me.n;a.appendChild(n);
+    var b=document.createElement('button');b.className='alt';b.textContent='Выйти';b.onclick=logout;a.appendChild(b);
+  }else{
+    var l=document.createElement('a');l.className='btn';l.textContent='Войти через Steam';l.href=API+'/auth/steam';l.onclick=function(){try{sessionStorage.setItem('rm-back','mahjong.html')}catch(e){}};a.appendChild(l);
+  }
+}
+function startRun(){
+  runTok=null;if(!tok)return;
+  api('/api/start',{}).then(function(j){runTok=j.run}).catch(function(){});
+}
+var lbMode='count';
+function fmtMs(ms){var s=Math.round(ms/1000),h=Math.floor(s/3600),m=Math.floor(s%3600/60),r=s%60;return (h?h+':'+('0'+m).slice(-2):m)+':'+('0'+r).slice(-2)}
+function openLb(){running=false;$('lbov').classList.add('show');loadLb(lbMode)}
+function loadLb(mode){
+  lbMode=mode;
+  var body=$('lbb'),msg=$('lbmsg');body.innerHTML='';msg.textContent='Загрузка…';
+  $('tabc').classList.toggle('alt',mode!=='count');$('tabs').classList.toggle('alt',mode!=='speed');
+  $('lbh').textContent=mode==='speed'?'Время':'Прошёл';
+  $('lbdesc').textContent=mode==='speed'?'Лучшее время прохождения всех уровней подряд':'Сколько раз игрок прошёл игру целиком';
+  api(mode==='speed'?'/api/speed':'/api/leaderboard').then(function(j){
+    msg.textContent=j.players.length?'':'Пока никто не прошёл все уровни.';
+    j.players.forEach(function(p,i){
+      var tr=document.createElement('tr');if(me&&p.id===me.sid)tr.className='me';
+      var c1=document.createElement('td');c1.textContent=i+1;
+      var c2=document.createElement('td');
+      if(p.a&&p.a.indexOf('https://')===0){var im=document.createElement('img');im.className='av';im.src=p.a;im.alt='';c2.appendChild(im)}
+      var a=document.createElement('a');a.textContent=p.n;a.href='https://steamcommunity.com/profiles/'+p.id;a.target='_blank';a.rel='noopener';c2.appendChild(a);
+      var c3=document.createElement('td');c3.textContent=mode==='speed'?fmtMs(p.ms):p.c;
+      tr.appendChild(c1);tr.appendChild(c2);tr.appendChild(c3);body.appendChild(tr);
+    });
+  }).catch(function(){msg.textContent='Не удалось загрузить рейтинг. Проверьте адрес сервера в начале скрипта.'});
+}
+$('lb').onclick=openLb;
+$('tabc').onclick=function(){loadLb('count')};
+$('tabs').onclick=function(){loadLb('speed')};
+$('lbclose').onclick=function(){$('lbov').classList.remove('show');running=!$('ov').classList.contains('show')};
+function loadPromos(){
+  if(!tok)return;
+  api('/api/promos').then(function(j){for(var n=1;n<=LEVELS.length;n++)if(hasReward(n)&&j.promos[n])setCard(n,j.promos[n])}).catch(function(){});
+}
+loadSession();renderAuth();loadPromos();
+probeImages(build);
+</script>
+</body>
+</html>
