@@ -262,7 +262,7 @@ function build(){
     d.onclick=function(){click(t)};
     t.el=d;board.appendChild(d);paint(t);
   });
-  $('lv').textContent=lvl+1;$('lvt').textContent=LEVELS.length;shufLeft=1;$('sl').textContent=1;if(lvl===0)startRun();startTimer();refresh();
+  $('lv').textContent=lvl+1;$('lvt').textContent=LEVELS.length;setShuf(SHUF_START);comboN=0;comboAt=0;if(lvl===0)startRun();startTimer();refresh();
 }
 function paint(t){
   var ic=ICONS[t.t];t.el.title=ic.n;t.el.innerHTML='';
@@ -285,13 +285,28 @@ function click(t){
   if(sel===t){t.el.classList.remove('sel');sel=null;return}
   if(sel.t===t.t){
     [sel,t].forEach(function(x){x.gone=true;x.el.classList.remove('sel');x.el.classList.add('gone')});
-    sel=null;SFX.match();refresh();
+    sel=null;SFX.match();combo();refresh();
   }else{sel.el.classList.remove('sel');sel=t;t.el.classList.add('sel');SFX.bad()}
 }
-var shufLeft=1;
+// ====== ПЕРЕМЕШИВАНИЯ И БОНУС ЗА СКОРОСТЬ ======
+var SHUF_START=1;      // сколько перемешиваний даётся в начале каждого уровня
+var SHUF_MAX=3;        // больше стольки перемешиваний накопить нельзя
+var COMBO_GAP=3000;    // макс. пауза между парами (мс), чтобы цепочка не прервалась
+var COMBO_PAIRS=4;     // сколько пар подряд нужно убрать быстро, чтобы получить +1 перемешивание
+var shufLeft=SHUF_START,comboN=0,comboAt=0;
+function setShuf(n){shufLeft=n;$('sl').textContent=n}
+function combo(){
+  var now=Date.now();
+  comboN=(comboAt&&now-comboAt<=COMBO_GAP)?comboN+1:1;comboAt=now;
+  if(comboN>=COMBO_PAIRS){
+    comboN=0;comboAt=0;
+    if(shufLeft<SHUF_MAX){setShuf(shufLeft+1);toast('Быстро! +1 перемешивание');SFX.win()}
+    else toast('Быстро! Перемешиваний уже максимум ('+SHUF_MAX+')');
+  }
+}
 function reshuffle(){
   if(shufLeft<=0){SFX.bad();return}
-  shufLeft--;$('sl').textContent=shufLeft;
+  setShuf(shufLeft-1);
   var rem=tiles.filter(function(t){return !t.gone});
   if(sel){sel.el.classList.remove('sel');sel=null}
   assign(rem,LEVELS[lvl].types);rem.forEach(paint);SFX.shuf();refresh();
