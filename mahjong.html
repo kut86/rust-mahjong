@@ -193,9 +193,11 @@ var SFX={
 
 // ====== Таймер ======
 var tleft=0,tick=null,running=false;
+var CARRY_TIME=true;   // переносить неистраченное время на следующий уровень
+var carry=0,carryNext=0; // carry — остаток, с которым начат текущий уровень; carryNext — остаток после победы
 function fmt(s){return Math.floor(s/60)+':'+('0'+s%60).slice(-2)}
 function drawTime(){var e=$('tm');e.textContent=fmt(tleft);e.style.color=tleft<=30?'var(--rustHi)':''}
-function startTimer(){tleft=LEVELS[lvl].time;running=true;clearInterval(tick);tick=setInterval(onTick,1000);drawTime()}
+function startTimer(){tleft=LEVELS[lvl].time+carry;running=true;clearInterval(tick);tick=setInterval(onTick,1000);drawTime()}
 function onTick(){if(!running)return;tleft--;drawTime();if(tleft<=10&&tleft>0)SFX.tick();if(tleft<=0){clearInterval(tick);timeUp()}}
 function timeUp(){running=false;SFX.lose();$('onext').disabled=false;
   $('ot').textContent='Время вышло';$('op').textContent='Не успели убрать все плитки. Попробуйте ещё раз.';
@@ -356,15 +358,15 @@ function toast(m){var t=$('toast');t.textContent=m;t.classList.add('show');clear
 function clearCards(){cards={};$('codes').innerHTML=''}
 function win(){
   var n=lvl+1,last=lvl===LEVELS.length-1,nb=$('onext');
-  running=false;clearInterval(tick);SFX.win();
+  running=false;clearInterval(tick);SFX.win();carryNext=(CARRY_TIME&&!last)?Math.max(0,tleft):0;
   $('ot').textContent=last?'Все уровни пройдены!':'Уровень '+n+' пройден!';
   $('oc').style.display='none';$('ocopy').style.display='none';
   $('op').textContent='Проверяем награду…';
   nb.textContent=last?'Играть снова':'Следующий уровень';nb.disabled=true;
-  nb.onclick=function(){hide();if(last)lvl=0;else lvl++;build()};
+  nb.onclick=function(){hide();carry=carryNext;if(last)lvl=0;else lvl++;build()};
   // Окно показываем сразу только если нужен ответ игроку; при быстром ответе сервера «пустые» уровни пролистываются без окна
   var shown=false,st=setTimeout(function(){shown=true;show()},700);
-  function done(m){clearTimeout(st);if(!shown){shown=true;show()}$('op').textContent=m;nb.disabled=false}
+  function done(m){clearTimeout(st);if(!shown){shown=true;show()}$('op').textContent=m+(carryNext?' Остаток времени ('+carryNext+' сек.) перенесётся на следующий уровень.':'');nb.disabled=false}
   if(!tok){done('Войдите через Steam, чтобы получать промокоды и попадать в рейтинг.');return}
   if(!runTok){done('Сервер не принял начало прохождения. Нажмите «Играть снова» и пройдите игру с 1 уровня.');return}
   api('/api/complete',{run:runTok,level:n}).then(function(j){
@@ -373,8 +375,8 @@ function win(){
     // Промокод уже получен или награды за уровень нет: сразу следующий уровень, только короткая плашка
     if(!last&&!j.expired&&(!j.code||j.received)){
       if(running)return; // игрок за это время начал заново
-      clearTimeout(st);hide();lvl++;build();
-      toast('Уровень '+n+' пройден'+(j.code?' · промокод уже получен':''));
+      clearTimeout(st);hide();carry=carryNext;lvl++;build();
+      toast('Уровень '+n+' пройден'+(j.code?' · промокод уже получен':'')+(carry?' · перенесено '+carry+' сек.':''));
       return;
     }
     if(j.code){
