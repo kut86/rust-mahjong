@@ -74,6 +74,11 @@ function renderAuth(){const a=$('#au');a.innerHTML='';
   const n=document.createElement('span');n.textContent=me.n+' · рекорды идут в рейтинг';a.appendChild(n);
   const o=document.createElement('a');o.href='#';o.className='sm';o.textContent='Выйти';o.onclick=e=>{e.preventDefault();logout()};a.appendChild(o)}
  else{const l=document.createElement('a');l.className='lk';l.textContent='Войти через Steam для рейтинга';l.href=API+'/auth/steam';l.onclick=()=>{try{sessionStorage.setItem('rm-back','tanki.html')}catch(e){}};a.appendChild(l)}}
+/* сезон прогресса: если владелец сменил TANK_PROGRESS_SEASON на сервере, сохранённый прогресс сбрасывается при заходе */
+function checkSeason(){fetch(API+'/api/seasons').then(r=>r.json()).then(j=>{const cur=String(j.tank);let old=null;try{old=localStorage.getItem('tk-season')}catch(e){}
+ if(old===cur)return;
+ if(old!==null){if(started)return;sv={co:0,own:['g'],sel:'g',lv:1,xp:0,tr:{ar:0,fi:0,nc:0},wp:'std',wl:{std:0}};svs();$('#co').textContent=sv.co;$('#t2').textContent='Начался новый сезон: прогресс сброшен. Удачи!'}
+ try{localStorage.setItem('tk-season',cur)}catch(e){}}).catch(()=>{})}
 function startRun(){runTok=null;if(!tok)return;api('/api/start',{game:'tk'}).then(j=>{runTok=j.run}).catch(()=>{})}
 function report(w,sc){if(tok&&runTok)api('/api/tank',{run:runTok,wave:w,score:sc,bosses}).catch(()=>{})}
 
@@ -248,7 +253,7 @@ function setPause(v){paused=v?1:0;$('#pz').classList.toggle('s',!!paused);$('#ps
 $('#ps').onclick=()=>{if(started&&!over&&!pause)setPause(!paused)};$('#rs').onclick=()=>setPause(0);
 $('#mn').onpointerdown=e=>e.stopPropagation();$('#mn').onclick=()=>{if(over||confirm('Выйти в меню? Текущий забег прервётся.'))location.href='index.html'};
 resize();p={x:GW/2,y:GH/2,a:-PI/2,t:-PI/2,r:.55,hp:100,rc:0,fl:0,c:'#4f9d62'};en=[];bl=[];pt=[];rg=[];ob=[];queue=[];pk=[];up={sp:0,hp:0,rt:0};over=true;
-renderAuth();
+renderAuth();checkSeason();
 requestAnimationFrame(loop);
 </script>
 </body>
