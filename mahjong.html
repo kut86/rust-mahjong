@@ -30,6 +30,7 @@ button:focus-visible{outline:3px solid var(--text);outline-offset:2px}
 .tile.sel{outline:3px solid var(--rustHi);transform:translateY(-3px)}
 .tile.gone{opacity:0;transform:scale(.6);pointer-events:none}
 .tile span{line-height:1;pointer-events:none}.tile img{width:76%;height:76%;object-fit:contain;pointer-events:none}
+#toast{position:fixed;left:50%;bottom:24px;transform:translate(-50%,20px);background:var(--panel);border:1px solid var(--line);border-left:4px solid var(--rust);border-radius:8px;padding:10px 16px;opacity:0;pointer-events:none;transition:opacity .25s,transform .25s;z-index:1200;text-align:center;max-width:90vw}#toast.show{opacity:1;transform:translate(-50%,0)}
 #codes{position:fixed;left:10px;top:76px;width:min(210px,44vw);display:flex;flex-direction:column;gap:8px;z-index:20;max-height:calc(100% - 90px);overflow:auto}
 .card{background:var(--panel);border:1px solid var(--line);border-left:4px solid var(--rust);border-radius:8px;padding:8px 10px;
   box-shadow:0 4px 14px rgba(0,0,0,.45);animation:in .35s ease-out}
@@ -75,6 +76,7 @@ a.btn{display:inline-block;background:#1b2838;color:#fff;text-decoration:none;bo
 </header>
 <div id="stage"><div id="board"></div></div>
 <div id="codes" aria-live="polite"></div>
+<div id="toast" role="status"></div>
 
 <div class="ov" id="ov"><div class="box">
   <h2 id="ot"></h2><p id="op"></p>
@@ -329,6 +331,8 @@ function setCard(n,code,exp){
   var un=c.querySelector('.until');un.textContent=untilText(exp);un.style.display=exp?'':'none';
   var b=c.querySelector('button');b.onclick=function(){copy(code,b)};
 }
+var toastT;
+function toast(m){var t=$('toast');t.textContent=m;t.classList.add('show');clearTimeout(toastT);toastT=setTimeout(function(){t.classList.remove('show')},2500)}
 function clearCards(){cards={};$('codes').innerHTML=''}
 function win(){
   var n=lvl+1,last=lvl===LEVELS.length-1,nb=$('onext');
@@ -338,13 +342,21 @@ function win(){
   $('op').textContent='Проверяем награду…';
   nb.textContent=last?'Играть снова':'Следующий уровень';nb.disabled=true;
   nb.onclick=function(){hide();if(last)lvl=0;else lvl++;build()};
-  show();
-  function done(m){$('op').textContent=m;nb.disabled=false}
+  // Окно показываем сразу только если нужен ответ игроку; при быстром ответе сервера «пустые» уровни пролистываются без окна
+  var shown=false,st=setTimeout(function(){shown=true;show()},700);
+  function done(m){clearTimeout(st);if(!shown){shown=true;show()}$('op').textContent=m;nb.disabled=false}
   if(!tok){done('Войдите через Steam, чтобы получать промокоды и попадать в рейтинг.');return}
   if(!runTok){done('Сервер не принял начало прохождения. Нажмите «Играть снова» и пройдите игру с 1 уровня.');return}
   api('/api/complete',{run:runTok,level:n}).then(function(j){
     if(last)runTok=null;
     if(!hasReward(n))j.code=null;
+    // Промокод уже получен или награды за уровень нет: сразу следующий уровень, только короткая плашка
+    if(!last&&!j.expired&&(!j.code||j.received)){
+      if(running)return; // игрок за это время начал заново
+      clearTimeout(st);hide();lvl++;build();
+      toast('Уровень '+n+' пройден'+(j.code?' · промокод уже получен':''));
+      return;
+    }
     if(j.code){
       setCard(n,j.code,j.exp);$('oc').value=j.code;$('oc').style.display='';$('ocopy').style.display='';
       $('ocopy').onclick=function(){copy(j.code,$('ocopy'))};$('oc').onclick=function(){this.select()};
