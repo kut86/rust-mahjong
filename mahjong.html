@@ -293,6 +293,7 @@ var SHUF_START=1;      // сколько перемешиваний даётся
 var SHUF_MAX=3;        // больше стольки перемешиваний накопить нельзя
 var COMBO_GAP=3000;    // макс. пауза между парами (мс), чтобы цепочка не прервалась
 var COMBO_PAIRS=4;     // сколько пар подряд нужно убрать быстро, чтобы получить +1 перемешивание
+var COMBO_TIME=2;      // сколько секунд добавляется к таймеру за цепочку
 var shufLeft=SHUF_START,comboN=0,comboAt=0;
 function setShuf(n){shufLeft=n;$('sl').textContent=n}
 function combo(){
@@ -300,8 +301,9 @@ function combo(){
   comboN=(comboAt&&now-comboAt<=COMBO_GAP)?comboN+1:1;comboAt=now;
   if(comboN>=COMBO_PAIRS){
     comboN=0;comboAt=0;
-    if(shufLeft<SHUF_MAX){setShuf(shufLeft+1);toast('Быстро! +1 перемешивание');SFX.win()}
-    else toast('Быстро! Перемешиваний уже максимум ('+SHUF_MAX+')');
+    tleft+=COMBO_TIME;drawTime();
+    if(shufLeft<SHUF_MAX){setShuf(shufLeft+1);toast('Быстро! +1 перемешивание и +'+COMBO_TIME+' сек.');SFX.win()}
+    else{toast('Быстро! +'+COMBO_TIME+' сек. (перемешиваний уже максимум)');SFX.match()}
   }
 }
 function reshuffle(){
