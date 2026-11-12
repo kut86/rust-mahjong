@@ -83,7 +83,7 @@ function startRun(){runTok=null;if(!tok)return;api('/api/start',{game:'tk'}).the
 function report(w,sc){if(tok&&runTok)api('/api/tank',{run:runTok,wave:w,score:sc,bosses}).catch(()=>{})}
 
 /* ===== Картинки танков: папка img/tanks/ рядом с index.html. Чего нет — рисуется кодом ===== */
-const TIMG='img/tanks/',TVER='1',TI={},TSZ=5.4; // TVER — меняйте при замене картинок (сброс кэша); TSZ — размер танка относительно его радиуса
+const TIMG='img/tanks/',TVER='1',TI={},TSZ=3.4; // TVER — меняйте при замене картинок (сброс кэша); TSZ — размер танка относительно его радиуса
 function tload(k,f,alt){const im=new Image();im.onload=()=>{TI[k]=im;if(k=='ground'&&GW)paintGround()};im.onerror=()=>{if(alt)tload(k,alt)};im.src=TIMG+f+'?v='+TVER}
 function tinit(){
  ['g','d','n','b','v'].forEach(s=>{tload('p-'+s+'-hull','player-'+s+'-hull.png');tload('p-'+s+'-tur','player-'+s+'-tur.png')});
