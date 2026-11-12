@@ -155,23 +155,24 @@ function typesFor(L,count){
   return Math.max(2,Math.min(n,ICONS.length,count/2));
 }
 
-// Уровни от простого к сложному. Растут число плиток, площадь поля и число слоёв со сдвигом на пол-плитки
-// (такая плитка закрывает сразу две нижние). Одинаковых эмодзи не больше 4 на уровне,
-// а на маленьких уровнях ещё меньше: там больше разных предметов на меньшее число плиток.
+// Уровни: симметричная пирамида из 4 слоёв. Нижний слой C x R плиток, каждый следующий слой на 1 плитку
+// меньше по каждой стороне и сдвинут на пол-плитки к центру (лежит на 4 плитках снизу).
+// Уровень 1: основание 6x6. Дальше основание растёт на 2 линии за уровень: колонки, ряды, колонки, ряды.
 // time — секунды на уровень, types — число разных предметов.
-// Блок слоя: [столбцов, строк, смещение x, смещение y, номер слоя 0-3] в размерах плитки.
+var BASES=[[6,6],[8,6],[8,8],[10,8],[10,10]],LAYER_COUNT=4;
+function pyramid(c,r){
+  var a=[];
+  for(var k=0;k<LAYER_COUNT;k++)a.push([c-k,r-k,k*.5,k*.5,k]);
+  return a;
+}
 var LEVELS=[
- // 1: 30 плиток, каждый предмет ровно по паре
- {time:90, types:15,layers:[[6,3,0,0,0],[1,2,6,.5,0],[3,2,1.5,.5,1],[2,1,2,1,2],[2,1,2,1,3]]},
- // 2: 48 плиток
- {time:130,types:18,layers:[[7,4,0,0,0],[1,2,7,1,0],[5,2,1.5,1,1],[3,2,2.5,1,2],[2,1,3,1.5,3]]},
- // 3: 64 плитки
- {time:170,types:22,layers:[[8,4,1,0,0],[1,2,0,1,0],[1,2,9,1,0],[6,3,2,.5,1],[4,2,3.5,1,2],[2,1,4.5,1.5,3]]},
- // 4: 84 плитки
- {time:220,types:24,layers:[[8,5,1,0,0],[1,2,0,1.5,0],[1,2,9,1.5,0],[6,4,2,.5,1],[4,3,3.5,1,2],[2,2,4.5,1.5,3]]},
- // 5: 104 плитки, каждый предмет по 4 штуки
- {time:270,types:26,layers:[[8,6,1,0,0],[1,4,0,1,0],[1,4,9,1,0],[6,5,2,.5,1],[4,3,3.5,1.5,2],[2,3,4.5,1.5,3]]}
+ {time:150,types:22,layers:pyramid(6,6)},   // 86 плиток
+ {time:200,types:28,layers:pyramid(8,6)},   // 122
+ {time:260,types:34,layers:pyramid(8,8)},   // 174
+ {time:320,types:40,layers:pyramid(10,8)},  // 226
+ {time:400,types:46,layers:pyramid(10,10)}  // 294
 ];
+
 
 // ====== Звуки (синтезируются, файлов не нужно) ======
 var AC=null,muted=false;
@@ -196,7 +197,7 @@ function fmt(s){return Math.floor(s/60)+':'+('0'+s%60).slice(-2)}
 function drawTime(){var e=$('tm');e.textContent=fmt(tleft);e.style.color=tleft<=30?'var(--rustHi)':''}
 function startTimer(){tleft=LEVELS[lvl].time;running=true;clearInterval(tick);tick=setInterval(onTick,1000);drawTime()}
 function onTick(){if(!running)return;tleft--;drawTime();if(tleft<=10&&tleft>0)SFX.tick();if(tleft<=0){clearInterval(tick);timeUp()}}
-function timeUp(){running=false;SFX.lose();
+function timeUp(){running=false;SFX.lose();$('onext').disabled=false;
   $('ot').textContent='Время вышло';$('op').textContent='Не успели убрать все плитки. Попробуйте ещё раз.';
   $('oc').style.display='none';$('ocopy').style.display='none';
   $('onext').textContent='Попробовать снова';$('onext').onclick=function(){hide();build()};show()}
@@ -227,7 +228,7 @@ function pickPool(n){
 
 // Раздаёт типы так, чтобы уровень всегда можно было пройти (разбираем с конца)
 function assign(list,nTypes){
-  for(var tries=0;tries<50;tries++){
+  for(var tries=0;tries<300;tries++){
     var rem=list.slice(),pairs=list.length/2,pool=pickPool(nTypes),k=0,ok=true;
     while(rem.length){
       var fr=rem.filter(function(t){return isFree(t,rem)});
@@ -240,7 +241,7 @@ function assign(list,nTypes){
 }
 
 function build(){
-  board.innerHTML='';tiles=[];sel=null;
+  $('onext').disabled=false;board.innerHTML='';tiles=[];sel=null;
   var L=LEVELS[lvl],W=0,H=0;
   L.layers.forEach(function(ly){
     for(var c=0;c<ly[0];c++)for(var r=0;r<ly[1];r++){
@@ -296,7 +297,7 @@ function reshuffle(){
   assign(rem,LEVELS[lvl].types);rem.forEach(paint);SFX.shuf();refresh();
 }
 function showNoMoves(){
-  SFX.bad();$('ot').textContent='Нет доступных пар';$('op').textContent='Плитки можно перемешать — уровень останется проходимым.';
+  $('onext').disabled=false;SFX.bad();$('ot').textContent='Нет доступных пар';$('op').textContent='Плитки можно перемешать — уровень останется проходимым.';
   $('oc').style.display='none';$('ocopy').style.display='none';
   if(shufLeft>0){$('onext').textContent='Перемешать';$('onext').onclick=function(){hide();reshuffle()}}
   else{$('op').textContent='Перемешивание на этом уровне уже использовано. Начните уровень заново.';$('onext').textContent='Начать заново';$('onext').onclick=function(){hide();build()}}
