@@ -59,7 +59,7 @@ a.btn{display:inline-block;background:#1b2838;color:#fff;text-decoration:none;bo
   <p class="sub">Выберите игру</p>
   <div class="gl">
     <a class="gc" href="mahjong.html"><span class="ge">🀄</span><b>МАДЖОНГ</b><small>5 уровней, промокоды для магазина, рейтинг по прохождениям и скорости</small></a>
-    <a class="gc" href="tanki.html"><span class="ge">🪖</span><b>ТАНЧИКИ</b><small>Волны врагов, боссы, гараж и скины, рейтинг по волнам и очкам</small></a>
+    <a class="gc" href="tanki.html"><span class="ge">🪖</span><b>ТАНЧИКИ</b><small>Волны врагов, боссы, гараж и скины, рейтинг по волнам и убитым боссам</small></a>
   </div>
   <p class="note">Вход через Steam один на все игры: после входа ваши результаты попадают в общий рейтинг.</p>
 </div>
@@ -117,8 +117,8 @@ function fmtMs(ms){var s=Math.round(ms/1000),h=Math.floor(s/3600),m=Math.floor(s
 var MODES=[
   {id:'mj', tab:'Маджонг: прохождения',url:'/api/leaderboard',   h:'Прошёл', d:'Сколько раз игрок прошёл маджонг целиком',               v:function(p){return p.c}},
   {id:'mjs',tab:'Маджонг: скорость',   url:'/api/speed',         h:'Время',  d:'Лучшее время прохождения всех уровней маджонга подряд',  v:function(p){return fmtMs(p.ms)}},
-  {id:'tkw',tab:'Танчики: волны',      url:'/api/tanks?by=wave', h:'Волн',   d:'Сколько волн пройдено за один забег (рядом очки)',       v:function(p){return p.w+' · '+p.s+' оч.'}},
-  {id:'tks',tab:'Танчики: очки',       url:'/api/tanks?by=score',h:'Очков',  d:'Больше всего очков за один забег (рядом волны)',         v:function(p){return p.s+' · '+p.w+' волн'}}
+  {id:'tkw',tab:'Танчики: волны',      url:'/api/tanks?by=wave', h:'Волн · очки',d:'Больше всего волн за один забег, рядом очки этого рекорда',v:function(p){return p.w+' · '+p.s+' оч.'}},
+  {id:'tkb',tab:'Танчики: боссы',      url:'/api/tanks?by=boss', h:'Боссов', d:'Сколько боссов убито в танчиках за всё время',        v:function(p){return p.b}}
 ];
 var lbMode='mj';
 function loadLb(id){
