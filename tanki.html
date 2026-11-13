@@ -31,7 +31,8 @@ html,body{height:100%;margin:0;background:#1d2219;overflow:hidden;touch-action:n
 #mn,#ps{position:fixed;left:10px;top:calc(env(safe-area-inset-top,0px) + 54px);z-index:3;display:none;width:54px;height:44px;border-radius:12px;border:0;background:rgba(255,255,255,.16);color:var(--tx);font-size:18px;font-weight:700;touch-action:none}
 #ps{left:74px}
 #pz{position:fixed;inset:0;z-index:2;background:rgba(12,14,10,.55);display:none;align-items:center;justify-content:center}#pz.s{display:flex}#pz button{background:var(--acc);color:var(--btx);border:0;border-radius:14px;font-size:22px;font-weight:700;padding:18px 44px}
-#up{position:fixed;inset:0;z-index:6;background:var(--ov);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;text-align:center;padding:14px;overflow:auto}#up.h{display:none}#up h2{margin:0;font-size:24px}#up p{margin:0;color:var(--mut)}.cd{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin:8px 0}#up button{background:#2e3528;color:var(--tx);border:2px solid transparent;border-radius:14px;padding:12px 16px;min-width:118px;font-size:15px;font-weight:600;display:flex;flex-direction:column;align-items:center;gap:4px}#up button b{font-size:28px}#up button small{color:var(--mut);font-weight:400;letter-spacing:2px}#up button:disabled{opacity:.4;filter:grayscale(1)}#up .cl{background:var(--acc);color:var(--btx);margin-top:6px}.ws{display:grid;grid-template-columns:auto auto;gap:6px 26px;margin:10px 0;text-align:left;font-size:16px}.ws span{color:var(--mut)}.ws b{text-align:right}
+#up{position:fixed;inset:0;z-index:6;background:rgba(12,14,10,.96);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;text-align:center;padding:14px;overflow:auto}#up.h{display:none}#up{justify-content:flex-start!important}#up>:first-child{margin-top:auto}#up>:last-child{margin-bottom:auto}#up h2{margin:0;font-size:24px}#up p{margin:0;color:var(--mut)}.cd{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin:8px 0}#up button{background:#2e3528;color:var(--tx);border:2px solid transparent;border-radius:14px;padding:12px 16px;min-width:118px;font-size:15px;font-weight:600;display:flex;flex-direction:column;align-items:center;gap:4px}#up button b{font-size:28px}#up button small{color:var(--mut);font-weight:400;letter-spacing:2px}#up button:disabled{opacity:.4;filter:grayscale(1)}#up .cl{background:var(--acc);color:var(--btx);margin-top:6px}.tn{font-size:16px;font-weight:700}.tg{font-size:11px;color:var(--mut);font-weight:400}.ts{font-size:11px;color:var(--mut);font-weight:400;line-height:1.45;max-width:180px}.st{font-size:12px;color:var(--mut);font-weight:600;letter-spacing:0}.st.ok{color:#6fcf6a}.st.no{color:#e85a4a}
+.ws{display:grid;grid-template-columns:auto auto;gap:6px 26px;margin:10px 0;text-align:left;font-size:16px}.ws span{color:var(--mut)}.ws b{text-align:right}
 #sb{position:fixed;right:10px;top:calc(env(safe-area-inset-top,0px) + 54px);z-index:3;display:none;flex-direction:column;gap:8px}#sb button{width:54px;height:44px;border-radius:12px;border:0;background:rgba(255,255,255,.16);color:var(--tx);font-size:13px;font-weight:700;touch-action:none}
 #rot{position:fixed;inset:0;z-index:9;background:var(--ov);display:none;flex-direction:column;align-items:center;justify-content:center;gap:14px;font-size:18px;text-align:center;padding:24px}#rot b{font-size:56px;animation:r 1.6s ease-in-out infinite}@keyframes r{50%{transform:rotate(90deg)}}@media (orientation:portrait){#rot{display:flex}}
 </style>
@@ -54,15 +55,52 @@ let al=[],mn=[],wk=[],ex=[],pk,up,pause=0,rpN=0,paused=0,W,H,S,GW,GH,OK,cam={x:0
 const keys={},st={L:null,R:null},ms={x:0,y:0,on:0,down:0};
 const DMGX=10; // только для показа: урон и здоровье на экране умножаются на это число (внутри игры числа не меняются)
 let dn=[],WS={d:0,k:0,b:0,xp:0,co:0}; // dn — всплывающие цифры урона; WS — итоги текущей волны
+function dtxt(px,py,t,c){dn.push({x:px,y:py,v:t,l:1,m:1,c})}
 function dnum(e,v){const val=Math.max(1,Math.round(v*DMGX));if(e.dn&&e.dn.l>e.dn.m-.2){e.dn.v+=val;e.dn.l=e.dn.m;return}const o={x:e.x+R(-.3,.3)*S,y:e.y-e.r*S*1.5-S*1.25,v:val,l:.9,m:.9};e.dn=o;dn.push(o)}
 const TY={n:{hp:3,sp:3.2,cd:1.6,c:'#c2453a',r:.55,pts:100},s:{hp:2,sp:5.2,cd:1.2,c:'#d9a32e',r:.45,pts:150},h:{hp:8,sp:2.1,cd:2.3,c:'#7b4fc2',r:.75,pts:300},B:{hp:55,sp:1.6,cd:1.0,c:'#8c1f1f',r:1.15,pts:1000},Q:{hp:4,sp:2.6,cd:2.4,c:'#2f8fbf',r:.6,pts:200},M:{hp:3,sp:2.8,cd:3.2,c:'#6b6f2a',r:.55,pts:200}};
 const BZ_TIME=5,BZ_RATE=.35; // 💥 шквал: сколько секунд и во сколько раз чаще стреляет (0.35 = втрое чаще)
 const BN=['Штурмовик','Каратель','Командир'],SC={x:25,s:20,d:15},WA={pel:1,spr:.06,v:1,life:1.3,d:.7},TR=[{k:'ar',n:'Броня',i:'🛡'},{k:'fi',n:'Урон',i:'🔥'},{k:'nc',n:'Некромант',i:'☠'}],WP={std:{n:'Пушка',i:'🔫',c:1,d:1,pel:1,spr:.03,v:1,life:1.3,p:0},sn:{n:'Снайпер',i:'🎯',c:2.2,d:3.5,pel:1,spr:.008,v:1.5,life:1.7,p:150},sh:{n:'Дробовик',i:'💥',c:1.6,d:.7,pel:5,spr:.2,v:.85,life:.45,p:250},rp:{n:'Скорострел',i:'⚙',c:.45,d:.5,pel:1,spr:.09,v:1.1,life:1.1,p:350}};
 const SK={g:{n:'Зелёный',c:'#4f9d62',f:'255,170,70',p:0},d:{n:'Пустыня',c:'#c9a45a',f:'255,200,90',p:50},n:{n:'Неон',c:'#2fd0d9',f:'60,220,255',p:120},b:{n:'Пламя',c:'#e0562a',f:'255,70,30',p:200},v:{n:'Плазма',c:'#b45cf0',f:'200,100,255',p:300}};
-/* прогрессия: макс. уровень, опыт на уровень, цены рангов (очки навыков), очки за уровень, цены апгрейда оружия (монеты) */
-const MAXLV=100,XN=l=>100+30*l,RC=[1,3,9,27,125],PPL=5,WU=[60,300];
-let sv={co:0,own:['g'],sel:'g',lv:1,xp:0,tr:{ar:0,fi:0,nc:0},wp:'std',wl:{std:0}};try{Object.assign(sv,JSON.parse(localStorage.getItem('tk')||'{}'))}catch(e){}
-sv.lv=Math.min(sv.lv,MAXLV);
+/* ===== Техника: 3 класса по 10 ступеней; на некоторых ступенях есть вторая башня «-мод» (развилка) ===== */
+const CL={l:'Лёгкие',m:'Средние',h:'Тяжёлые'};
+// [класс, ступень, вариант, название, здоровье, скорость, поворот башни, урон за выстрел, перезарядка (с), рикошет %]
+const TD=[
+['l',1,'','Шакал',70,6.5,16,.70,.154,0],['l',2,'','Оса',76,6.7,17,.76,.150,0],
+['l',3,'A','Гепард',82,7.0,18,.82,.146,0],['l',3,'B','Гепард-мод',82,7.0,14,.98,.170,0],
+['l',4,'','Вихрь',80,7.5,19,.86,.140,0],
+['l',5,'A','Стриж',86,7.7,26,.90,.132,0],['l',5,'B','Стриж-мод',104,7.0,12,1.30,.175,0],
+['l',6,'','Ястреб',98,7.9,22,1.00,.128,0],['l',7,'','Мираж',108,8.2,23,1.08,.124,0],['l',8,'','Призрак',118,8.5,24,1.16,.120,0],
+['l',9,'','Шторм',128,8.8,25,1.26,.116,0],['l',10,'','Феникс',140,9.2,27,1.40,.110,0],
+['m',1,'','Мустанг',100,5.0,14,1.00,.220,5],['m',2,'','Бизон',110,5.1,14.5,1.10,.215,5],['m',3,'','Кабан',120,5.3,15,1.20,.210,8],
+['m',4,'A','Лось',128,5.2,15.5,1.30,.205,8],['m',4,'B','Лось-мод',128,5.0,11,1.65,.290,8],
+['m',5,'','Барс',138,5.5,16,1.45,.200,10],
+['m',6,'A','Рысь',150,5.6,17,1.60,.195,10],['m',6,'B','Рысь-мод',138,5.9,22,1.15,.140,10],
+['m',7,'','Ягуар',162,5.8,17.5,1.80,.190,12],['m',8,'','Пума',176,6.0,18,1.95,.185,12],['m',9,'','Тайфун',190,6.1,19,2.15,.180,15],['m',10,'','Скорпион',206,6.3,20,2.40,.175,15],
+['h',1,'','Бульдог',160,3.6,10,1.90,.396,15],['h',2,'','Носорог',176,3.7,10.5,2.05,.390,18],
+['h',3,'A','Медведь',194,3.8,11,2.25,.384,20],['h',3,'B','Медведь-мод',194,4.0,14,1.60,.300,18],
+['h',4,'','Бык',214,3.9,11.5,2.45,.376,22],['h',5,'','Мамонт',236,4.0,12,2.70,.370,25],
+['h',6,'A','Титан',260,4.1,12.5,2.95,.364,28],['h',6,'B','Титан-мод',260,3.8,9,3.90,.560,30],
+['h',7,'','Голем',286,4.2,13,3.25,.358,30],['h',8,'','Колосс',314,4.3,13.5,3.55,.352,33],['h',9,'','Левиафан',344,4.4,14,3.90,.346,36],['h',10,'','Бегемот',380,4.5,15,4.30,.340,40]];
+const TANKS=TD.map(a=>({id:a[0]+a[1]+a[2].toLowerCase(),c:a[0],t:a[1],v:a[2],n:a[3],hp:a[4],sp:a[5],tt:a[6],dm:a[7],cd:a[8],rk:a[9],r:{l:.5,m:.55,h:.65}[a[0]]+.01*(a[1]-1)}));
+const FIRST={l:0,m:2000,h:5000};  // цена первого танка класса в монетах (лёгкий даётся бесплатно)
+const XPC=t=>Math.round(200*Math.pow(1.55,t-2)),GDC=t=>Math.round(XPC(t)/1.5); // опыт и золото для открытия танка ступени t
+const XFX=10;                     // сколько свободного опыта меняется на 1 монету
+const ENHP=.06,EDMG=.015;         // рост здоровья врагов и их урона за каждую волну (после 1-й)
+let NEC=0;                        // шанс союзника-некроманта (ветка появится позже)
+const defSv=()=>({v:2,co:0,own:['g'],sel:'g',tank:'l1',tk:['l1'],xp:{},fx:0});
+let sv=defSv();try{const o=JSON.parse(localStorage.getItem('tk')||'{}');if(o.v>=2)Object.assign(sv,o);else{sv.co=+o.co||0;if(Array.isArray(o.own)&&o.own.length)sv.own=o.own;if(SK[o.sel])sv.sel=o.sel}}catch(e){}
+sv.tk=(sv.tk||[]).filter(id=>TANKS.some(t=>t.id==id));if(!sv.tk.includes('l1'))sv.tk.unshift('l1');if(!sv.tk.includes(sv.tank))sv.tank='l1';sv.xp=sv.xp||{};sv.fx=+sv.fx||0;
+const TK=id=>TANKS.find(t=>t.id==(id||sv.tank)),own=id=>sv.tk.includes(id),preds=t=>TANKS.filter(s=>s.c==t.c&&s.t==t.t-1);
+let TKc=TK();
+const hasNext=t=>TANKS.some(s=>s.c==t.c&&s.t==t.t+1&&!own(s.id));
+// опыт идёт танку, на котором играем; если ему нечего открывать, он становится свободным
+function addXP(n){const t=TK();if(hasNext(t))sv.xp[t.id]=(sv.xp[t.id]||0)+n;else sv.fx+=n}
+// что нужно, чтобы открыть танк t: lock — закрыт (предыдущий не открыт); have — опыт на лучшем из предыдущих
+function openInfo(t){if(t.t==1)return{lock:false,xp:0,gd:FIRST[t.c],have:0,src:null};
+ const ps=preds(t).filter(s=>own(s.id));if(!ps.length)return{lock:true};
+ let b=ps[0];for(const s of ps)if((sv.xp[s.id]||0)>(sv.xp[b.id]||0))b=s;
+ return{lock:false,xp:XPC(t.t),gd:GDC(t.t),have:sv.xp[b.id]||0,src:b.id}}
+function tankClick(id){const t=TK(id);if(own(id)){sv.tank=id;return}const o=openInfo(t);if(o.lock||sv.co<o.gd||o.have<o.xp)return;sv.co-=o.gd;if(o.src)sv.xp[o.src]-=o.xp;sv.tk.push(id)}
 const svs=()=>{try{localStorage.setItem('tk',JSON.stringify(sv))}catch(e){}};
 
 /* ===== вход через Steam (общий с меню и маджонгом) и рейтинг волн ===== */
@@ -81,7 +119,7 @@ function renderAuth(){const a=$('#au');a.innerHTML='';
 /* сезон прогресса: если владелец сменил TANK_PROGRESS_SEASON на сервере, сохранённый прогресс сбрасывается при заходе */
 function checkSeason(){fetch(API+'/api/seasons').then(r=>r.json()).then(j=>{const cur=String(j.tank);let old=null;try{old=localStorage.getItem('tk-season')}catch(e){}
  if(old===cur)return;
- if(old!==null){if(started)return;sv={co:0,own:['g'],sel:'g',lv:1,xp:0,tr:{ar:0,fi:0,nc:0},wp:'std',wl:{std:0}};svs();$('#co').textContent=sv.co;$('#t2').textContent='Начался новый сезон: прогресс сброшен. Удачи!'}
+ if(old!==null){if(started)return;sv=defSv();TKc=TK();svs();$('#co').textContent=sv.co;$('#t2').textContent='Начался новый сезон: прогресс сброшен. Удачи!'}
  try{localStorage.setItem('tk-season',cur)}catch(e){}}).catch(()=>{})}
 function startRun(){runTok=null;if(!tok)return;api('/api/start',{game:'tk'}).then(j=>{runTok=j.run}).catch(()=>{})}
 function report(w,sc){if(tok&&runTok)api('/api/tank',{run:runTok,wave:w,score:sc,bosses}).catch(()=>{})}
@@ -91,14 +129,14 @@ const TIMG='img/tanks/',TVER='1',TI={},TSZ=2.4; // TVER — меняйте пр�
 function tload(k,f,alt){const im=new Image();im.onload=()=>{TI[k]=im;if(k=='ground'&&GW)paintGround()};im.onerror=()=>{if(alt)tload(k,alt)};im.src=TIMG+f+'?v='+TVER}
 function tinit(){
  ['g','d','n','b','v'].forEach(s=>{tload('p-'+s+'-hull','player-'+s+'-hull.png');tload('p-'+s+'-tur','player-'+s+'-tur.png')});
- /* башня игрока берётся по оружию: player-g-tur-sn.png (под скин и оружие) → player-tur-sn.png (общая под оружие) → player-g-tur.png (прежняя) */
- ['std','sn','sh','rp'].forEach(w=>{tload('p-tur-'+w,'player-tur-'+w+'.png');['g','d','n','b','v'].forEach(s=>tload('p-'+s+'-tur-'+w,'player-'+s+'-tur-'+w+'.png'))});
+ /* картинки игрока: player-hull-ID.png и player-tur-ID.png для каждого танка (ID: l1, m5, h3a …); если их нет — player-СКИН-hull.png / player-СКИН-tur.png, затем рисуется кодом */
+ TANKS.forEach(t=>{tload('p-hull-'+t.id,'player-hull-'+t.id+'.png');tload('p-tur-'+t.id,'player-tur-'+t.id+'.png')});
  ['n','s','h','q','m'].forEach(t=>{tload('e-'+t+'-hull','enemy-'+t+'-hull.png');tload('e-'+t+'-tur','enemy-'+t+'-tur.png');tload('w-'+t,'wreck-'+t+'.png')});
  tload('e-b-hull','boss-hull.png');tload('e-b-tur','boss-tur.png');tload('w-b','wreck-boss.png');tload('w-p','wreck-player.png');tload('wreck','wreck.png');
  tload('ground','ground.jpg','ground.png');
  [1,2,3].forEach(n=>tload('crate'+n,'crate-'+n+'.png'));
  tload('steel','steel.png');tload('bp','bullet-player.png');tload('be','bullet-enemy.png');tload('mo','mine-off.png');tload('mn','mine-on.png');
- ['g','d','n','b','v'].forEach(k=>tload('skin-'+k,'skin-'+k+'.png'));['std','sn','sh','rp'].forEach(k=>tload('wp-'+k,'weapon-'+k+'.png'));['ar','fi','nc'].forEach(k=>tload('tr-'+k,'talent-'+k+'.png'));
+ ['g','d','n','b','v'].forEach(k=>tload('skin-'+k,'skin-'+k+'.png'));
  tload('pr','pick-repair.png');tload('pd','pick-damage.png');tload('ps','pick-shield.png');tload('explosion','explosion.png')}
 const ic=(k,fb)=>TI[k]?`<img src='${TI[k].src}' alt='' style='width:46px;height:46px;object-fit:contain;display:block;margin:0 auto 4px'>`:fb;
 const tkey=e=>e===p?'p-'+sv.sel:e.type?'e-'+e.type.toLowerCase():null;
@@ -139,8 +177,8 @@ function spawnPos(r){const mg=S*1.5;
   if(Math.abs(px-p.x)>W/2+S*.3||Math.abs(py-p.y)>H/2+S*.3)return[px,py]}
  return[p.x<GW/2?GW-r:r,p.y<GH/2?GH-r:r]}
 function mk(t){const d=TY[t],r=d.r*S,s=R(4)|0;const[px,py]=spawnPos(r);
- const H_=Math.ceil(d.hp*(1+.012*(sv.lv-1)+Math.min(.5,.025*wave))),bv=((wave/5|0)-1)%3;return{type:t,hp:H_,mh:H_,bv,sp:d.sp,c:t=='B'?['#8c1f1f','#a0501a','#1f5a8c'][bv]:d.c,r:d.r,pts:d.pts,cdMax:d.cd,x:px,y:py,a:PI/2,t:PI/2,cd:R(1,2),ph:R(6),w:0,rc:0,fl:0,tr:0}}
-function reset(){startRun();bosses=0;up={sp:0,hp:0,rt:0};p={x:GW/2,y:GH/2,a:-PI/2,t:-PI/2,r:.55,sp:5,hp:100,mhp:100,rate:.22,dbl:0,sh:0,cd:0,rc:0,fl:0,tr:0,c:SK[sv.sel].c};pk=[];pause=0;rpN=0;setPause(0);$('#up').classList.add('h');applyUp();p.hp=p.mhp;p.dm=1+.1*sv.tr.fi;al=[];mn=[];en=[];bl=[];pt=[];rg=[];wk=[];ex=[];dn=[];queue=[];score=0;wave=0;over=false;waitT=-1;spawnT=0;hurt=0;paintGround();ob=[];
+ const H_=Math.ceil(d.hp*(1+ENHP*(wave-1))),bv=((wave/5|0)-1)%3;return{type:t,hp:H_,mh:H_,bv,sp:d.sp,c:t=='B'?['#8c1f1f','#a0501a','#1f5a8c'][bv]:d.c,r:d.r,pts:d.pts,cdMax:d.cd,x:px,y:py,a:PI/2,t:PI/2,cd:R(1,2),ph:R(6),w:0,rc:0,fl:0,tr:0}}
+function reset(){TKc=TK();startRun();bosses=0;up={sp:0,hp:0,rt:0};p={x:GW/2,y:GH/2,a:-PI/2,t:-PI/2,r:TKc.r,sp:5,hp:100,mhp:100,rate:.22,dbl:0,sh:0,cd:0,rc:0,fl:0,tr:0,c:SK[sv.sel].c};pk=[];pause=0;rpN=0;setPause(0);$('#up').classList.add('h');applyUp();p.hp=p.mhp;p.dm=TKc.dm;al=[];mn=[];en=[];bl=[];pt=[];rg=[];wk=[];ex=[];dn=[];queue=[];score=0;wave=0;over=false;waitT=-1;spawnT=0;hurt=0;paintGround();ob=[];
  const NO=Math.round(14*OK),NS=Math.round(4*OK);for(let i=0;i<NO;i++){const st_=i<NS,w=st_?S*2:S*1.1,h=st_?S*1.2:S*1.1;let px,py,n=0;
   do{px=R(S,GW-S-w);py=R(S,GH-S-h)}while(n++<40&&(Math.hypot(px+w/2-GW/2,py+h/2-GH/2)<S*3.5||ob.some(o=>!(px>o.x+o.w+S||px+w<o.x-S||py>o.y+o.h+S||py+h<o.y-S))));
   ob.push({x:px,y:py,w,h,hp:st_?1e9:3,steel:st_})}
@@ -151,8 +189,8 @@ function push(e,o,r){const cx=C(e.x,o.x,o.x+o.w),cy=C(e.y,o.y,o.y+o.h),dx=e.x-cx
 function moveT(e,dx,dy,dt){const r=e.r*S,px=e.x,py=e.y;e.x=C(e.x+dx*e.sp*S*dt,r,GW-r);e.y=C(e.y+dy*e.sp*S*dt,r,GH-r);for(const o of ob)push(e,o,r);
  e.tr+=Math.hypot(e.x-px,e.y-py);if(e.tr>S*.5){e.tr=0;g.save();g.translate(e.x,e.y);g.rotate(e.a);g.fillStyle='rgba(12,15,9,.22)';g.fillRect(-r*.3,-r*.8,r*.35,r*.4);g.fillRect(-r*.3,r*.4,r*.35,r*.4);g.restore()}}
 function shoot(e,own,spread,q){const a=e.t+R(-spread,spread),r=e.r*S,mx=e.x+Math.cos(e.t)*r*1.3,my=e.y+Math.sin(e.t)*r*1.3,sp=own?17*S:9*S;
- const pw=e===p,W_=pw?WP[sv.wp]:WA,np=own?W_.pel:1;for(let i=0;i<np;i++){const aa=own?e.t+R(-W_.spr,W_.spr):a,vm=own?W_.v:1;for(const o of pw&&p.dbl>0?[-.28,.28]:[0])bl.push({x:mx-Math.sin(e.t)*o*S,y:my+Math.cos(e.t)*o*S,vx:Math.cos(aa)*sp*vm,vy:Math.sin(aa)*sp*vm,own,life:own?W_.life:1.3,dm:own?p.dm*W_.d*(pw?1+.2*(sv.wl[sv.wp]||0):1):1})}if(!q){e.rc=r*.35;muzzle(mx,my,e.t,own);sfx(own?0:1)}}
-function kill(e){const rs=e.type!='B'&&al.length<3&&Math.random()<(sv.tr.nc?.03+.015*(sv.tr.nc-1):0);if(rs){P(e.x,e.y,0,0,.5,S*4,'g','80,255,200');spark(e.x,e.y);al.push({x:e.x,y:e.y,a:e.a,t:e.t,r:e.r*.9,sp:4.2,c:e.c,hp:1,cd:.4,rc:0,fl:0,tr:0,life:18})}else{wreck(e);boom(e.x,e.y,e.type=='B'?2.8:e.type=='h'?1.7:1)}score+=e.pts;e.dead=1;WS.k++;if(e.type=='B')WS.b++;WS.xp+=Math.ceil(e.pts/10);WS.co+=Math.ceil(e.pts/50);sv.xp+=Math.ceil(e.pts/10);while(sv.lv<MAXLV&&sv.xp>=XN(sv.lv)){sv.xp-=XN(sv.lv);sv.lv++;banner('Уровень '+sv.lv+'!')}if(sv.lv>=MAXLV)sv.xp=0;sv.co+=Math.ceil(e.pts/50);svs();if(e.type=='B'){bosses++;report(wave-1,score)}if(e.type=='B'||Math.random()<.2)pk.push({x:e.x,y:e.y,t:'rds'[R(3)|0],l:12});g.save();g.translate(e.x,e.y);g.rotate(e.a);g.fillStyle='rgba(10,10,8,.85)';const r=e.r*S;g.fillRect(-r*.8,-r*.7,r*1.6,r*1.4);g.restore()}
+ const pw=e===p,W_=pw?WP.std:WA,np=own?W_.pel:1;for(let i=0;i<np;i++){const aa=own?e.t+R(-W_.spr,W_.spr):a,vm=own?W_.v:1;for(const o of pw&&p.dbl>0?[-.28,.28]:[0])bl.push({x:mx-Math.sin(e.t)*o*S,y:my+Math.cos(e.t)*o*S,vx:Math.cos(aa)*sp*vm,vy:Math.sin(aa)*sp*vm,own,life:own?W_.life:1.3,dm:own?p.dm*W_.d:1})}if(!q){e.rc=r*.35;muzzle(mx,my,e.t,own);sfx(own?0:1)}}
+function kill(e){const rs=e.type!='B'&&al.length<3&&Math.random()<NEC;if(rs){P(e.x,e.y,0,0,.5,S*4,'g','80,255,200');spark(e.x,e.y);al.push({x:e.x,y:e.y,a:e.a,t:e.t,r:e.r*.9,sp:4.2,c:e.c,hp:1,cd:.4,rc:0,fl:0,tr:0,life:18})}else{wreck(e);boom(e.x,e.y,e.type=='B'?2.8:e.type=='h'?1.7:1)}score+=e.pts;e.dead=1;WS.k++;if(e.type=='B')WS.b++;WS.xp+=Math.ceil(e.pts/10);WS.co+=Math.ceil(e.pts/50);addXP(Math.ceil(e.pts/10));sv.co+=Math.ceil(e.pts/50);svs();if(e.type=='B'){bosses++;report(wave-1,score)}if(e.type=='B'||Math.random()<.2)pk.push({x:e.x,y:e.y,t:'rds'[R(3)|0],l:12});g.save();g.translate(e.x,e.y);g.rotate(e.a);g.fillStyle='rgba(10,10,8,.85)';const r=e.r*S;g.fillRect(-r*.8,-r*.7,r*1.6,r*1.4);g.restore()}
 function vec(s){const dx=s.x-s.ox,dy=s.y-s.oy,h=Math.hypot(dx,dy)||1,m=Math.min(1,h/(S*2.2));return{x:dx/h*m,y:dy/h*m,m}}
 
 function update(dt){camUpd();
@@ -160,11 +198,11 @@ function update(dt){camUpd();
   if(st.L){const v=vec(st.L);mx=v.x;my=v.y}
   mx+=(keys.d||keys.arrowright?1:0)-(keys.a||keys.arrowleft?1:0);my+=(keys.s||keys.arrowdown?1:0)-(keys.w||keys.arrowup?1:0);
   const mm=Math.hypot(mx,my);if(mm>1){mx/=mm;my/=mm}
-  if(mm>.12){p.a=la(p.a,Math.atan2(my,mx),dt*9);moveT(p,mx,my,dt)}
+  if(mm>.12){p.a=la(p.a,Math.atan2(my,mx),dt*(p.ht||9));moveT(p,mx,my,dt)}
   if(st.R){const v=vec(st.R);if(v.m>.25){aim=Math.atan2(v.y,v.x);fire=true}}
   else if(ms.on){aim=Math.atan2(ms.y-(p.y-cam.y),ms.x-(p.x-cam.x));fire=!!ms.down||!!keys[' ']}
-  if(aim!==null)p.t=la(p.t,aim,dt*16);else if(mm>.12)p.t=la(p.t,p.a,dt*2);
-  p.cd-=dt;if((fire||p.bz>0)&&p.cd<=0){shoot(p,true,.03);p.cd=p.rate*WP[sv.wp].c*(p.bz>0?BZ_RATE:1)}}
+  if(aim!==null)p.t=la(p.t,aim,dt*TKc.tt);else if(mm>.12)p.t=la(p.t,p.a,dt*2);
+  p.cd-=dt;if((fire||p.bz>0)&&p.cd<=0){shoot(p,true,.03);p.cd=p.rate*(p.bz>0?BZ_RATE:1)}}
  p.rc=Math.max(0,p.rc-dt*S*3);p.fl-=dt;p.dbl=Math.max(0,p.dbl-dt);p.sh=Math.max(0,p.sh-dt);p.bz=Math.max(0,(p.bz||0)-dt);
  for(const k of pk){k.l-=dt;if(!over&&Math.hypot(k.x-p.x,k.y-p.y)<S*1.1){k.l=0;if(k.t=='r')p.hp=Math.min(p.mhp,p.hp+35);else if(k.t=='d')p.dbl=10;else p.sh=8;spark(k.x,k.y);sfx(3);vib(15)}}pk=pk.filter(k=>k.l>0);
  for(const m of mn){m.l-=dt;m.a-=dt;if(m.a<=0&&!over&&Math.hypot(m.x-p.x,m.y-p.y)<S*.9){m.l=0;boom(m.x,m.y,.8);bl.push({x:p.x,y:p.y,vx:0,vy:0,own:false,life:.05,ed:25})}}mn=mn.filter(m=>m.l>0);
@@ -187,7 +225,9 @@ function update(dt){camUpd();
   for(const o of ob)if(b.life>0&&b.x>o.x&&b.x<o.x+o.w&&b.y>o.y&&b.y<o.y+o.h){b.life=0;spark(b.x,b.y);if(!o.steel&&--o.hp<=0){crate(o);o.dead=1}}
   if(b.life<=0)continue;
   if(b.own){for(const e of en)if(!e.dead&&!(b.h&&b.h.includes(e))&&Math.hypot(b.x-e.x,b.y-e.y)<e.r*S){if(b.pr)(b.h=b.h||[]).push(e);else b.life=0;e.fl=.08;spark(b.x,b.y);sfx(3);{const dd=b.dm||1;WS.d+=Math.min(dd,Math.max(e.hp,0));dnum(e,dd)}e.hp-=b.dm||1;if(e.hp<=0)kill(e);if(!b.pr)break}}
-  else if(!over&&Math.hypot(b.x-p.x,b.y-p.y)<p.r*S){b.life=0;if(p.sh>0){spark(b.x,b.y);sfx(3);continue}p.hp-=(b.ed||10)*(1+.003*(sv.lv-1));p.fl=.08;hurt=.3;shake=Math.max(shake,5);spark(b.x,b.y);sfx(3);vib(30);
+  else if(!over&&Math.hypot(b.x-p.x,b.y-p.y)<p.r*S){b.life=0;if(p.sh>0){spark(b.x,b.y);sfx(3);continue}
+   if(TKc.rk&&(b.vx||b.vy)&&Math.abs(ad(Math.atan2(b.vy,b.vx),p.a+PI))<1.05&&Math.random()*100<TKc.rk){spark(b.x,b.y);sfx(3);dtxt(p.x,p.y-p.r*S*1.6,'РИКОШЕТ','#9fd8ff');continue} // попадание в лоб (±60°): шанс рикошета = броня танка
+   p.hp-=(b.ed||10)*(1+EDMG*(wave-1));p.fl=.08;hurt=.3;shake=Math.max(shake,5);spark(b.x,b.y);sfx(3);vib(30);
    if(p.hp<=0){p.hp=0;over=true;report(wave-1,score);wreck(p);boom(p.x,p.y,1.7);setTimeout(()=>{$('#t1').textContent='Танк уничтожен';$('#t2').textContent='Очки: '+score+' · Волна: '+wave;$('#go').textContent='Играть снова';$('#co').textContent=sv.co;$('#ov').classList.remove('h')},900)}}}
  bl=bl.filter(b=>b.life>0);en=en.filter(e=>!e.dead);ob=ob.filter(o=>!o.dead);
  for(const q of pt){q.x+=q.vx*dt;q.y+=q.vy*dt;q.l-=dt;const dr=q.t=='k'?1.5:q.t=='d'?2:3.2;q.vx*=1-dr*dt;q.vy*=1-dr*dt}pt=pt.filter(q=>q.l>0);
@@ -195,9 +235,9 @@ function update(dt){camUpd();
  for(const q of dn){q.l-=dt;q.y-=S*1.4*dt}dn=dn.filter(q=>q.l>0);
  for(const w of wk)w.l-=dt;wk=wk.filter(w=>w.l>0);for(const q of ex)q.l+=dt;ex=ex.filter(q=>q.l<q.d);
  shake*=Math.pow(.003,dt);hurt=Math.max(0,hurt-dt);
- $('#sc').textContent=score+' · ур.'+sv.lv+' · 🪙'+sv.co;document.querySelectorAll('#sb button').forEach(b=>b.style.opacity=sv.co>=SC[b.dataset.s]?1:.4);$('#hp').style.width=p.hp/p.mhp*100+'%'}
+ $('#sc').textContent=score+' · '+TKc.n+' · 🪙'+sv.co;document.querySelectorAll('#sb button').forEach(b=>b.style.opacity=sv.co>=SC[b.dataset.s]?1:.4);$('#hp').style.width=p.hp/p.mhp*100+'%'}
 
-function tank(e,col){const r=e.r*S,k=tkey(e),hi=k&&TI[k+'-hull'],ti=e===p?(TI['p-'+sv.sel+'-tur-'+sv.wp]||TI['p-tur-'+sv.wp]||TI[k+'-tur']):k&&TI[k+'-tur'],z=r*TSZ;x.save();x.translate(e.x,e.y);x.rotate(e.a);
+function tank(e,col){const r=e.r*S,k=tkey(e),hi=e===p?(TI['p-hull-'+sv.tank]||TI[k+'-hull']):k&&TI[k+'-hull'],ti=e===p?(TI['p-tur-'+sv.tank]||TI[k+'-tur']):k&&TI[k+'-tur'],z=r*TSZ;x.save();x.translate(e.x,e.y);x.rotate(e.a);
  if(hi)timg(hi,z,e.fl>0);else{x.fillStyle='#161814';x.fillRect(-r*.95,-r*.85,r*1.9,r*.42);x.fillRect(-r*.95,r*.43,r*1.9,r*.42);
  x.fillStyle=e.fl>0?'#fff':col;x.fillRect(-r*.8,-r*.55,r*1.6,r*1.1);x.fillStyle='rgba(0,0,0,.18)';x.fillRect(-r*.8,-r*.1,r*1.6,r*.2)}x.restore();
  x.save();x.translate(e.x,e.y);x.rotate(e.t);
@@ -222,7 +262,7 @@ function draw(){
  if(!over||p.hp>0)tank(p,p.c);
  if(p.sh>0){x.strokeStyle=`rgba(80,200,255,${.55+.3*Math.sin(last/110)})`;x.lineWidth=3;x.beginPath();x.arc(p.x,p.y,p.r*S*1.5,0,7);x.stroke()}
  x.font='bold '+Math.max(12,Math.round(S*.62))+'px system-ui,sans-serif';x.textAlign='center';x.textBaseline='middle';x.lineWidth=3;x.lineJoin='round';
- for(const q of dn){const u=Math.min(1,q.l/q.m*1.6);x.globalAlpha=u;x.strokeStyle='rgba(0,0,0,.85)';x.strokeText(q.v,q.x,q.y);x.fillStyle=q.v>=100?'#ff7a3a':'#ffd34a';x.fillText(q.v,q.x,q.y)}x.globalAlpha=1;
+ for(const q of dn){const u=Math.min(1,q.l/q.m*1.6);x.globalAlpha=u;x.strokeStyle='rgba(0,0,0,.85)';x.strokeText(q.v,q.x,q.y);x.fillStyle=q.c||(q.v>=100?'#ff7a3a':'#ffd34a');x.fillText(q.v,q.x,q.y)}x.globalAlpha=1;
  for(const q of pt){const u=q.l/q.m;if(q.t=='s'){x.fillStyle=`rgba(40,40,38,${u*.4})`;x.beginPath();x.arc(q.x,q.y,q.s*(1.9-u*.9),0,7);x.fill()}else if(q.t=='d'){x.globalAlpha=Math.min(1,u*2);x.fillStyle=q.c;x.fillRect(q.x,q.y,q.s,q.s);x.globalAlpha=1}}
  if(TI.explosion)for(const q of ex){const im=TI.explosion,n=Math.max(1,Math.round(im.width/im.height)),f=Math.min(n-1,q.l/q.d*n|0),fw=im.width/n;x.drawImage(im,f*fw,0,fw,im.height,q.x-q.s/2,q.y-q.s/2,q.s,q.s)}
  x.globalCompositeOperation='lighter';
@@ -241,7 +281,7 @@ function arrows(){if(over||!started)return;const m=S*.9,cx=W/2,cy=H/2;
   const dx=sx-cx,dy=sy-cy,t=Math.min((cx-m)/(Math.abs(dx)||1e-6),(cy-m)/(Math.abs(dy)||1e-6)),k=e.type=='B'?1.6:1;
   x.save();x.translate(cx+dx*t,cy+dy*t);x.rotate(Math.atan2(dy,dx));x.globalAlpha=.9;x.fillStyle=e.c;x.strokeStyle='rgba(0,0,0,.65)';x.lineWidth=2;
   x.beginPath();x.moveTo(S*.5*k,0);x.lineTo(-S*.3*k,-S*.38*k);x.lineTo(-S*.3*k,S*.38*k);x.closePath();x.fill();x.stroke();x.restore()}}
-function applyUp(){p.sp=5*(1+.12*up.sp);p.mhp=(100+25*up.hp)*(1+.1*sv.tr.ar);p.rate=.22*Math.pow(.9,up.rt)}
+function applyUp(){p.sp=TKc.sp;p.mhp=TKc.hp;p.rate=TKc.cd;p.ht=Math.min(11,5+TKc.sp*.8)}
 function showUp(){report(wave,score);pause=1;p.hp=Math.min(p.mhp,p.hp+15);let fixed=0;const u=$('#up'),cost=()=>Math.ceil(10*Math.pow(1.15,rpN)),render=()=>{const c=cost();
  u.innerHTML='<h2>Волна '+wave+' пройдена</h2><div class="ws"><span>Нанесено урона</span><b>'+Math.round(WS.d*DMGX)+'</b><span>Уничтожено техники</span><b>'+WS.k+'</b><span>Убито боссов</span><b>'+WS.b+'</b><span>Опыт</span><b>+'+WS.xp+'</b><span>Монеты за волну</span><b>+'+WS.co+' 🪙</b><span>Броня</span><b>'+Math.round(p.hp/p.mhp*100)+'%</b></div><p>Монет всего: '+sv.co+' 🪙</p><div class="cd"><button data-k="rp"'+(fixed||sv.co<c||p.hp>=p.mhp?' disabled':'')+'><b>🔧</b>Полный ремонт<small>'+c+' 🪙</small></button></div><button class="cl" data-k="nx">Следующая волна ▶</button>';u.classList.remove('h');
  u.querySelectorAll('button').forEach(b=>b.onclick=()=>{const k=b.dataset.k;
@@ -255,7 +295,7 @@ function buildMap(l){ob=[];paintGround();bl=[];mn=[];wk=[];const B=(a,b,w,h,s)=>
  ob=ob.filter(o=>Math.hypot(o.x+o.w/2-p.x,o.y+o.h/2-p.y)>S*3+Math.max(o.w,o.h)/2)}
 function shopUI(){const u=$('#up');u.innerHTML='<h2>Скины · '+sv.co+' 🪙</h2><p>Меняют цвет танка, выстрелов и взрывов</p><div class="cd">'+Object.entries(SK).map(([k,s])=>`<button data-k='${k}' style='border-color:${sv.sel==k?'#e8a73a':'transparent'}'><b style='color:${s.c}'>■</b>${s.n}<small>${sv.sel==k?'выбран':sv.own.includes(k)?'выбрать':s.p+' 🪙'}</small></button>`).join('')+'</div><button class="cl">Назад</button>';u.classList.remove('h');
  u.querySelectorAll('.cd button').forEach(b=>b.onclick=()=>{const k=b.dataset.k,s=SK[k];if(sv.own.includes(k))sv.sel=k;else if(sv.co>=s.p){sv.co-=s.p;sv.own.push(k);sv.sel=k}svs();$('#co').textContent=sv.co;shopUI()});u.querySelector('.cl').onclick=()=>u.classList.add('h')}
-$('#shop').onclick=()=>garage('s');$('#co').textContent=sv.co;
+$('#shop').onclick=()=>{gcl=TK().c;garage('k')};$('#co').textContent=sv.co;
 const pickT=()=>{const r=Math.random();return r<.10&&wave>=4?'Q':r<.20&&wave>=6?'M':r<.32&&wave>=3?'h':r<.55&&wave>=2?'s':'n'};
 function efire(e){const t0=e.t,ty=e.type;
  if(ty=='M'){mn.push({x:e.x,y:e.y,l:25,a:.8});if(mn.length>12)mn.shift();return}
@@ -266,12 +306,26 @@ function efire(e){const t0=e.t,ty=e.type;
   e.t=t0;return}
  shoot(e,false,.1)}
 function superShot(){const r=p.r*S,mx=p.x+Math.cos(p.t)*r*1.4,my=p.y+Math.sin(p.t)*r*1.4;bl.push({x:mx,y:my,vx:Math.cos(p.t)*26*S,vy:Math.sin(p.t)*26*S,own:true,life:1.2,dm:10*p.dm,pr:1,big:1});muzzle(mx,my,p.t,true);P(mx,my,0,0,.2,S*3,'g','255,240,160');shake=9;p.rc=r*.6}
-function garage(t){t=t||'s';const u=$('#up'),sp=k=>{let s=0;for(let i=0;i<sv.tr[k];i++)s+=RC[i];return s},pts=(sv.lv-1)*PPL-sp('ar')-sp('fi')-sp('nc');let it=[],h='';
- if(t=='s'){h='Цвет танка, выстрелов и взрывов';it=Object.entries(SK).map(([k,s])=>({i:ic('skin-'+k,`<b style='color:${s.c}'>■</b>`),n:s.n,s:sv.sel==k?'выбран':sv.own.includes(k)?'выбрать':s.p+' 🪙',f(){if(sv.own.includes(k))sv.sel=k;else if(sv.co>=s.p){sv.co-=s.p;sv.own.push(k);sv.sel=k}}}))}
- else if(t=='w'){h='Нажмите: купить, выбрать или улучшить выбранное (до ур.3)';it=Object.entries(WP).map(([k,w])=>{const l=sv.wl[k],own=l!==undefined;return{i:ic('wp-'+k,`<b>${w.i}</b>`),n:w.n,s:(sv.wp==k?'✓ ':'')+(own?'ур.'+(l+1)+(l<2?' · +'+WU[l]+'🪙':' MAX'):w.p+' 🪙'),f(){if(!own){if(sv.co>=w.p){sv.co-=w.p;sv.wl[k]=0;sv.wp=k}}else if(sv.wp!=k)sv.wp=k;else if(l<2&&sv.co>=WU[l]){sv.co-=WU[l];sv.wl[k]++}}}})}
- else{h='Очки навыков: '+pts+' · Броня и Урон +10% за ранг · Некромант (с ур.3): шанс 3% +1.5% за ранг';it=TR.map(r=>{const v=sv.tr[r.k];return{i:ic('tr-'+r.k,`<b>${r.i}</b>`),n:r.n,s:'●'.repeat(v)+'○'.repeat(5-v)+(v<5?' · '+RC[v]+' оч.':' MAX')+(r.k=='nc'&&sv.lv<3?' 🔒':''),f(){if(v<5&&pts>=RC[v]&&!(r.k=='nc'&&sv.lv<3))sv.tr[r.k]++}}})}
- u.innerHTML=`<h2>Гараж · ур.${sv.lv} · ${sv.co} 🪙</h2><p>${h}</p><div class='cd'>${[['s','Скины'],['w','Оружие'],['t','Древо']].map(([k,n])=>`<button data-t='${k}' style='border-color:${t==k?'#e8a73a':'transparent'}'>${n}</button>`).join('')}</div><div class='cd'>${it.map((q,i)=>`<button data-i='${i}'>${q.i}${q.n}<small>${q.s}</small></button>`).join('')}</div><button class='cl'>Назад</button>`;u.classList.remove('h');
- u.querySelectorAll('[data-t]').forEach(b=>b.onclick=()=>garage(b.dataset.t));u.querySelectorAll('[data-i]').forEach(b=>b.onclick=()=>{it[+b.dataset.i].f();svs();$('#co').textContent=sv.co;garage(t)});u.querySelector('.cl').onclick=()=>u.classList.add('h')}
+let gcl='l';
+const f1=v=>Math.round(v*10)/10;
+function tcard(t){const o=openInfo(t),mine=own(t.id),on=sv.tank==t.id;let st,cls='st',dis='';
+ if(mine){st=on?'✓ в бою':'выбрать';if(on)cls+=' ok'}
+ else if(o.lock){st='🔒 закрыт';dis=' disabled'}
+ else{const k=o.have>=o.xp&&sv.co>=o.gd;st=(o.xp?'опыт '+o.have+'/'+o.xp+' · ':'')+o.gd+' 🪙';cls+=k?' ok':' no'}
+ return `<button data-k='${t.id}'${dis} style='border-color:${on?'#e8a73a':'transparent'}'><span class='tn'>${t.n}</span><span class='tg'>ступень ${t.t}${t.v?' · развилка':''}</span><span class='ts'>ХП ${t.hp} · Скор ${t.sp}<br>Урон ${f1(t.dm*DMGX)} · ${f1(1/t.cd)} выст/с<br>Башня ${t.tt} · Рикошет ${t.rk}%</span><span class='${cls}'>${st}</span></button>`}
+function garage(t){t=t||'k';const u=$('#up');let it=[],h='',body='';
+ if(t=='k'){const cur=TK();h=`Опыт на «${cur.n}»: ${hasNext(cur)?(sv.xp[cur.id]||0):'—'} · Свободный опыт: ${sv.fx}`;
+  const n=Math.floor(sv.fx/XFX);
+  body=`<div class='cd'>${Object.entries(CL).map(([k,n])=>`<button data-c='${k}' style='border-color:${gcl==k?'#e8a73a':'transparent'}'>${n}</button>`).join('')}</div><div class='cd'>${TANKS.filter(s=>s.c==gcl).map(tcard).join('')}</div><div class='cd'><button data-x='1'${n<1?' disabled':''}>Обменять свободный опыт<span class='st'>${n} 🪙 за ${n*XFX} оп.</span></button></div>`}
+ else{h='Цвет танка, выстрелов и взрывов';it=Object.entries(SK).map(([k,s])=>({i:ic('skin-'+k,`<b style='color:${s.c}'>■</b>`),n:s.n,s:sv.sel==k?'выбран':sv.own.includes(k)?'выбрать':s.p+' 🪙',f(){if(sv.own.includes(k))sv.sel=k;else if(sv.co>=s.p){sv.co-=s.p;sv.own.push(k);sv.sel=k}}}));
+  body=`<div class='cd'>${it.map((q,i)=>`<button data-i='${i}'>${q.i}${q.n}<small>${q.s}</small></button>`).join('')}</div>`}
+ u.innerHTML=`<h2>Гараж · ${sv.co} 🪙</h2><p>${h}</p><div class='cd'>${[['k','Техника'],['s','Скины']].map(([k,n])=>`<button data-t='${k}' style='border-color:${t==k?'#e8a73a':'transparent'}'>${n}</button>`).join('')}</div>${body}<button class='cl'>Назад</button>`;u.classList.remove('h');
+ u.querySelectorAll('[data-t]').forEach(b=>b.onclick=()=>garage(b.dataset.t));
+ u.querySelectorAll('[data-c]').forEach(b=>b.onclick=()=>{gcl=b.dataset.c;garage('k')});
+ u.querySelectorAll('[data-k]').forEach(b=>b.onclick=()=>{tankClick(b.dataset.k);TKc=TK();svs();$('#co').textContent=sv.co;garage('k')});
+ u.querySelectorAll('[data-x]').forEach(b=>b.onclick=()=>{const n=Math.floor(sv.fx/XFX);if(n>0){sv.co+=n;sv.fx-=n*XFX;svs();$('#co').textContent=sv.co}garage('k')});
+ u.querySelectorAll('[data-i]').forEach(b=>b.onclick=()=>{it[+b.dataset.i].f();svs();$('#co').textContent=sv.co;garage('s')});
+ u.querySelector('.cl').onclick=()=>u.classList.add('h')}
 document.querySelectorAll('#sb button').forEach(b=>b.onpointerdown=e=>{e.stopPropagation();if(!started||over||pause||paused)return;const k=b.dataset.s;if(sv.co<SC[k])return;sv.co-=SC[k];svs();if(k=='s')p.sh=8;else if(k=='d')p.dbl=10;else{p.bz=BZ_TIME;shake=Math.max(shake,4)}sfx(3);vib(20)});
 function loop(t){const rd=Math.min(.033,(t-last)/1000||0);last=t;let dt=rd;if(slow>0){dt*=.3;slow-=rd}if(started&&!pause&&!paused&&innerWidth>innerHeight)update(dt);draw();requestAnimationFrame(loop)}
 
