@@ -85,7 +85,7 @@ a.btn{display:inline-block;background:#1b2838;color:#fff;text-decoration:none;bo
 var API='https://rust-mahjong-api.rust-pve.workers.dev';
 var $=function(i){return document.getElementById(i)};
 
-// ====== Вход через Steam (токен общий для всех игр, хранится в localStorage) ======
+// ====== Вход через Steam (токен общий для всех игр, хранится в localStorage ) ======
 var tok=null,me=null;
 function b64d(s){s=s.replace(/-/g,'+').replace(/_/g,'/');var b=atob(s),u=new Uint8Array(b.length);for(var i=0;i<b.length;i++)u[i]=b.charCodeAt(i);return new TextDecoder().decode(u)}
 function setTok(t){
