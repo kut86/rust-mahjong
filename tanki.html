@@ -14,8 +14,9 @@ html,body{height:100%;margin:0;background:#1d2219;overflow:hidden;touch-action:n
 #c{position:fixed;inset:0;width:100%;height:100%;display:block}
 #hud{position:fixed;left:0;right:0;top:env(safe-area-inset-top,0px);display:flex;justify-content:space-between;align-items:center;padding:10px 16px;pointer-events:none;gap:12px;font-weight:700}
 .l{font-size:11px;color:var(--mut);text-transform:uppercase;letter-spacing:.08em;font-weight:500}
-#bar{width:110px;height:10px;background:rgba(255,255,255,.15);border-radius:6px;overflow:hidden;margin-top:4px}
-#hp{height:100%;width:100%;background:var(--hp);transition:width .15s}
+#bar{position:relative;width:150px;height:18px;background:rgba(0,0,0,.55);border:1px solid rgba(255,255,255,.25);border-radius:6px;overflow:hidden;margin-top:4px}
+#hp{height:100%;width:100%;background:var(--hp);transition:width .15s,background .15s}
+#hpt{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:#fff;text-shadow:0 0 3px #000,0 0 3px #000,0 1px 2px #000}
 #ban{position:fixed;left:0;right:0;top:30%;text-align:center;font-size:38px;font-weight:800;letter-spacing:.04em;opacity:0;pointer-events:none;transition:opacity .4s}
 #ban.s{opacity:1}
 #ov{position:fixed;inset:0;background:var(--ov);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;text-align:center;padding:24px;z-index:5}
@@ -50,7 +51,7 @@ html,body{height:100%;margin:0;background:#1d2219;overflow:hidden;touch-action:n
 </head>
 <body>
 <canvas id="c"></canvas>
-<div id="hud"><div><div class="l">Очки</div><div id="sc">0</div></div><div style="text-align:center"><div class="l">Волна</div><div id="wv">1</div></div><div style="text-align:right"><div class="l">Броня</div><div id="bar"><div id="hp"></div></div></div></div>
+<div id="hud"><div><div class="l">Очки</div><div id="sc">0</div></div><div style="text-align:center"><div class="l">Волна</div><div id="wv">1</div></div><div style="text-align:right"><div class="l">Броня</div><div id="bar"><div id="hp"></div><span id="hpt"></span></div></div></div>
 <div id="ban"></div>
 <div id="up" class="h"></div>
 <button id="mn" aria-label="Меню">☰</button><button id="ps" aria-label="Пауза">⏸</button>
@@ -294,7 +295,7 @@ function update(dt){camUpd();
  for(const q of dn){q.l-=dt;q.y-=S*1.4*dt}dn=dn.filter(q=>q.l>0);
  for(const w of wk)w.l-=dt;wk=wk.filter(w=>w.l>0);for(const q of ex)q.l+=dt;ex=ex.filter(q=>q.l<q.d);
  shake*=Math.pow(.003,dt);hurt=Math.max(0,hurt-dt);
- $('#sc').textContent=score+' · '+TKc.n+' · 🪙'+sv.co;document.querySelectorAll('#sb button').forEach(b=>b.style.opacity=sv.co>=SC[b.dataset.s]?1:.4);$('#hp').style.width=p.hp/p.mhp*100+'%'}
+ $('#sc').textContent=score+' · '+TKc.n+' · 🪙'+sv.co;document.querySelectorAll('#sb button').forEach(b=>b.style.opacity=sv.co>=SC[b.dataset.s]?1:.4);{const k=Math.max(0,p.hp/p.mhp),h=$('#hp');h.style.width=k*100+'%';h.style.background=k>.5?'#6fcf6a':k>.25?'#e8a73a':'#e85a4a';$('#hpt').textContent=Math.ceil(Math.max(0,p.hp))+'/'+Math.round(p.mhp)}}
 
 function tank(e,col){const r=e.r*S,k=tkey(e),hi=e===p?pimg('hull'):k&&TI[k+'-hull'],ti=e===p?pimg('tur'):k&&TI[k+'-tur'],z=r*TSZ;x.save();x.translate(e.x,e.y);x.rotate(e.a);
  if(hi)timg(hi,z,e.fl>0);else{x.fillStyle='#161814';x.fillRect(-r*.95,-r*.85,r*1.9,r*.42);x.fillRect(-r*.95,r*.43,r*1.9,r*.42);
