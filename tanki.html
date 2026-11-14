@@ -175,7 +175,7 @@ function report(w,sc){if(tok&&runTok)api('/api/tank',{run:runTok,wave:w,score:sc
 
 /* ===== Картинки танков: папка img/tanks/ рядом с index.html. Чего нет — рисуется кодом ===== */
 const TIMG='img/tanks/',TVER='1',TI={},TSZ=2.4; // TVER — меняйте при замене картинок (сброс кэша); TSZ — размер танка относительно его радиуса
-function tload(k,f,...alt){const im=new Image();im.onload=()=>{TI[k]=im;if(k=='ground'&&GW)paintGround()};im.onerror=()=>{if(alt.length)tload(k,...alt)};im.src=TIMG+f+'?v='+TVER} // f — основной путь, дальше запасные (старые имена файлов)
+function tload(k,f,...alt){const im=new Image();im.onload=()=>{TI[k]=im;if(k=='ground'&&GW)paintGround();if(k[0]=='s'&&k[1]=='i'&&k[2]=='-'&&typeof gsk!='undefined'&&gsk&&gtk&&!$('#up').classList.contains('h'))garage()};im.onerror=()=>{if(alt.length)tload(k,...alt)};im.src=TIMG+f+'?v='+TVER} // f — основной путь, дальше запасные (старые имена файлов)
 /* Структура папок (внутри img/tanks/):
    light|medium|heavy/ID/  hull.png tur.png wreck.png  + скины hull-d.png tur-d.png (d,n,b,v; g — по желанию)
    boss/1-shturmovik|2-karatel|3-komandir/  hull.png tur.png wreck.png
@@ -407,8 +407,10 @@ function cardHTML(t){const mine=own(t.id),e=eff(t),o=openInfo(t),on=sv.tank==t.i
   return `<div class='sk${sel?' on':''}${open?'':' lk'}'><span class='tn' style='font-size:14px'>${ic} ${nm}</span><span class='dots'>${'●'.repeat(r)}${'○'.repeat(5-r)}</span><span class='ts'>${r?SKT[k](r):'не изучен'}${r<5?'<br>след.: '+SKT[k](r+1):''}</span>`+
    `<button data-su='${k}' ${open&&r<5?'':'disabled'}>${r<5?'Улучшить<br><span class="st '+(open&&xp>=x&&sv.co>=g?'ok':'no')+'">'+x+' оп · '+g+' 🪙</span>':'Максимум'}</button><button data-ss='${k}' ${open&&r>0&&!sel?'':'disabled'}>${sel?'✓ Выбран':'Выбрать'}</button></div>`}).join('');
  return `<div class='cw'>${left}<div class='mods'>${rows}<div class='skw'><div class='mt' style='width:auto;margin-bottom:4px'>Навыки <span class='tg'>${open?'· в бою работает один выбранный':'· откроются, когда изучены все модули'}</span></div><div class='skr'>${sks}</div></div></div></div>`}
-function skinsHTML(t){const mine=own(t.id);
- return `<p class='tg' style='margin:2px 0 8px'>Скин для «${t.n}»: цвет танка, выстрелов и взрывов${mine?'':' · сначала откройте танк'}</p><div class='cd'>${Object.entries(SK).map(([k,s])=>{const ow=skOwn(t.id,k),sel=skinOf(t.id)==k;return `<button data-i='${k}' ${mine?'':'disabled'} style='border-color:${sel?'#e8a73a':'transparent'}'>${ic('skin-'+k,`<b style='color:${s.c}'>■</b>`)}${s.n}<small>${sel?'выбран':ow?'выбрать':SKP(t,k)+' 🪙'}</small></button>`}).join('')}</div>`}
+// картинка скина в гараже: у каждого танка своя, в его папке: icon-СКИН.png; нет — hull-СКИН.png; нет — общая common/skin-СКИН.png
+const SL={};function sload(t){const d=TDIR(t);if(SL[t.id])return;SL[t.id]=1;for(const k in SK)tload('si-'+t.id+'-'+k,d+'icon-'+k+'.png',d+'hull-'+k+'.png','common/skin-'+k+'.png','skin-'+k+'.png')}
+function skinsHTML(t){const mine=own(t.id);sload(t);
+ return `<p class='tg' style='margin:2px 0 8px'>Скин для «${t.n}»: цвет танка, выстрелов и взрывов${mine?'':' · сначала откройте танк'}</p><div class='cd'>${Object.entries(SK).map(([k,s])=>{const ow=skOwn(t.id,k),sel=skinOf(t.id)==k;return `<button data-i='${k}' ${mine?'':'disabled'} style='border-color:${sel?'#e8a73a':'transparent'}'>${ic('si-'+t.id+'-'+k,`<b style='color:${s.c}'>■</b>`)}${s.n}<small>${sel?'выбран':ow?'выбрать':SKP(t,k)+' 🪙'}</small></button>`}).join('')}</div>`}
 function garage(){const u=$('#up');let h='',body='';
  if(gtk){const tt=TK(gtk);h=`<div class='cd'><button data-a='back' style='min-width:0'>← К дереву</button><button data-a='skins' style='min-width:0;border-color:${gsk?'#e8a73a':'transparent'}'>${gsk?'Модули и навыки':'Скины'}</button></div>`;body=`<p style='min-height:20px;color:#e8a73a'>${gmsg}</p>`+(gsk?skinsHTML(tt):cardHTML(tt))}
  else{const n=Math.floor(sv.fx/XFX);h=`<p>Свободный опыт: ${sv.fx} · Опыт копится на танке, на котором играете</p>`;
