@@ -3,6 +3,13 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Amigos">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#12140e">
 <title>Rust Amigos — Танчики</title>
 <link rel="icon" type="image/x-icon" href="favicon.ico">
 <style>
@@ -46,7 +53,7 @@ html,body{height:100%;margin:0;background:#1d2219;overflow:hidden;touch-action:n
 .tn{font-size:16px;font-weight:700}.tg{font-size:11px;color:var(--mut);font-weight:400}.ts{font-size:11px;color:var(--mut);font-weight:400;line-height:1.45;max-width:180px}.st{font-size:12px;color:var(--mut);font-weight:600;letter-spacing:0}.st.ok{color:#6fcf6a}.st.no{color:#e85a4a}
 .ws{display:grid;grid-template-columns:auto auto;gap:6px 26px;margin:10px 0;text-align:left;font-size:16px}.ws span{color:var(--mut)}.ws b{text-align:right}
 #sb{position:fixed;right:10px;top:calc(env(safe-area-inset-top,0px) + 54px);z-index:3;display:none;flex-direction:column;gap:8px}#sb button{width:54px;height:44px;border-radius:12px;border:0;background:rgba(255,255,255,.16);color:var(--tx);font-size:13px;font-weight:700;touch-action:none}
-#rot{position:fixed;inset:0;z-index:9;background:var(--ov);display:none;flex-direction:column;align-items:center;justify-content:center;gap:14px;font-size:18px;text-align:center;padding:24px}#rot b{font-size:56px;animation:r 1.6s ease-in-out infinite}@keyframes r{50%{transform:rotate(90deg)}}@media (orientation:portrait){#rot{display:flex}}
+#rot{position:fixed;inset:0;z-index:9;background:var(--ov);display:none;flex-direction:column;align-items:center;justify-content:center;gap:14px;font-size:18px;text-align:center;padding:24px}#rot b{font-size:56px;animation:r 1.6s ease-in-out infinite}@keyframes r{50%{transform:rotate(90deg)}}#rot.s{display:flex}
 </style>
 </head>
 <body>
@@ -58,7 +65,7 @@ html,body{height:100%;margin:0;background:#1d2219;overflow:hidden;touch-action:n
 <div id="pz"><button id="rs">▶ Продолжить</button></div>
 <div id='sb'><button data-s='x'>💥 25</button><button data-s='s'>🛡 20</button><button data-s='d'>⚡ 15</button></div>
 <div id="rot"><b>📱</b>Поверните телефон горизонтально<a href="index.html" style="margin-top:6px;color:var(--tx);background:#3a4030;border-radius:14px;padding:12px 28px;font-size:16px;font-weight:700;text-decoration:none">☰ Меню игр</a></div>
-<div id="ov"><h1 id="t1">🪖 Танчики</h1><p id="t2">Левый палец — движение, правый — прицел и огонь. На компьютере: WASD, мышь, клик.</p><button id="go">Играть</button><button id="shop" style="background:#3a4030;color:var(--tx);margin-top:4px;font-size:16px">🔧 Гараж · <span id="co">0</span> 🪙</button><a class="lk" href="index.html">☰ Меню игр</a><div id="au"></div></div>
+<div id="ov"><h1 id="t1">🪖 Танчики</h1><p id="t2">Левый палец — движение, правый — прицел и огонь. На компьютере: WASD, мышь, клик.</p><button id="go">Играть</button><button id="fs" style="display:none;background:#3a4030;color:var(--tx);margin-top:4px;font-size:16px"></button><p id="fsh" class="tg" style="display:none;max-width:320px;line-height:1.5"></p><button id="shop" style="background:#3a4030;color:var(--tx);margin-top:4px;font-size:16px">🔧 Гараж · <span id="co">0</span> 🪙</button><a class="lk" href="index.html">☰ Меню игр</a><div id="au"></div></div>
 <script>
 const $=s=>document.querySelector(s),cv=$('#c'),x=cv.getContext('2d'),gr=document.createElement('canvas'),g=gr.getContext('2d');
 const R=(a,b)=>b===undefined?Math.random()*a:a+Math.random()*(b-a),C=(v,a,b)=>Math.max(a,Math.min(b,v)),PI=Math.PI;
@@ -418,7 +425,7 @@ function garage(){const u=$('#up');let h='',body='';
  u.querySelectorAll('[data-i]').forEach(b=>b.onclick=()=>{gmsg=skinClick(TK(gtk),b.dataset.i);sync();pload();garage()});
  u.querySelector('.cl').onclick=()=>u.classList.add('h')}
 document.querySelectorAll('#sb button').forEach(b=>b.onpointerdown=e=>{e.stopPropagation();if(!started||over||pause||paused)return;const k=b.dataset.s;if(sv.co<SC[k])return;sv.co-=SC[k];svs();if(k=='s')p.sh=8;else if(k=='d')p.dbl=10;else{p.bz=BZ_TIME;shake=Math.max(shake,4)}sfx(3);vib(20)});
-function loop(t){const rd=Math.min(.033,(t-last)/1000||0);last=t;let dt=rd;if(slow>0){dt*=.3;slow-=rd}if(started&&!pause&&!paused&&innerWidth>innerHeight)update(dt);draw();requestAnimationFrame(loop)}
+function loop(t){const rd=Math.min(.033,(t-last)/1000||0);last=t;let dt=rd;if(slow>0){dt*=.3;slow-=rd}$('#rot').classList.toggle('s',!!started&&innerHeight>innerWidth);if(started&&!pause&&!paused&&innerWidth>innerHeight)update(dt);draw();requestAnimationFrame(loop)}
 
 cv.addEventListener('pointerdown',e=>{if(e.pointerType==='mouse'){ms.on=1;ms.down=1;ms.x=e.clientX;ms.y=e.clientY;return}
  const k=e.clientX<W/2?'L':'R';if(st[k])return;st[k]={id:e.pointerId,ox:e.clientX,oy:e.clientY,x:e.clientX,y:e.clientY};try{cv.setPointerCapture(e.pointerId)}catch(_){}});
@@ -427,7 +434,11 @@ const pu=e=>{ms.down=0;for(const k of['L','R'])if(st[k]&&st[k].id===e.pointerId)
 cv.addEventListener('pointerup',pu);cv.addEventListener('pointercancel',pu);
 addEventListener('keydown',e=>{const k=e.key.toLowerCase();keys[k]=1;if((k=='p'||k=='escape')&&started&&!over&&!pause)setPause(!paused)});addEventListener('keyup',e=>keys[e.key.toLowerCase()]=0);
 let wasL=innerWidth>innerHeight;addEventListener('resize',()=>{resize();const l=innerWidth>innerHeight;if(l!==wasL){wasL=l;if(started&&$('#ov').classList.contains('h'))reset()}});
-$('#go').onclick=()=>{try{const d=document.documentElement;(d.requestFullscreen?d.requestFullscreen():Promise.reject()).then(()=>screen.orientation.lock('landscape')).catch(()=>{})}catch(_){}A();if(ac&&ac.state==='suspended')ac.resume();$('#ov').classList.add('h');$('#sb').style.display='flex';$('#mn').style.display='block';$('#ps').style.display='block';reset();started=true};
+/* кнопка «на весь экран»: Android/iPad/ПК — включает полный экран; iPhone (Safari и другие браузеры) не умеют — показываем, как установить игру на главный экран */
+(()=>{const standalone=matchMedia('(display-mode: fullscreen)').matches||matchMedia('(display-mode: standalone)').matches||navigator.standalone,d=document.documentElement,fsf=d.requestFullscreen||d.webkitRequestFullscreen,b=$('#fs'),h=$('#fsh');if(standalone)return;b.style.display='block';
+ if(fsf){b.textContent='⛶ Во весь экран';b.onclick=()=>{try{Promise.resolve(fsf.call(d)).then(()=>screen.orientation.lock('landscape')).catch(()=>{})}catch(_){}}}
+ else{b.textContent='📲 Открыть на весь экран';const ios=/iPhone|iPad|iPod/.test(navigator.userAgent);b.onclick=()=>{h.style.display=h.style.display=='block'?'none':'block';h.innerHTML=ios?'Нажмите «Поделиться» <b>⬆</b> внизу браузера → «На экран "Домой"» → «Добавить». Потом запускайте игру с иконки — она откроется без адресной строки, на весь экран.':'В меню браузера выберите «Установить приложение» или «Добавить на главный экран», потом запускайте игру с иконки.'}}})();
+$('#go').onclick=()=>{try{const d=document.documentElement,fs=d.requestFullscreen||d.webkitRequestFullscreen;(fs?Promise.resolve(fs.call(d)):Promise.reject()).then(()=>screen.orientation.lock('landscape')).catch(()=>{try{screen.orientation.lock('landscape').catch(()=>{})}catch(_){}})}catch(_){}A();if(ac&&ac.state==='suspended')ac.resume();$('#ov').classList.add('h');$('#sb').style.display='flex';$('#mn').style.display='block';$('#ps').style.display='block';reset();started=true};
 function setPause(v){paused=v?1:0;$('#pz').classList.toggle('s',!!paused);$('#ps').textContent=paused?'▶':'⏸';st.L=st.R=null;ms.down=0}
 $('#ps').onclick=()=>{if(started&&!over&&!pause)setPause(!paused)};$('#rs').onclick=()=>setPause(0);
 $('#mn').onpointerdown=e=>e.stopPropagation();$('#mn').onclick=()=>{if(over||confirm('Выйти в меню? Текущий забег прервётся.'))location.href='index.html'};
