@@ -28,6 +28,9 @@ html,body{height:100%;margin:0;background:#1d2219;overflow:hidden;touch-action:n
 #ban.s{opacity:1}
 #ov{position:fixed;inset:0;background:var(--ov);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;text-align:center;padding:24px;z-index:5}
 #ov.h{display:none}
+#ov{overflow-y:auto;justify-content:flex-start;-webkit-overflow-scrolling:touch;padding-top:calc(14px + env(safe-area-inset-top,0px));padding-bottom:calc(14px + env(safe-area-inset-bottom,0px))}#ov>:first-child{margin-top:auto}#ov>:last-child{margin-bottom:auto}#ov>*{flex-shrink:0}
+@media (orientation:landscape){#fs,#fsh{display:none!important}}:fullscreen #fs,:fullscreen #fsh{display:none!important}
+@media (max-height:480px){#ov{gap:5px;padding:calc(6px + env(safe-area-inset-top,0px)) 12px calc(6px + env(safe-area-inset-bottom,0px))}#ov h1{font-size:24px}#ov p{max-width:520px;font-size:13px;line-height:1.35}#ov button{margin-top:6px;font-size:16px;padding:9px 30px}#ov .lk{margin-top:2px;font-size:14px;padding:8px 22px}#au{min-height:0;font-size:13px}#au a.lk{padding:6px 14px}}
 #ov h1{margin:0;font-size:34px}
 #ov p{margin:0;color:var(--mut);max-width:300px;line-height:1.5;font-size:15px}
 #ov button{margin-top:16px;background:var(--acc);color:var(--btx);border:0;border-radius:14px;font-size:19px;font-weight:700;padding:15px 38px}
@@ -432,7 +435,8 @@ cv.addEventListener('pointerdown',e=>{if(e.pointerType==='mouse'){ms.on=1;ms.dow
 cv.addEventListener('pointermove',e=>{if(e.pointerType==='mouse'){ms.on=1;ms.x=e.clientX;ms.y=e.clientY;return}for(const k of['L','R'])if(st[k]&&st[k].id===e.pointerId){st[k].x=e.clientX;st[k].y=e.clientY}});
 const pu=e=>{ms.down=0;for(const k of['L','R'])if(st[k]&&st[k].id===e.pointerId)st[k]=null};
 cv.addEventListener('pointerup',pu);cv.addEventListener('pointercancel',pu);
-addEventListener('keydown',e=>{const k=e.key.toLowerCase();keys[k]=1;if((k=='p'||k=='escape')&&started&&!over&&!pause)setPause(!paused)});addEventListener('keyup',e=>keys[e.key.toLowerCase()]=0);
+const kn=e=>/^Key[A-Z]$/.test(e.code)?e.code[3].toLowerCase():e.key.toLowerCase(); // по физической клавише, чтобы WASD работали и в русской раскладке
+addEventListener('keydown',e=>{const k=kn(e);keys[k]=1;if((k=='p'||k=='escape')&&started&&!over&&!pause)setPause(!paused)});addEventListener('keyup',e=>{keys[kn(e)]=0});
 let wasL=innerWidth>innerHeight;addEventListener('resize',()=>{resize();const l=innerWidth>innerHeight;if(l!==wasL){wasL=l;if(started&&$('#ov').classList.contains('h'))reset()}});
 /* кнопка «на весь экран»: Android/iPad/ПК — включает полный экран; iPhone (Safari и другие браузеры) не умеют — показываем, как установить игру на главный экран */
 (()=>{const standalone=matchMedia('(display-mode: fullscreen)').matches||matchMedia('(display-mode: standalone)').matches||navigator.standalone,d=document.documentElement,fsf=d.requestFullscreen||d.webkitRequestFullscreen,b=$('#fs'),h=$('#fsh');if(standalone)return;b.style.display='block';
