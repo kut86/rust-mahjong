@@ -186,8 +186,8 @@ const TDIR=t=>({l:'light',m:'medium',h:'heavy'}[t.c])+'/'+t.id+'/',BDIR=['1-shtu
 function tinit(){
  ['g','d','n','b','v'].forEach(s=>{tload('p-'+s+'-hull','player-'+s+'-hull.png');tload('p-'+s+'-tur','player-'+s+'-tur.png')});
  TANKS.forEach(t=>{const d=TDIR(t);tload('p-hull-'+t.id,d+'hull.png','player-hull-'+t.id+'.png');tload('p-tur-'+t.id,d+'tur.png','player-tur-'+t.id+'.png')});
- ['n','s','h','q','m'].forEach(t=>{const d='enemy/'+t+'/';tload('e-'+t+'-hull',d+'hull.png','enemy-'+t+'-hull.png');tload('e-'+t+'-tur',d+'tur.png','enemy-'+t+'-tur.png');tload('w-'+t,d+'wreck.png','wreck-'+t+'.png')});
- BDIR.forEach((n,i)=>{const d='boss/'+n+'/';tload('e-b'+i+'-hull',d+'hull.png','boss-hull.png');tload('e-b'+i+'-tur',d+'tur.png','boss-tur.png');tload('w-b'+i,d+'wreck.png','wreck-boss.png')});
+ ['n','s','h','q','m'].forEach(t=>{const d='enemy/'+t+'/';tload('e-'+t+'-hull',d+'hull.png','enemy-'+t+'-hull.png');tload('e-'+t+'-tur',d+'tur.png','enemy-'+t+'-tur.png');tload('w-'+t,d+'wreck.png','wreck-'+t+'.png');tload('wh-'+t,d+'wreck-hull.png');tload('wt-'+t,d+'wreck-tur.png')});
+ BDIR.forEach((n,i)=>{const d='boss/'+n+'/';tload('e-b'+i+'-hull',d+'hull.png','boss-hull.png');tload('e-b'+i+'-tur',d+'tur.png','boss-tur.png');tload('w-b'+i,d+'wreck.png','wreck-boss.png');tload('wh-b'+i,d+'wreck-hull.png');tload('wt-b'+i,d+'wreck-tur.png')});
  const c=(k,f,...a)=>tload(k,'common/'+f,f,...a);
  c('w-p','wreck-player.png');c('wreck','wreck.png');
  c('ground','ground.jpg','common/ground.png','ground.png');
@@ -197,13 +197,26 @@ function tinit(){
  c('pr','pick-repair.png');c('pd','pick-damage.png');c('ps','pick-shield.png');c('explosion','explosion.png')}
 const TL={},TT={};
 // картинки скина игрока: player-hull-ID-СКИН.png / player-tur-ID-СКИН.png (грузятся только для выбранного танка); нет файла — базовая картинка танка красится цветом скина
-function pload(){const t=TK(),id=t.id,k=psk(),d=TDIR(t);for(const part of['hull','tur']){const key='p-'+part+'-'+id+'-'+k;if(!TL[key]){TL[key]=1;tload(key,d+part+'-'+k+'.png','player-'+part+'-'+id+'-'+k+'.png')}}if(!TL['w'+id]){TL['w'+id]=1;tload('w-p-'+id,d+'wreck.png')}if(!TL['w'+id+k]){TL['w'+id+k]=1;tload('w-p-'+id+'-'+k,d+'wreck-'+k+'.png',d+'wreck.png')}}
+function pload(){const t=TK(),id=t.id,k=psk(),d=TDIR(t);for(const part of['hull','tur']){const key='p-'+part+'-'+id+'-'+k;if(!TL[key]){TL[key]=1;tload(key,d+part+'-'+k+'.png','player-'+part+'-'+id+'-'+k+'.png')}}for(const part of['hull','tur']){const q=(part=='hull'?'wh':'wt')+'-p-'+id;if(!TL[q]){TL[q]=1;tload(q,d+'wreck-'+part+'.png')}const q2=q+'-'+k;if(!TL[q2]){TL[q2]=1;tload(q2,d+'wreck-'+part+'-'+k+'.png',d+'wreck-'+part+'.png')}}if(!TL['w'+id]){TL['w'+id]=1;tload('w-p-'+id,d+'wreck.png')}if(!TL['w'+id+k]){TL['w'+id+k]=1;tload('w-p-'+id+'-'+k,d+'wreck-'+k+'.png',d+'wreck.png')}}
 function tint(im,sk){if(!im||sk=='g')return im||null;const key=sk+im.src;if(TT[key])return TT[key];const c=document.createElement('canvas');c.width=im.width;c.height=im.height;const q=c.getContext('2d');q.drawImage(im,0,0);q.globalCompositeOperation='source-atop';q.globalAlpha=.4;q.fillStyle=SK[sk].c;q.fillRect(0,0,c.width,c.height);return TT[key]=c}
 function pimg(part){const id=sv.tank,sk=psk();return TI['p-'+part+'-'+id+'-'+sk]||tint(TI['p-'+part+'-'+id],sk)||TI['p-'+sk+'-'+part]}
 const ic=(k,fb)=>TI[k]?`<img src='${TI[k].src}' alt='' style='width:46px;height:46px;object-fit:contain;display:block;margin:0 auto 4px'>`:fb;
 const tkey=e=>e===p?'p-'+psk():e.type?'e-'+(e.type=='B'?'b'+(e.bv|0):e.type.toLowerCase()):null;
 function timg(im,z,fl,ox){x.drawImage(im,-z/2+(ox||0),-z/2,z,z);if(fl){x.globalCompositeOperation='lighter';x.globalAlpha=.7;x.drawImage(im,-z/2+(ox||0),-z/2,z,z);x.globalAlpha=1;x.globalCompositeOperation='source-over'}}
-function wreck(e){const i=(e===p?TI['w-p-'+sv.tank+'-'+psk()]||TI['w-p-'+sv.tank]||TI['w-p']:TI['w-'+(e.type=='B'?'b'+(e.bv|0):(e.type||'').toLowerCase())])||TI.wreck||null;wk.push({x:e.x,y:e.y,a:e.a,i,z:e.r*S*TSZ,r:e.r*S,l:9});if(wk.length>30)wk.shift()}
+/* Обломок: корпус и башня остаются в том же положении, что были у танка, сверху горит огонь и идёт дым.
+   Картинки (в папке танка/врага/босса): wreck-hull.png и wreck-tur.png (+ wreck-hull-СКИН.png, wreck-tur-СКИН.png для игрока).
+   Нет их — берутся обычные hull/tur, затемнённые как обгоревшие; нет и их — старый одиночный wreck.png или рисунок кодом. */
+const BM=new WeakMap(),WT=12,WFIRE=5; // сколько секунд лежит обломок и сколько из них горит
+function burn(im){if(!im)return null;if(BM.has(im))return BM.get(im);const c=document.createElement('canvas');c.width=im.width;c.height=im.height;const q=c.getContext('2d');q.drawImage(im,0,0);q.globalCompositeOperation='source-atop';q.fillStyle='rgba(14,11,9,.68)';q.fillRect(0,0,c.width,c.height);BM.set(im,c);return c}
+function wreck(e){const isP=e===p,key=e.type=='B'?'b'+(e.bv|0):(e.type||'').toLowerCase(),id=sv.tank,sk=psk(),k=tkey(e);
+ let h=isP?TI['wh-p-'+id+'-'+sk]||TI['wh-p-'+id]:TI['wh-'+key],u=isP?TI['wt-p-'+id+'-'+sk]||TI['wt-p-'+id]:TI['wt-'+key],i=null;
+ if(!h||!u){const bh=isP?pimg('hull'):k&&TI[k+'-hull'],bt=isP?pimg('tur'):k&&TI[k+'-tur'];h=h||burn(bh);u=u||burn(bt)}
+ if(!h&&!u)i=(isP?TI['w-p-'+id+'-'+sk]||TI['w-p-'+id]||TI['w-p']:TI['w-'+key])||TI.wreck||null;
+ wk.push({x:e.x,y:e.y,a:e.a,t:e.t,h,u,i,z:e.r*S*TSZ,r:e.r*S,l:WT,m:WT,sp:0});if(wk.length>30)wk.shift()}
+function wreckFx(w,dt){w.sp-=dt;if(w.sp>0||pt.length>700)return;const big=Math.sqrt(Math.max(1,w.r/(S*.55))),age=w.m-w.l,fire=age<WFIRE,u=fire?1-age/WFIRE:0;w.sp=R(.1,.2)/big;
+ const ox=R(-.4,.4)*w.r,oy=R(-.4,.4)*w.r;
+ if(fire&&Math.random()<.3+.6*u)P(w.x+ox,w.y+oy,-PI/2+R(-.4,.4),R(.3,1)*S,R(.3,.55),S*R(.12,.22)*big*(.6+.4*u),'f');
+ if(w.l>1.5&&Math.random()<.55)P(w.x+ox*.7,w.y+oy*.7-w.r*.2,-PI/2+R(-.6,.6),R(.4,1.1)*S,R(1.2,2),S*R(.18,.32)*big,'s')}
 
 function resize(){const d=Math.min(devicePixelRatio||1,2);W=innerWidth;H=innerHeight;S=Math.min(W,H)/14;GW=Math.round(Math.max(S*52,W*1.6));GH=Math.round(Math.max(S*28,H*1.6));OK=GW*GH/(S*S*392);cv.width=W*d;cv.height=H*d;x.setTransform(d,0,0,d,0,0);const gs=Math.min(1,Math.sqrt(6e6/(GW*GH)));gr.width=Math.round(GW*gs);gr.height=Math.round(GH*gs);g.setTransform(gs,0,0,gs,0,0);paintGround()}
 function paintGround(){const im=TI.ground;if(im){const ts=S*8;for(let a=0;a<GW;a+=ts)for(let b=0;b<GH;b+=ts)g.drawImage(im,a,b,ts+1,ts+1);return}g.fillStyle='#2b3328';g.fillRect(0,0,GW,GH);const n=Math.round(GW*GH/640);for(let i=0;i<n;i++){g.fillStyle=Math.random()<.5?'rgba(255,255,255,.035)':'rgba(0,0,0,.07)';g.fillRect(R(GW),R(GH),R(2,S*.7),R(2,S*.7))}}
@@ -303,7 +316,7 @@ function update(dt){camUpd();
  for(const q of pt){q.x+=q.vx*dt;q.y+=q.vy*dt;q.l-=dt;const dr=q.t=='k'?1.5:q.t=='d'?2:3.2;q.vx*=1-dr*dt;q.vy*=1-dr*dt}pt=pt.filter(q=>q.l>0);
  for(const r of rg){r.l-=dt;r.r+=S*14*r.k*dt}rg=rg.filter(r=>r.l>0);
  for(const q of dn){q.l-=dt;q.y-=S*1.4*dt}dn=dn.filter(q=>q.l>0);
- for(const w of wk)w.l-=dt;wk=wk.filter(w=>w.l>0);for(const q of ex)q.l+=dt;ex=ex.filter(q=>q.l<q.d);
+ for(const w of wk){w.l-=dt;wreckFx(w,dt)}wk=wk.filter(w=>w.l>0);for(const q of ex)q.l+=dt;ex=ex.filter(q=>q.l<q.d);
  shake*=Math.pow(.003,dt);hurt=Math.max(0,hurt-dt);
  $('#sc').textContent=score+' · '+TKc.n+' · 🪙'+sv.co;document.querySelectorAll('#sb button').forEach(b=>b.style.opacity=sv.co>=SC[b.dataset.s]?1:.4);{const k=Math.max(0,p.hp/p.mhp),h=$('#hp');h.style.width=k*100+'%';h.style.background=k>.5?'#6fcf6a':k>.25?'#e8a73a':'#e85a4a';$('#hpt').textContent=Math.ceil(Math.max(0,p.hp))+'/'+Math.round(p.mhp)}}
 
@@ -326,7 +339,11 @@ function draw(){
   else{x.fillStyle=o.hp>2?'#8a6a3a':o.hp>1?'#735730':'#5c4626';x.fillRect(o.x,o.y,o.w,o.h);x.strokeStyle='rgba(0,0,0,.35)';x.lineWidth=2;x.strokeRect(o.x+1,o.y+1,o.w-2,o.h-2);x.beginPath();x.moveTo(o.x,o.y);x.lineTo(o.x+o.w,o.y+o.h);x.moveTo(o.x+o.w,o.y);x.lineTo(o.x,o.y+o.h);x.stroke()}}
  for(const k of pk){if(k.l<3&&(k.l*6|0)%2)continue;const pi=TI[k.t=='r'?'pr':k.t=='d'?'pd':'ps'];if(pi){x.drawImage(pi,k.x-S*.7,k.y-S*.7,S*1.4,S*1.4);continue}x.fillStyle='rgba(0,0,0,.45)';x.beginPath();x.arc(k.x,k.y,S*.6,0,7);x.fill();x.strokeStyle=k.t=='r'?'#6fcf6a':k.t=='d'?'#f2c14e':'#4fc3f7';x.lineWidth=2;x.stroke();x.font=S*.8+'px serif';x.textAlign='center';x.textBaseline='middle';x.fillText(k.t=='r'?'🔧':k.t=='d'?'⚡':'🛡',k.x,k.y+1)}
  for(const m of mn){const mo=m.a>0||(last/200|0)%2,mi=TI[mo?'mn':'mo'];if(mi){x.drawImage(mi,m.x-S*.4,m.y-S*.4,S*.8,S*.8);continue}x.fillStyle='#2a2c22';x.beginPath();x.arc(m.x,m.y,S*.35,0,7);x.fill();x.fillStyle=m.a>0||(last/200|0)%2?'#e4452e':'#511';x.beginPath();x.arc(m.x,m.y,S*.12,0,7);x.fill()}
- for(const w of wk){x.save();x.globalAlpha=Math.min(1,w.l/2);x.translate(w.x,w.y);x.rotate(w.a);if(w.i)x.drawImage(w.i,-w.z/2,-w.z/2,w.z,w.z);else{x.fillStyle='rgba(18,18,14,.8)';x.beginPath();x.roundRect(-w.r*.85,-w.r*.6,w.r*1.7,w.r*1.2,w.r*.25);x.fill();x.fillStyle='rgba(0,0,0,.5)';x.beginPath();x.arc(w.r*.1,0,w.r*.4,0,7);x.fill()}x.restore()}
+ for(const w of wk){x.save();x.globalAlpha=Math.min(1,w.l/2);x.translate(w.x,w.y);const r=w.r;
+  if(w.h||w.u||!w.i){x.save();x.rotate(w.a);if(w.h)x.drawImage(w.h,-w.z/2,-w.z/2,w.z,w.z);else{x.fillStyle='#0c0d0a';x.fillRect(-r*.95,-r*.85,r*1.9,r*.42);x.fillRect(-r*.95,r*.43,r*1.9,r*.42);x.fillStyle='#23251d';x.fillRect(-r*.8,-r*.55,r*1.6,r*1.1)}x.restore();
+   x.save();x.rotate(w.t);if(w.u)x.drawImage(w.u,-w.z/2,-w.z/2,w.z,w.z);else{x.fillStyle='#17180f';x.fillRect(r*.1,-r*.14,r*1.2,r*.28);x.fillStyle='#2a2b22';x.beginPath();x.arc(0,0,r*.45,0,7);x.fill()}x.restore()}
+  else{x.rotate(w.a);x.drawImage(w.i,-w.z/2,-w.z/2,w.z,w.z)}
+  x.restore()}
  for(const e of en)tank(e,e.c);
  for(const a of al){tank(a,a.c);x.strokeStyle='rgba(90,255,210,.7)';x.lineWidth=2;x.beginPath();x.arc(a.x,a.y,a.r*S*1.35,0,7);x.stroke()}
  if(!over||p.hp>0)tank(p,p.c);
