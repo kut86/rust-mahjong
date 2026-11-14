@@ -8,4 +8,4 @@ pick-repair.png / pick-damage.png / pick-shield.png — подбираемые �
 explosion.png    — лента кадров взрыва в одну строку (кадры подряд слева направо, квадратные)
 wreck.png        — общие обломки, если у танка нет своих
 wreck-player.png — общие обломки игрока, если у танка нет своих
-skin-g.png, skin-d.png, skin-n.png, skin-b.png, skin-v.png — иконки скинов в гараже (46×46)
+skin-g.png ... skin-v.png — общие иконки скинов в гараже; запасные, если у танка нет своих icon-СКИН.png в его папке

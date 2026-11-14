@@ -12,3 +12,6 @@ ID: h1
   hull-n.png / tur-n.png — Неон
   hull-b.png / tur-b.png — Пламя
   hull-v.png / tur-v.png — Плазма
+
+Картинки скинов для гаража (превью в карточке «Скины», у каждого танка свои, по желанию; нет файла — берётся hull-СКИН.png этого танка):
+  icon-g.png, icon-d.png, icon-n.png, icon-b.png, icon-v.png  (квадрат, например 128×128)
