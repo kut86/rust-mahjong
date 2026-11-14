@@ -197,13 +197,13 @@ function tinit(){
  c('pr','pick-repair.png');c('pd','pick-damage.png');c('ps','pick-shield.png');c('explosion','explosion.png')}
 const TL={},TT={};
 // картинки скина игрока: player-hull-ID-СКИН.png / player-tur-ID-СКИН.png (грузятся только для выбранного танка); нет файла — базовая картинка танка красится цветом скина
-function pload(){const t=TK(),id=t.id,k=psk(),d=TDIR(t);for(const part of['hull','tur']){const key='p-'+part+'-'+id+'-'+k;if(!TL[key]){TL[key]=1;tload(key,d+part+'-'+k+'.png','player-'+part+'-'+id+'-'+k+'.png')}}if(!TL['w'+id]){TL['w'+id]=1;tload('w-p-'+id,d+'wreck.png')}}
+function pload(){const t=TK(),id=t.id,k=psk(),d=TDIR(t);for(const part of['hull','tur']){const key='p-'+part+'-'+id+'-'+k;if(!TL[key]){TL[key]=1;tload(key,d+part+'-'+k+'.png','player-'+part+'-'+id+'-'+k+'.png')}}if(!TL['w'+id]){TL['w'+id]=1;tload('w-p-'+id,d+'wreck.png')}if(!TL['w'+id+k]){TL['w'+id+k]=1;tload('w-p-'+id+'-'+k,d+'wreck-'+k+'.png',d+'wreck.png')}}
 function tint(im,sk){if(!im||sk=='g')return im||null;const key=sk+im.src;if(TT[key])return TT[key];const c=document.createElement('canvas');c.width=im.width;c.height=im.height;const q=c.getContext('2d');q.drawImage(im,0,0);q.globalCompositeOperation='source-atop';q.globalAlpha=.4;q.fillStyle=SK[sk].c;q.fillRect(0,0,c.width,c.height);return TT[key]=c}
 function pimg(part){const id=sv.tank,sk=psk();return TI['p-'+part+'-'+id+'-'+sk]||tint(TI['p-'+part+'-'+id],sk)||TI['p-'+sk+'-'+part]}
 const ic=(k,fb)=>TI[k]?`<img src='${TI[k].src}' alt='' style='width:46px;height:46px;object-fit:contain;display:block;margin:0 auto 4px'>`:fb;
 const tkey=e=>e===p?'p-'+psk():e.type?'e-'+(e.type=='B'?'b'+(e.bv|0):e.type.toLowerCase()):null;
 function timg(im,z,fl,ox){x.drawImage(im,-z/2+(ox||0),-z/2,z,z);if(fl){x.globalCompositeOperation='lighter';x.globalAlpha=.7;x.drawImage(im,-z/2+(ox||0),-z/2,z,z);x.globalAlpha=1;x.globalCompositeOperation='source-over'}}
-function wreck(e){const i=(e===p?TI['w-p-'+sv.tank]||TI['w-p']:TI['w-'+(e.type=='B'?'b'+(e.bv|0):(e.type||'').toLowerCase())])||TI.wreck;if(!i)return;wk.push({x:e.x,y:e.y,a:e.a,i,z:e.r*S*TSZ,l:9});if(wk.length>30)wk.shift()}
+function wreck(e){const i=(e===p?TI['w-p-'+sv.tank+'-'+psk()]||TI['w-p-'+sv.tank]||TI['w-p']:TI['w-'+(e.type=='B'?'b'+(e.bv|0):(e.type||'').toLowerCase())])||TI.wreck||null;wk.push({x:e.x,y:e.y,a:e.a,i,z:e.r*S*TSZ,r:e.r*S,l:9});if(wk.length>30)wk.shift()}
 
 function resize(){const d=Math.min(devicePixelRatio||1,2);W=innerWidth;H=innerHeight;S=Math.min(W,H)/14;GW=Math.round(Math.max(S*52,W*1.6));GH=Math.round(Math.max(S*28,H*1.6));OK=GW*GH/(S*S*392);cv.width=W*d;cv.height=H*d;x.setTransform(d,0,0,d,0,0);const gs=Math.min(1,Math.sqrt(6e6/(GW*GH)));gr.width=Math.round(GW*gs);gr.height=Math.round(GH*gs);g.setTransform(gs,0,0,gs,0,0);paintGround()}
 function paintGround(){const im=TI.ground;if(im){const ts=S*8;for(let a=0;a<GW;a+=ts)for(let b=0;b<GH;b+=ts)g.drawImage(im,a,b,ts+1,ts+1);return}g.fillStyle='#2b3328';g.fillRect(0,0,GW,GH);const n=Math.round(GW*GH/640);for(let i=0;i<n;i++){g.fillStyle=Math.random()<.5?'rgba(255,255,255,.035)':'rgba(0,0,0,.07)';g.fillRect(R(GW),R(GH),R(2,S*.7),R(2,S*.7))}}
@@ -252,7 +252,7 @@ function moveT(e,dx,dy,dt){const r=e.r*S,px=e.x,py=e.y;e.x=C(e.x+dx*e.sp*S*dt,r,
  e.tr+=Math.hypot(e.x-px,e.y-py);if(e.tr>S*.5){e.tr=0;g.save();g.translate(e.x,e.y);g.rotate(e.a);g.fillStyle='rgba(12,15,9,.22)';g.fillRect(-r*.3,-r*.8,r*.35,r*.4);g.fillRect(-r*.3,r*.4,r*.35,r*.4);g.restore()}}
 function shoot(e,own,spread,q){const a=e.t+R(-spread,spread),r=e.r*S,mx=e.x+Math.cos(e.t)*r*1.3,my=e.y+Math.sin(e.t)*r*1.3,sp=own?17*S:9*S;
  const pw=e===p,W_=pw?WP.std:WA,np=own?W_.pel:1;for(let i=0;i<np;i++){const aa=own?e.t+R(-W_.spr,W_.spr):a,vm=own?W_.v:1;for(const o of pw&&p.dbl>0?[-.28,.28]:[0])bl.push({x:mx-Math.sin(e.t)*o*S,y:my+Math.cos(e.t)*o*S,vx:Math.cos(aa)*sp*vm,vy:Math.sin(aa)*sp*vm,own,life:own?W_.life:1.3,dm:own?p.dm*W_.d:1,pl:pw&&own,bs:!own&&e.type=='B'})}if(!q){e.rc=r*.35;muzzle(mx,my,e.t,own);sfx(own?0:1)}}
-function kill(e){const rs=e.type!='B'&&al.length<3&&Math.random()<NEC;if(rs){P(e.x,e.y,0,0,.5,S*4,'g','80,255,200');spark(e.x,e.y);al.push({x:e.x,y:e.y,a:e.a,t:e.t,r:e.r*.9,sp:4.2,c:e.c,hp:1,cd:.4,rc:0,fl:0,tr:0,life:18})}else{wreck(e);boom(e.x,e.y,e.type=='B'?2.8:e.type=='h'?1.7:1)}score+=e.pts;e.dead=1;WS.k++;if(e.type=='B')WS.b++;WS.xp+=Math.ceil(e.pts/10);WS.co+=Math.ceil(e.pts/50);addXP(Math.ceil(e.pts/10));sv.co+=Math.ceil(e.pts/50);svs();if(e.type=='B'){bosses++;report(wave-1,score)}if(e.type=='B'||Math.random()<.2)pk.push({x:e.x,y:e.y,t:'rds'[R(3)|0],l:12});g.save();g.translate(e.x,e.y);g.rotate(e.a);g.fillStyle='rgba(10,10,8,.85)';const r=e.r*S;g.fillRect(-r*.8,-r*.7,r*1.6,r*1.4);g.restore()}
+function kill(e){const rs=e.type!='B'&&al.length<3&&Math.random()<NEC;if(rs){P(e.x,e.y,0,0,.5,S*4,'g','80,255,200');spark(e.x,e.y);al.push({x:e.x,y:e.y,a:e.a,t:e.t,r:e.r*.9,sp:4.2,c:e.c,hp:1,cd:.4,rc:0,fl:0,tr:0,life:18})}else{wreck(e);boom(e.x,e.y,e.type=='B'?2.8:e.type=='h'?1.7:1)}score+=e.pts;e.dead=1;WS.k++;if(e.type=='B')WS.b++;WS.xp+=Math.ceil(e.pts/10);WS.co+=Math.ceil(e.pts/50);addXP(Math.ceil(e.pts/10));sv.co+=Math.ceil(e.pts/50);svs();if(e.type=='B'){bosses++;report(wave-1,score)}if(e.type=='B'||Math.random()<.2)pk.push({x:e.x,y:e.y,t:'rds'[R(3)|0],l:12});}
 function vec(s){const dx=s.x-s.ox,dy=s.y-s.oy,h=Math.hypot(dx,dy)||1,m=Math.min(1,h/(S*2.2));return{x:dx/h*m,y:dy/h*m,m}}
 
 function hitP(v,quiet){p.hp-=v;p.fl=.08;hurt=.3;shake=Math.max(shake,5);vib(30);if(!quiet)dnum(p,v,'#ff6a5a','-');if(p.hp<=0)die()}
@@ -326,7 +326,7 @@ function draw(){
   else{x.fillStyle=o.hp>2?'#8a6a3a':o.hp>1?'#735730':'#5c4626';x.fillRect(o.x,o.y,o.w,o.h);x.strokeStyle='rgba(0,0,0,.35)';x.lineWidth=2;x.strokeRect(o.x+1,o.y+1,o.w-2,o.h-2);x.beginPath();x.moveTo(o.x,o.y);x.lineTo(o.x+o.w,o.y+o.h);x.moveTo(o.x+o.w,o.y);x.lineTo(o.x,o.y+o.h);x.stroke()}}
  for(const k of pk){if(k.l<3&&(k.l*6|0)%2)continue;const pi=TI[k.t=='r'?'pr':k.t=='d'?'pd':'ps'];if(pi){x.drawImage(pi,k.x-S*.7,k.y-S*.7,S*1.4,S*1.4);continue}x.fillStyle='rgba(0,0,0,.45)';x.beginPath();x.arc(k.x,k.y,S*.6,0,7);x.fill();x.strokeStyle=k.t=='r'?'#6fcf6a':k.t=='d'?'#f2c14e':'#4fc3f7';x.lineWidth=2;x.stroke();x.font=S*.8+'px serif';x.textAlign='center';x.textBaseline='middle';x.fillText(k.t=='r'?'🔧':k.t=='d'?'⚡':'🛡',k.x,k.y+1)}
  for(const m of mn){const mo=m.a>0||(last/200|0)%2,mi=TI[mo?'mn':'mo'];if(mi){x.drawImage(mi,m.x-S*.4,m.y-S*.4,S*.8,S*.8);continue}x.fillStyle='#2a2c22';x.beginPath();x.arc(m.x,m.y,S*.35,0,7);x.fill();x.fillStyle=m.a>0||(last/200|0)%2?'#e4452e':'#511';x.beginPath();x.arc(m.x,m.y,S*.12,0,7);x.fill()}
- for(const w of wk){x.save();x.globalAlpha=Math.min(1,w.l/2);x.translate(w.x,w.y);x.rotate(w.a);x.drawImage(w.i,-w.z/2,-w.z/2,w.z,w.z);x.restore()}
+ for(const w of wk){x.save();x.globalAlpha=Math.min(1,w.l/2);x.translate(w.x,w.y);x.rotate(w.a);if(w.i)x.drawImage(w.i,-w.z/2,-w.z/2,w.z,w.z);else{x.fillStyle='rgba(18,18,14,.8)';x.beginPath();x.roundRect(-w.r*.85,-w.r*.6,w.r*1.7,w.r*1.2,w.r*.25);x.fill();x.fillStyle='rgba(0,0,0,.5)';x.beginPath();x.arc(w.r*.1,0,w.r*.4,0,7);x.fill()}x.restore()}
  for(const e of en)tank(e,e.c);
  for(const a of al){tank(a,a.c);x.strokeStyle='rgba(90,255,210,.7)';x.lineWidth=2;x.beginPath();x.arc(a.x,a.y,a.r*S*1.35,0,7);x.stroke()}
  if(!over||p.hp>0)tank(p,p.c);
@@ -358,11 +358,15 @@ function showUp(){report(wave,score);pause=1;p.hp=Math.min(p.mhp,p.hp+150);let f
   if(k=='nx'){u.classList.add('h');pause=0;startWave();return}
   if(k=='rp'){const c=cost();if(fixed||sv.co<c)return;sv.co-=c;rpN++;fixed=1;p.hp=p.mhp;svs();$('#co').textContent=sv.co}
   render()})};render()}
+// ящики не должны появляться внутри стальных стен и друг на друге: если место занято, ящик переносится, а если свободного места нет — пропадает
+function fixCrates(){const hit=(a,b,m)=>!(a.x>b.x+b.w+m||a.x+a.w<b.x-m||a.y>b.y+b.h+m||a.y+a.h<b.y-m),ok=ob.filter(o=>o.steel);
+ for(const o of ob){if(o.steel)continue;let n=0;while(n<60&&ok.some(q=>hit(o,q,S*.3))){n++;o.x=R(S,GW-S-o.w);o.y=R(S,GH-S-o.h)}if(n>=60)o.dead=1;else ok.push(o)}
+ ob=ob.filter(o=>!o.dead)}
 function buildMap(l){ob=[];paintGround();bl=[];mn=[];wk=[];const B=(a,b,w,h,s)=>ob.push({x:a,y:b,w,h,hp:s?1e9:3,steel:s}),w=S*1.1,N=Math.round;
  if(l==1){const cx=GW/2,cy=GH/2;B(cx-S*3,cy-S*.6,S*6,S*1.2,1);B(cx-S*.6,cy-S*3,S*1.2,S*6,1);for(let i=0;i<4;i++){const a=i*PI/2+PI/4;B(cx+Math.cos(a)*S*5.5-w/2,cy+Math.sin(a)*S*4-w/2,w,w)}for(let i=0;i<N(6*OK);i++)B(R(S,GW-S*2),R(S,GH-S*2),w,w);for(let i=0;i<N(3*OK);i++)B(R(S,GW-S*3),R(S,GH-S*2),S*2,S*1.2,1)}
  else if(l==2){for(const[a,b]of[[.12,.15],[.5,.15],[.12,.5],[.5,.5],[.12,.8],[.5,.8]])B(GW*a,GH*b,GW*.3,S*.9,1);for(let i=0;i<N(8*OK);i++)B(R(S*2,GW-S*3),R(S,GH-S*2),w,w)}
  else for(let i=0;i<N(14*OK);i++){const s=i<N(4*OK),ww=s?S*2:w,h=s?S*1.2:w;B(R(S,GW-S-ww),R(S,GH-S-h),ww,h,s)}
- ob=ob.filter(o=>Math.hypot(o.x+o.w/2-p.x,o.y+o.h/2-p.y)>S*3+Math.max(o.w,o.h)/2)}
+ fixCrates(); ob=ob.filter(o=>Math.hypot(o.x+o.w/2-p.x,o.y+o.h/2-p.y)>S*3+Math.max(o.w,o.h)/2)}
 $('#shop').onclick=()=>{gcl=TK().c;gtk=null;gmsg='';gsk=0;garage()};$('#co').textContent=sv.co;
 const pickT=()=>{const r=Math.random();return r<.10&&wave>=4?'Q':r<.20&&wave>=6?'M':r<.32&&wave>=3?'h':r<.55&&wave>=2?'s':'n'};
 function efire(e){const t0=e.t,ty=e.type;
