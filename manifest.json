@@ -1,0 +1,26 @@
+{
+ "name": "Rust Amigos — игры",
+ "short_name": "Amigos",
+ "start_url": "index.html",
+ "scope": ".",
+ "display": "fullscreen",
+ "display_override": [
+  "fullscreen",
+  "standalone"
+ ],
+ "background_color": "#12140e",
+ "theme_color": "#12140e",
+ "icons": [
+  {
+   "src": "icon-192.png",
+   "sizes": "192x192",
+   "type": "image/png"
+  },
+  {
+   "src": "icon-512.png",
+   "sizes": "512x512",
+   "type": "image/png",
+   "purpose": "any"
+  }
+ ]
+}
