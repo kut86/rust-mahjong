@@ -164,27 +164,35 @@ function report(w,sc){if(tok&&runTok)api('/api/tank',{run:runTok,wave:w,score:sc
 
 /* ===== Картинки танков: папка img/tanks/ рядом с index.html. Чего нет — рисуется кодом ===== */
 const TIMG='img/tanks/',TVER='1',TI={},TSZ=2.4; // TVER — меняйте при замене картинок (сброс кэша); TSZ — размер танка относительно его радиуса
-function tload(k,f,alt){const im=new Image();im.onload=()=>{TI[k]=im;if(k=='ground'&&GW)paintGround()};im.onerror=()=>{if(alt)tload(k,alt)};im.src=TIMG+f+'?v='+TVER}
+function tload(k,f,...alt){const im=new Image();im.onload=()=>{TI[k]=im;if(k=='ground'&&GW)paintGround()};im.onerror=()=>{if(alt.length)tload(k,...alt)};im.src=TIMG+f+'?v='+TVER} // f — основной путь, дальше запасные (старые имена файлов)
+/* Структура папок (внутри img/tanks/):
+   light|medium|heavy/ID/  hull.png tur.png wreck.png  + скины hull-d.png tur-d.png (d,n,b,v; g — по желанию)
+   boss/1-shturmovik|2-karatel|3-komandir/  hull.png tur.png wreck.png
+   enemy/n|s|h|q|m/  hull.png tur.png wreck.png
+   common/  ground.jpg crate-1..3.png steel.png bullet-player.png bullet-enemy.png mine-off.png mine-on.png pick-*.png explosion.png wreck.png wreck-player.png skin-*.png
+   Старые имена файлов в корне img/tanks/ работают как запасные. */
+const TDIR=t=>({l:'light',m:'medium',h:'heavy'}[t.c])+'/'+t.id+'/',BDIR=['1-shturmovik','2-karatel','3-komandir'];
 function tinit(){
  ['g','d','n','b','v'].forEach(s=>{tload('p-'+s+'-hull','player-'+s+'-hull.png');tload('p-'+s+'-tur','player-'+s+'-tur.png')});
- /* картинки игрока: player-hull-ID.png и player-tur-ID.png для каждого танка (ID: l1, m5, h3a …); если их нет — player-СКИН-hull.png / player-СКИН-tur.png, затем рисуется кодом */
- TANKS.forEach(t=>{tload('p-hull-'+t.id,'player-hull-'+t.id+'.png');tload('p-tur-'+t.id,'player-tur-'+t.id+'.png')});
- ['n','s','h','q','m'].forEach(t=>{tload('e-'+t+'-hull','enemy-'+t+'-hull.png');tload('e-'+t+'-tur','enemy-'+t+'-tur.png');tload('w-'+t,'wreck-'+t+'.png')});
- tload('e-b-hull','boss-hull.png');tload('e-b-tur','boss-tur.png');tload('w-b','wreck-boss.png');tload('w-p','wreck-player.png');tload('wreck','wreck.png');
- tload('ground','ground.jpg','ground.png');
- [1,2,3].forEach(n=>tload('crate'+n,'crate-'+n+'.png'));
- tload('steel','steel.png');tload('bp','bullet-player.png');tload('be','bullet-enemy.png');tload('mo','mine-off.png');tload('mn','mine-on.png');
- ['g','d','n','b','v'].forEach(k=>tload('skin-'+k,'skin-'+k+'.png'));
- tload('pr','pick-repair.png');tload('pd','pick-damage.png');tload('ps','pick-shield.png');tload('explosion','explosion.png')}
+ TANKS.forEach(t=>{const d=TDIR(t);tload('p-hull-'+t.id,d+'hull.png','player-hull-'+t.id+'.png');tload('p-tur-'+t.id,d+'tur.png','player-tur-'+t.id+'.png')});
+ ['n','s','h','q','m'].forEach(t=>{const d='enemy/'+t+'/';tload('e-'+t+'-hull',d+'hull.png','enemy-'+t+'-hull.png');tload('e-'+t+'-tur',d+'tur.png','enemy-'+t+'-tur.png');tload('w-'+t,d+'wreck.png','wreck-'+t+'.png')});
+ BDIR.forEach((n,i)=>{const d='boss/'+n+'/';tload('e-b'+i+'-hull',d+'hull.png','boss-hull.png');tload('e-b'+i+'-tur',d+'tur.png','boss-tur.png');tload('w-b'+i,d+'wreck.png','wreck-boss.png')});
+ const c=(k,f,...a)=>tload(k,'common/'+f,f,...a);
+ c('w-p','wreck-player.png');c('wreck','wreck.png');
+ c('ground','ground.jpg','common/ground.png','ground.png');
+ [1,2,3].forEach(n=>c('crate'+n,'crate-'+n+'.png'));
+ c('steel','steel.png');c('bp','bullet-player.png');c('be','bullet-enemy.png');c('mo','mine-off.png');c('mn','mine-on.png');
+ ['g','d','n','b','v'].forEach(k=>c('skin-'+k,'skin-'+k+'.png'));
+ c('pr','pick-repair.png');c('pd','pick-damage.png');c('ps','pick-shield.png');c('explosion','explosion.png')}
 const TL={},TT={};
 // картинки скина игрока: player-hull-ID-СКИН.png / player-tur-ID-СКИН.png (грузятся только для выбранного танка); нет файла — базовая картинка танка красится цветом скина
-function pload(){const id=sv.tank,k=psk();for(const part of['hull','tur']){const key='p-'+part+'-'+id+'-'+k;if(!TL[key]){TL[key]=1;tload(key,'player-'+part+'-'+id+'-'+k+'.png')}}}
+function pload(){const t=TK(),id=t.id,k=psk(),d=TDIR(t);for(const part of['hull','tur']){const key='p-'+part+'-'+id+'-'+k;if(!TL[key]){TL[key]=1;tload(key,d+part+'-'+k+'.png','player-'+part+'-'+id+'-'+k+'.png')}}if(!TL['w'+id]){TL['w'+id]=1;tload('w-p-'+id,d+'wreck.png')}}
 function tint(im,sk){if(!im||sk=='g')return im||null;const key=sk+im.src;if(TT[key])return TT[key];const c=document.createElement('canvas');c.width=im.width;c.height=im.height;const q=c.getContext('2d');q.drawImage(im,0,0);q.globalCompositeOperation='source-atop';q.globalAlpha=.4;q.fillStyle=SK[sk].c;q.fillRect(0,0,c.width,c.height);return TT[key]=c}
 function pimg(part){const id=sv.tank,sk=psk();return TI['p-'+part+'-'+id+'-'+sk]||tint(TI['p-'+part+'-'+id],sk)||TI['p-'+sk+'-'+part]}
 const ic=(k,fb)=>TI[k]?`<img src='${TI[k].src}' alt='' style='width:46px;height:46px;object-fit:contain;display:block;margin:0 auto 4px'>`:fb;
-const tkey=e=>e===p?'p-'+psk():e.type?'e-'+e.type.toLowerCase():null;
+const tkey=e=>e===p?'p-'+psk():e.type?'e-'+(e.type=='B'?'b'+(e.bv|0):e.type.toLowerCase()):null;
 function timg(im,z,fl,ox){x.drawImage(im,-z/2+(ox||0),-z/2,z,z);if(fl){x.globalCompositeOperation='lighter';x.globalAlpha=.7;x.drawImage(im,-z/2+(ox||0),-z/2,z,z);x.globalAlpha=1;x.globalCompositeOperation='source-over'}}
-function wreck(e){const i=TI[e===p?'w-p':'w-'+(e.type||'').toLowerCase()]||TI.wreck;if(!i)return;wk.push({x:e.x,y:e.y,a:e.a,i,z:e.r*S*TSZ,l:9});if(wk.length>30)wk.shift()}
+function wreck(e){const i=(e===p?TI['w-p-'+sv.tank]||TI['w-p']:TI['w-'+(e.type=='B'?'b'+(e.bv|0):(e.type||'').toLowerCase())])||TI.wreck;if(!i)return;wk.push({x:e.x,y:e.y,a:e.a,i,z:e.r*S*TSZ,l:9});if(wk.length>30)wk.shift()}
 
 function resize(){const d=Math.min(devicePixelRatio||1,2);W=innerWidth;H=innerHeight;S=Math.min(W,H)/14;GW=Math.round(Math.max(S*52,W*1.6));GH=Math.round(Math.max(S*28,H*1.6));OK=GW*GH/(S*S*392);cv.width=W*d;cv.height=H*d;x.setTransform(d,0,0,d,0,0);const gs=Math.min(1,Math.sqrt(6e6/(GW*GH)));gr.width=Math.round(GW*gs);gr.height=Math.round(GH*gs);g.setTransform(gs,0,0,gs,0,0);paintGround()}
 function paintGround(){const im=TI.ground;if(im){const ts=S*8;for(let a=0;a<GW;a+=ts)for(let b=0;b<GH;b+=ts)g.drawImage(im,a,b,ts+1,ts+1);return}g.fillStyle='#2b3328';g.fillRect(0,0,GW,GH);const n=Math.round(GW*GH/640);for(let i=0;i<n;i++){g.fillStyle=Math.random()<.5?'rgba(255,255,255,.035)':'rgba(0,0,0,.07)';g.fillRect(R(GW),R(GH),R(2,S*.7),R(2,S*.7))}}
