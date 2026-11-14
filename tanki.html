@@ -100,10 +100,13 @@ const ENHP=.06,EDMG=.015;         // рост здоровья врагов и �
 let NEC=0;                        // шанс союзника-некроманта (из навыка)
 const PCRIT_MUL=2,BCRIT_CH=15,BCRIT_MUL=1.5; // крит: множитель урона игрока; шанс и множитель крита босса по игроку (удар в борт/корму)
 const RAM_DMG=10,RAM_BACK=25,RAM_CAP=60;      // таран: урон врагу на полной скорости, ответный урон игроку и его потолок
-const defSv=()=>({v:3,co:0,own:['g'],sel:'g',tank:'l1',tk:['l1'],xp:{},fx:0,mod:{},eq:{},sk:{}});
-let sv=defSv();try{const o=JSON.parse(localStorage.getItem('tk')||'{}');if(o.v>=2)Object.assign(sv,o);else{sv.co=+o.co||0;if(Array.isArray(o.own)&&o.own.length)sv.own=o.own;if(SK[o.sel])sv.sel=o.sel}}catch(e){}
-sv.tk=(sv.tk||[]).filter(id=>TANKS.some(t=>t.id==id));if(!sv.tk.includes('l1'))sv.tk.unshift('l1');if(!sv.tk.includes(sv.tank))sv.tank='l1';sv.xp=sv.xp||{};sv.fx=+sv.fx||0;sv.mod=sv.mod||{};sv.eq=sv.eq||{};sv.sk=sv.sk||{};
+const defSv=()=>({v:3,co:0,tank:'l1',tk:['l1'],xp:{},fx:0,mod:{},eq:{},sk:{},sks:{}});
+let sv=defSv();try{const o=JSON.parse(localStorage.getItem('tk')||'{}');if(o.v>=2)Object.assign(sv,o);else{sv.co=+o.co||0}}catch(e){}
+sv.tk=(sv.tk||[]).filter(id=>TANKS.some(t=>t.id==id));if(!sv.tk.includes('l1'))sv.tk.unshift('l1');if(!sv.tk.includes(sv.tank))sv.tank='l1';sv.xp=sv.xp||{};sv.fx=+sv.fx||0;sv.mod=sv.mod||{};sv.eq=sv.eq||{};sv.sk=sv.sk||{};sv.sks=sv.sks||{};
 const TK=id=>TANKS.find(t=>t.id==(id||sv.tank)),own=id=>sv.tk.includes(id),preds=t=>TANKS.filter(s=>s.c==t.c&&s.t==t.t-1);
+/* ----- скины: у каждого танка свои (куплены/выбран); «Зелёный» есть у всех бесплатно; цена растёт со ступенью ----- */
+const skinOf=id=>{const o=sv.sks[id];return o&&SK[o.sel]?o.sel:'g'},psk=()=>skinOf(sv.tank),skOwn=(id,k)=>k=='g'||!!(sv.sks[id]&&sv.sks[id].own.includes(k)),SKP=(t,k)=>Math.round(SK[k].p*(1+.3*(t.t-1)));
+function skinClick(t,k){if(!own(t.id)||!SK[k])return'';const o=sv.sks[t.id]=sv.sks[t.id]||{own:[],sel:'g'};if(skOwn(t.id,k)){o.sel=k;return''}const c=SKP(t,k);if(sv.co<c)return'Не хватает монет';sv.co-=c;o.own.push(k);o.sel=k;return''}
 /* ----- модули танка: орудие, башня, двигатель, гусеницы; 3 уровня, 1-й стоковый. Каждый уровень задаёт ИТОГОВЫЕ значения (множители к характеристикам корпуса);
    у 2-го уровня небольшой плюс, у 3-го сильный плюс в одном и минус в другом. Бонусы установленных модулей складываются ----- */
 const MD=[['g','Орудие'],['t','Башня'],['e','Двигатель'],['k','Гусеницы']];
@@ -173,8 +176,13 @@ function tinit(){
  tload('steel','steel.png');tload('bp','bullet-player.png');tload('be','bullet-enemy.png');tload('mo','mine-off.png');tload('mn','mine-on.png');
  ['g','d','n','b','v'].forEach(k=>tload('skin-'+k,'skin-'+k+'.png'));
  tload('pr','pick-repair.png');tload('pd','pick-damage.png');tload('ps','pick-shield.png');tload('explosion','explosion.png')}
+const TL={},TT={};
+// картинки скина игрока: player-hull-ID-СКИН.png / player-tur-ID-СКИН.png (грузятся только для выбранного танка); нет файла — базовая картинка танка красится цветом скина
+function pload(){const id=sv.tank,k=psk();for(const part of['hull','tur']){const key='p-'+part+'-'+id+'-'+k;if(!TL[key]){TL[key]=1;tload(key,'player-'+part+'-'+id+'-'+k+'.png')}}}
+function tint(im,sk){if(!im||sk=='g')return im||null;const key=sk+im.src;if(TT[key])return TT[key];const c=document.createElement('canvas');c.width=im.width;c.height=im.height;const q=c.getContext('2d');q.drawImage(im,0,0);q.globalCompositeOperation='source-atop';q.globalAlpha=.4;q.fillStyle=SK[sk].c;q.fillRect(0,0,c.width,c.height);return TT[key]=c}
+function pimg(part){const id=sv.tank,sk=psk();return TI['p-'+part+'-'+id+'-'+sk]||tint(TI['p-'+part+'-'+id],sk)||TI['p-'+sk+'-'+part]}
 const ic=(k,fb)=>TI[k]?`<img src='${TI[k].src}' alt='' style='width:46px;height:46px;object-fit:contain;display:block;margin:0 auto 4px'>`:fb;
-const tkey=e=>e===p?'p-'+sv.sel:e.type?'e-'+e.type.toLowerCase():null;
+const tkey=e=>e===p?'p-'+psk():e.type?'e-'+e.type.toLowerCase():null;
 function timg(im,z,fl,ox){x.drawImage(im,-z/2+(ox||0),-z/2,z,z);if(fl){x.globalCompositeOperation='lighter';x.globalAlpha=.7;x.drawImage(im,-z/2+(ox||0),-z/2,z,z);x.globalAlpha=1;x.globalCompositeOperation='source-over'}}
 function wreck(e){const i=TI[e===p?'w-p':'w-'+(e.type||'').toLowerCase()]||TI.wreck;if(!i)return;wk.push({x:e.x,y:e.y,a:e.a,i,z:e.r*S*TSZ,l:9});if(wk.length>30)wk.shift()}
 
@@ -200,7 +208,7 @@ function boom(px,py,k){
  for(let i=0;i<24;i++)P(px,py,R(7),R(4,14)*S,R(.3,.8),R(1.2,2.2),'k');
  for(let i=0;i<12;i++)P(px,py,R(7),R(.3,2)*S,R(1,2),S*.7,'s');
  for(let i=0;i<10;i++)P(px,py,R(7),R(2,8)*S,R(.8,1.4),R(2,5),'d',i%2?'#3a3a36':'#6a2a22');
- P(px,py,0,0,.3,S*5*k,'g',SK[sv.sel].f);rg.push({x:px,y:py,r:S*.5,l:.45,m:.45,k});
+ P(px,py,0,0,.3,S*5*k,'g',SK[psk()].f);rg.push({x:px,y:py,r:S*.5,l:.45,m:.45,k});
  const q=g.createRadialGradient(px,py,0,px,py,S*1.4*k);q.addColorStop(0,'rgba(0,0,0,.6)');q.addColorStop(1,'rgba(0,0,0,0)');g.fillStyle=q;g.fillRect(px-S*2*k,py-S*2*k,S*4*k,S*4*k);
  shake=Math.max(shake,8*k);slow=.15;sfx(2);vib(k>1?[30,20,60]:35)}
 
@@ -213,7 +221,7 @@ function spawnPos(r){const mg=S*1.5;
  return[p.x<GW/2?GW-r:r,p.y<GH/2?GH-r:r]}
 function mk(t){const d=TY[t],r=d.r*S,s=R(4)|0;const[px,py]=spawnPos(r);
  const H_=Math.ceil(d.hp*(1+ENHP*(wave-1))),bv=((wave/5|0)-1)%3;return{type:t,hp:H_,mh:H_,bv,sp:d.sp,c:t=='B'?['#8c1f1f','#a0501a','#1f5a8c'][bv]:d.c,r:d.r,pts:d.pts,cdMax:d.cd,x:px,y:py,a:PI/2,t:PI/2,cd:R(1,2),ph:R(6),w:0,rc:0,fl:0,tr:0}}
-function reset(){TKc=eff(TK());NEC=TKc.nec||0;startRun();bosses=0;up={sp:0,hp:0,rt:0};p={x:GW/2,y:GH/2,a:-PI/2,t:-PI/2,r:TKc.r,sp:5,hp:100,mhp:100,rate:.22,dbl:0,sh:0,cd:0,rc:0,fl:0,tr:0,c:SK[sv.sel].c};pk=[];pause=0;rpN=0;setPause(0);$('#up').classList.add('h');applyUp();p.hp=p.mhp;p.dm=TKc.dm;al=[];mn=[];en=[];bl=[];pt=[];rg=[];wk=[];ex=[];dn=[];queue=[];score=0;wave=0;over=false;waitT=-1;spawnT=0;hurt=0;paintGround();ob=[];
+function reset(){pload();TKc=eff(TK());NEC=TKc.nec||0;startRun();bosses=0;up={sp:0,hp:0,rt:0};p={x:GW/2,y:GH/2,a:-PI/2,t:-PI/2,r:TKc.r,sp:5,hp:100,mhp:100,rate:.22,dbl:0,sh:0,cd:0,rc:0,fl:0,tr:0,c:SK[psk()].c};pk=[];pause=0;rpN=0;setPause(0);$('#up').classList.add('h');applyUp();p.hp=p.mhp;p.dm=TKc.dm;al=[];mn=[];en=[];bl=[];pt=[];rg=[];wk=[];ex=[];dn=[];queue=[];score=0;wave=0;over=false;waitT=-1;spawnT=0;hurt=0;paintGround();ob=[];
  const NO=Math.round(14*OK),NS=Math.round(4*OK);for(let i=0;i<NO;i++){const st_=i<NS,w=st_?S*2:S*1.1,h=st_?S*1.2:S*1.1;let px,py,n=0;
   do{px=R(S,GW-S-w);py=R(S,GH-S-h)}while(n++<40&&(Math.hypot(px+w/2-GW/2,py+h/2-GH/2)<S*3.5||ob.some(o=>!(px>o.x+o.w+S||px+w<o.x-S||py>o.y+o.h+S||py+h<o.y-S))));
   ob.push({x:px,y:py,w,h,hp:st_?1e9:3,steel:st_})}
@@ -280,7 +288,7 @@ function update(dt){camUpd();
  shake*=Math.pow(.003,dt);hurt=Math.max(0,hurt-dt);
  $('#sc').textContent=score+' · '+TKc.n+' · 🪙'+sv.co;document.querySelectorAll('#sb button').forEach(b=>b.style.opacity=sv.co>=SC[b.dataset.s]?1:.4);$('#hp').style.width=p.hp/p.mhp*100+'%'}
 
-function tank(e,col){const r=e.r*S,k=tkey(e),hi=e===p?(TI['p-hull-'+sv.tank]||TI[k+'-hull']):k&&TI[k+'-hull'],ti=e===p?(TI['p-tur-'+sv.tank]||TI[k+'-tur']):k&&TI[k+'-tur'],z=r*TSZ;x.save();x.translate(e.x,e.y);x.rotate(e.a);
+function tank(e,col){const r=e.r*S,k=tkey(e),hi=e===p?pimg('hull'):k&&TI[k+'-hull'],ti=e===p?pimg('tur'):k&&TI[k+'-tur'],z=r*TSZ;x.save();x.translate(e.x,e.y);x.rotate(e.a);
  if(hi)timg(hi,z,e.fl>0);else{x.fillStyle='#161814';x.fillRect(-r*.95,-r*.85,r*1.9,r*.42);x.fillRect(-r*.95,r*.43,r*1.9,r*.42);
  x.fillStyle=e.fl>0?'#fff':col;x.fillRect(-r*.8,-r*.55,r*1.6,r*1.1);x.fillStyle='rgba(0,0,0,.18)';x.fillRect(-r*.8,-r*.1,r*1.6,r*.2)}x.restore();
  x.save();x.translate(e.x,e.y);x.rotate(e.t);
@@ -312,7 +320,7 @@ function draw(){
  for(const q of pt){const u=q.l/q.m;if(q.t=='f'){x.fillStyle=`hsla(${10+45*u},100%,${40+25*u}%,${u*.8})`;x.beginPath();x.arc(q.x,q.y,q.s*(.4+u*.8),0,7);x.fill()}
   else if(q.t=='k'){x.strokeStyle=`rgba(255,${120+120*u|0},60,${u})`;x.lineWidth=q.s;x.beginPath();x.moveTo(q.x,q.y);x.lineTo(q.x-q.vx*.04,q.y-q.vy*.04);x.stroke()}
   else if(q.t=='g'){const gd=x.createRadialGradient(q.x,q.y,0,q.x,q.y,q.s);gd.addColorStop(0,`rgba(${q.c},${u*.7})`);gd.addColorStop(1,`rgba(${q.c},0)`);x.fillStyle=gd;x.fillRect(q.x-q.s,q.y-q.s,q.s*2,q.s*2)}}
- for(const b of bl){const bi=TI[b.own?'bp':'be'];if(bi){const L=S*(b.big?1.8:1.1);x.save();x.globalCompositeOperation='source-over';x.translate(b.x,b.y);x.rotate(Math.atan2(b.vy,b.vx));x.drawImage(bi,-L*.75,-L/8,L,L/4);x.restore();continue}x.strokeStyle=b.own?`rgba(${SK[sv.sel].f},.9)`:'rgba(255,100,80,.9)';x.lineWidth=b.big?10:3;x.lineCap='round';x.beginPath();x.moveTo(b.x,b.y);x.lineTo(b.x-b.vx*.035,b.y-b.vy*.035);x.stroke()}
+ for(const b of bl){const bi=TI[b.own?'bp':'be'];if(bi){const L=S*(b.big?1.8:1.1);x.save();x.globalCompositeOperation='source-over';x.translate(b.x,b.y);x.rotate(Math.atan2(b.vy,b.vx));x.drawImage(bi,-L*.75,-L/8,L,L/4);x.restore();continue}x.strokeStyle=b.own?`rgba(${SK[psk()].f},.9)`:'rgba(255,100,80,.9)';x.lineWidth=b.big?10:3;x.lineCap='round';x.beginPath();x.moveTo(b.x,b.y);x.lineTo(b.x-b.vx*.035,b.y-b.vy*.035);x.stroke()}
  for(const r of rg){const u=r.l/r.m;x.strokeStyle=`rgba(255,200,120,${u*.6})`;x.lineWidth=2+u*5;x.beginPath();x.arc(r.x,r.y,r.r,0,7);x.stroke()}
  x.globalCompositeOperation='source-over';x.restore();
  arrows();
@@ -336,9 +344,7 @@ function buildMap(l){ob=[];paintGround();bl=[];mn=[];wk=[];const B=(a,b,w,h,s)=>
  else if(l==2){for(const[a,b]of[[.12,.15],[.5,.15],[.12,.5],[.5,.5],[.12,.8],[.5,.8]])B(GW*a,GH*b,GW*.3,S*.9,1);for(let i=0;i<N(8*OK);i++)B(R(S*2,GW-S*3),R(S,GH-S*2),w,w)}
  else for(let i=0;i<N(14*OK);i++){const s=i<N(4*OK),ww=s?S*2:w,h=s?S*1.2:w;B(R(S,GW-S-ww),R(S,GH-S-h),ww,h,s)}
  ob=ob.filter(o=>Math.hypot(o.x+o.w/2-p.x,o.y+o.h/2-p.y)>S*3+Math.max(o.w,o.h)/2)}
-function shopUI(){const u=$('#up');u.innerHTML='<h2>Скины · '+sv.co+' 🪙</h2><p>Меняют цвет танка, выстрелов и взрывов</p><div class="cd">'+Object.entries(SK).map(([k,s])=>`<button data-k='${k}' style='border-color:${sv.sel==k?'#e8a73a':'transparent'}'><b style='color:${s.c}'>■</b>${s.n}<small>${sv.sel==k?'выбран':sv.own.includes(k)?'выбрать':s.p+' 🪙'}</small></button>`).join('')+'</div><button class="cl">Назад</button>';u.classList.remove('h');
- u.querySelectorAll('.cd button').forEach(b=>b.onclick=()=>{const k=b.dataset.k,s=SK[k];if(sv.own.includes(k))sv.sel=k;else if(sv.co>=s.p){sv.co-=s.p;sv.own.push(k);sv.sel=k}svs();$('#co').textContent=sv.co;shopUI()});u.querySelector('.cl').onclick=()=>u.classList.add('h')}
-$('#shop').onclick=()=>{gcl=TK().c;gtk=null;gmsg='';garage('k')};$('#co').textContent=sv.co;
+$('#shop').onclick=()=>{gcl=TK().c;gtk=null;gmsg='';gsk=0;garage()};$('#co').textContent=sv.co;
 const pickT=()=>{const r=Math.random();return r<.10&&wave>=4?'Q':r<.20&&wave>=6?'M':r<.32&&wave>=3?'h':r<.55&&wave>=2?'s':'n'};
 function efire(e){const t0=e.t,ty=e.type;
  if(ty=='M'){mn.push({x:e.x,y:e.y,l:25,a:.8});if(mn.length>12)mn.shift();return}
@@ -349,7 +355,7 @@ function efire(e){const t0=e.t,ty=e.type;
   e.t=t0;return}
  shoot(e,false,.1)}
 function superShot(){const r=p.r*S,mx=p.x+Math.cos(p.t)*r*1.4,my=p.y+Math.sin(p.t)*r*1.4;bl.push({x:mx,y:my,vx:Math.cos(p.t)*26*S,vy:Math.sin(p.t)*26*S,own:true,life:1.2,dm:10*p.dm,pr:1,big:1,pl:1});muzzle(mx,my,p.t,true);P(mx,my,0,0,.2,S*3,'g','255,240,160');shake=9;p.rc=r*.6}
-let gcl='l',gtk=null,gmsg='';
+let gcl='l',gtk=null,gmsg='',gsk=0;
 const f1=v=>Math.round(v*10)/10,RM=['I','II','III','IV','V','VI','VII','VIII','IX','X'];
 const NW=124,NH=58,CW=158,RH=74;
 function treeHTML(c){const ts=TANKS.filter(s=>s.c==c),pos=t=>({x:12+(t.t-1)*CW,y:10+(t.v=='B'?RH:0)});let lines='';
@@ -382,26 +388,25 @@ function cardHTML(t){const mine=own(t.id),e=eff(t),o=openInfo(t),on=sv.tank==t.i
   return `<div class='sk${sel?' on':''}${open?'':' lk'}'><span class='tn' style='font-size:14px'>${ic} ${nm}</span><span class='dots'>${'●'.repeat(r)}${'○'.repeat(5-r)}</span><span class='ts'>${r?SKT[k](r):'не изучен'}${r<5?'<br>след.: '+SKT[k](r+1):''}</span>`+
    `<button data-su='${k}' ${open&&r<5?'':'disabled'}>${r<5?'Улучшить<br><span class="st '+(open&&xp>=x&&sv.co>=g?'ok':'no')+'">'+x+' оп · '+g+' 🪙</span>':'Максимум'}</button><button data-ss='${k}' ${open&&r>0&&!sel?'':'disabled'}>${sel?'✓ Выбран':'Выбрать'}</button></div>`}).join('');
  return `<div class='cw'>${left}<div class='mods'>${rows}<div class='skw'><div class='mt' style='width:auto;margin-bottom:4px'>Навыки <span class='tg'>${open?'· в бою работает один выбранный':'· откроются, когда изучены все модули'}</span></div><div class='skr'>${sks}</div></div></div></div>`}
-function garage(t){t=t||'k';const u=$('#up');let it=[],h='',body='';
- if(t=='k'){const n=Math.floor(sv.fx/XFX);
-  if(gtk){const tt=TK(gtk);h=`<button data-a='back' style='min-width:0;flex-direction:row'>← К дереву</button>`;body=`<p style='min-height:20px;color:#e8a73a'>${gmsg}</p>`+cardHTML(tt)}
-  else{h=`Свободный опыт: ${sv.fx} · Опыт копится на танке, на котором играете`;
-   body=`<div class='cd'>${Object.entries(CL).map(([k,nm])=>`<button data-c='${k}' style='border-color:${gcl==k?'#e8a73a':'transparent'}'>${nm}</button>`).join('')}</div>${treeHTML(gcl)}<div class='cd'><button data-x='1'${n<1?' disabled':''}>Обменять свободный опыт<span class='st'>${n} 🪙 за ${n*XFX} оп.</span></button></div>`}}
- else{h='Цвет танка, выстрелов и взрывов';it=Object.entries(SK).map(([k,s])=>({i:ic('skin-'+k,`<b style='color:${s.c}'>■</b>`),n:s.n,s:sv.sel==k?'выбран':sv.own.includes(k)?'выбрать':s.p+' 🪙',f(){if(sv.own.includes(k))sv.sel=k;else if(sv.co>=s.p){sv.co-=s.p;sv.own.push(k);sv.sel=k}}}));
-  body=`<div class='cd'>${it.map((q,i)=>`<button data-i='${i}'>${q.i}${q.n}<small>${q.s}</small></button>`).join('')}</div>`}
- u.innerHTML=`<h2>Гараж · ${sv.co} 🪙</h2><div class='cd'>${[['k','Техника'],['s','Скины']].map(([k,nm])=>`<button data-t='${k}' style='border-color:${t==k?'#e8a73a':'transparent'}'>${nm}</button>`).join('')}</div><p>${h}</p>${body}<button class='cl'>Назад</button>`;u.classList.remove('h');
+function skinsHTML(t){const mine=own(t.id);
+ return `<p class='tg' style='margin:2px 0 8px'>Скин для «${t.n}»: цвет танка, выстрелов и взрывов${mine?'':' · сначала откройте танк'}</p><div class='cd'>${Object.entries(SK).map(([k,s])=>{const ow=skOwn(t.id,k),sel=skinOf(t.id)==k;return `<button data-i='${k}' ${mine?'':'disabled'} style='border-color:${sel?'#e8a73a':'transparent'}'>${ic('skin-'+k,`<b style='color:${s.c}'>■</b>`)}${s.n}<small>${sel?'выбран':ow?'выбрать':SKP(t,k)+' 🪙'}</small></button>`}).join('')}</div>`}
+function garage(){const u=$('#up');let h='',body='';
+ if(gtk){const tt=TK(gtk);h=`<div class='cd'><button data-a='back' style='min-width:0'>← К дереву</button><button data-a='skins' style='min-width:0;border-color:${gsk?'#e8a73a':'transparent'}'>${gsk?'Модули и навыки':'Скины'}</button></div>`;body=`<p style='min-height:20px;color:#e8a73a'>${gmsg}</p>`+(gsk?skinsHTML(tt):cardHTML(tt))}
+ else{const n=Math.floor(sv.fx/XFX);h=`<p>Свободный опыт: ${sv.fx} · Опыт копится на танке, на котором играете</p>`;
+  body=`<div class='cd'>${Object.entries(CL).map(([k,nm])=>`<button data-c='${k}' style='border-color:${gcl==k?'#e8a73a':'transparent'}'>${nm}</button>`).join('')}</div>${treeHTML(gcl)}<div class='cd'><button data-x='1'${n<1?' disabled':''}>Обменять свободный опыт<span class='st'>${n} 🪙 за ${n*XFX} оп.</span></button></div>`}
+ u.innerHTML=`<h2>Гараж · ${sv.co} 🪙</h2>${h}${body}<button class='cl'>Назад</button>`;u.classList.remove('h');
  const sync=()=>{svs();TKc=eff(TK());$('#co').textContent=sv.co};
- u.querySelectorAll('[data-t]').forEach(b=>b.onclick=()=>{gtk=null;garage(b.dataset.t)});
- u.querySelectorAll('[data-c]').forEach(b=>b.onclick=()=>{gcl=b.dataset.c;garage('k')});
- u.querySelectorAll('.nd').forEach(b=>b.onclick=()=>{gtk=b.dataset.k;gmsg='';garage('k')});
- u.querySelectorAll("[data-a='back']").forEach(b=>b.onclick=()=>{gtk=null;gmsg='';garage('k')});
- u.querySelectorAll("[data-a='sel']").forEach(b=>b.onclick=()=>{const tt=TK(gtk),o=openInfo(tt);gmsg='';if(!own(gtk)&&!o.lock&&(o.have<o.xp||sv.co<o.gd))gmsg='Не хватает '+(o.have<o.xp?'опыта на предыдущем танке':'монет');tankClick(gtk);sync();garage('k')});
- u.querySelectorAll('[data-m]').forEach(b=>b.onclick=()=>{gmsg=research(TK(gtk),b.dataset.m);sync();garage('k')});
- u.querySelectorAll('[data-v]').forEach(b=>b.onclick=()=>{const[m,l]=b.dataset.v.split(':');install(TK(gtk),m,+l);gmsg='';sync();garage('k')});
- u.querySelectorAll('[data-su]').forEach(b=>b.onclick=()=>{gmsg=skUp(TK(gtk),b.dataset.su);sync();garage('k')});
- u.querySelectorAll('[data-ss]').forEach(b=>b.onclick=()=>{skSel(TK(gtk),b.dataset.ss);gmsg='';sync();garage('k')});
- u.querySelectorAll('[data-x]').forEach(b=>b.onclick=()=>{const n=Math.floor(sv.fx/XFX);if(n>0){sv.co+=n;sv.fx-=n*XFX;sync()}garage('k')});
- u.querySelectorAll('[data-i]').forEach(b=>b.onclick=()=>{it[+b.dataset.i].f();sync();garage('s')});
+ u.querySelectorAll('[data-c]').forEach(b=>b.onclick=()=>{gcl=b.dataset.c;garage()});
+ u.querySelectorAll('.nd').forEach(b=>b.onclick=()=>{gtk=b.dataset.k;gmsg='';gsk=0;garage()});
+ u.querySelectorAll("[data-a='back']").forEach(b=>b.onclick=()=>{gtk=null;gmsg='';gsk=0;garage()});
+ u.querySelectorAll("[data-a='skins']").forEach(b=>b.onclick=()=>{gsk=gsk?0:1;gmsg='';garage()});
+ u.querySelectorAll("[data-a='sel']").forEach(b=>b.onclick=()=>{const tt=TK(gtk),o=openInfo(tt);gmsg='';if(!own(gtk)&&!o.lock&&(o.have<o.xp||sv.co<o.gd))gmsg='Не хватает '+(o.have<o.xp?'опыта на предыдущем танке':'монет');tankClick(gtk);sync();pload();garage()});
+ u.querySelectorAll('[data-m]').forEach(b=>b.onclick=()=>{gmsg=research(TK(gtk),b.dataset.m);sync();garage()});
+ u.querySelectorAll('[data-v]').forEach(b=>b.onclick=()=>{const[m,l]=b.dataset.v.split(':');install(TK(gtk),m,+l);gmsg='';sync();garage()});
+ u.querySelectorAll('[data-su]').forEach(b=>b.onclick=()=>{gmsg=skUp(TK(gtk),b.dataset.su);sync();garage()});
+ u.querySelectorAll('[data-ss]').forEach(b=>b.onclick=()=>{skSel(TK(gtk),b.dataset.ss);gmsg='';sync();garage()});
+ u.querySelectorAll('[data-x]').forEach(b=>b.onclick=()=>{const n=Math.floor(sv.fx/XFX);if(n>0){sv.co+=n;sv.fx-=n*XFX;sync()}garage()});
+ u.querySelectorAll('[data-i]').forEach(b=>b.onclick=()=>{gmsg=skinClick(TK(gtk),b.dataset.i);sync();pload();garage()});
  u.querySelector('.cl').onclick=()=>u.classList.add('h')}
 document.querySelectorAll('#sb button').forEach(b=>b.onpointerdown=e=>{e.stopPropagation();if(!started||over||pause||paused)return;const k=b.dataset.s;if(sv.co<SC[k])return;sv.co-=SC[k];svs();if(k=='s')p.sh=8;else if(k=='d')p.dbl=10;else{p.bz=BZ_TIME;shake=Math.max(shake,4)}sfx(3);vib(20)});
 function loop(t){const rd=Math.min(.033,(t-last)/1000||0);last=t;let dt=rd;if(slow>0){dt*=.3;slow-=rd}if(started&&!pause&&!paused&&innerWidth>innerHeight)update(dt);draw();requestAnimationFrame(loop)}
