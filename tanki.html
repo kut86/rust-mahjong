@@ -56,6 +56,7 @@ html,body{height:100%;margin:0;background:#1d2219;overflow:hidden;touch-action:n
 .skw{margin-top:6px}.skr{display:flex;gap:6px;flex-wrap:wrap}.sk{width:122px;display:flex;flex-direction:column;gap:2px;align-items:center;padding:6px;border:2px solid #3a4030;border-radius:10px;background:#2e3528;text-align:center}.sk.on{border-color:#e8a73a;background:#475130}.sk.lk{opacity:.5}#up .sk button{min-width:0;width:100%;padding:4px;font-size:12px;margin-top:2px}.dots{color:#e8a73a;letter-spacing:1px;font-size:12px}
 .tn{font-size:16px;font-weight:700}.tg{font-size:11px;color:var(--mut);font-weight:400}.ts{font-size:11px;color:var(--mut);font-weight:400;line-height:1.45;max-width:180px}.st{font-size:12px;color:var(--mut);font-weight:600;letter-spacing:0}.st.ok{color:#6fcf6a}.st.no{color:#e85a4a}
 .ws{display:grid;grid-template-columns:auto auto;gap:6px 26px;margin:10px 0;text-align:left;font-size:16px}.ws span{color:var(--mut)}.ws b{text-align:right}
+#bt{font-size:14px;font-weight:700;min-height:16px;text-shadow:0 1px 2px #000}
 #sh{position:fixed;right:70px;top:calc(env(safe-area-inset-top,0px) + 80px);z-index:3;display:none;flex-direction:column;gap:8px}#sh button{width:54px;height:44px;border-radius:12px;border:2px solid transparent;background:rgba(255,255,255,.16);color:var(--tx);font-size:11px;font-weight:700;touch-action:none;line-height:1.15;padding:0}#sh button.on{border-color:#f2c14e}#sh i{display:block;font-style:normal;font-weight:400}
  #wsel{display:flex;gap:6px;overflow-x:auto;max-width:min(92vw,520px);padding:4px;-webkit-overflow-scrolling:touch;scrollbar-width:thin}#wsel button{flex:0 0 auto;width:40px;height:40px;min-width:0;padding:0;border-radius:10px;border:2px solid #3a4030;background:#2e3528;color:var(--tx);font-size:15px;font-weight:700;position:relative}#wsel button.on{border-color:#f2c14e;background:#4a4228}#wsel button sup{position:absolute;top:-4px;right:-2px;font-size:10px}
 .amb{display:flex;flex-direction:column;gap:6px;border:2px solid #3a4030;border-radius:10px;padding:8px 10px;background:#2e3528;min-width:300px}.amb .rw{display:grid;grid-template-columns:170px 1fr 54px;gap:8px;align-items:center;text-align:left}.amb .ts{max-width:none}.amb input[type=range]{width:100%;min-width:90px}.amb .bar{height:8px;border-radius:4px;background:#1c2118;overflow:hidden}.amb .bar>div{height:100%;background:#f2c14e}.amb .bar.bad>div{background:#e85a4a}.amb .cd{margin:2px 0 0}#sb{position:fixed;right:10px;top:calc(env(safe-area-inset-top,0px) + 80px);z-index:3;display:none;flex-direction:column;gap:8px}#sb button{width:54px;height:44px;border-radius:12px;border:0;background:rgba(255,255,255,.16);color:var(--tx);font-size:13px;font-weight:700;touch-action:none}
@@ -64,7 +65,7 @@ html,body{height:100%;margin:0;background:#1d2219;overflow:hidden;touch-action:n
 </head>
 <body>
 <canvas id="c"></canvas>
-<div id="hud"><div><div class="l">Очки</div><div id="sc">0</div></div><div style="text-align:center"><div class="l">Волна</div><div id="wv">1</div></div><div style="text-align:right"><div class="l">Броня</div><div id="bar"><div id="hp"></div><span id="hpt"></span></div><div id="am"></div></div></div>
+<div id="hud"><div><div class="l">Очки</div><div id="sc">0</div></div><div style="text-align:center"><div class="l">Волна</div><div id="wv">1</div><div id="bt"></div></div><div style="text-align:right"><div class="l">Броня</div><div id="bar"><div id="hp"></div><span id="hpt"></span></div><div id="am"></div></div></div>
 <div id="ban"></div>
 <div id="up" class="h"></div>
 <button id="mn" aria-label="Меню">☰</button><button id="ps" aria-label="Пауза">⏸</button>
@@ -124,6 +125,7 @@ const ASIDE=.7,AREAR=.5,PENVAR=.25;           // толщина борта и к
 const AMMOT=385; // вместимость боекомплекта = 385 выстрелов непрерывной стрельбы (Шакал 2500)
 // типы снарядов: pn/dm — множители пробития и урона, v — скорость полёта, pr — цена за 100 шт. при калибре 20 мм (дальше × калибр/20)
 const SHELL={ap:{n:'Бронебойный',s:'БР',pn:1,dm:1,v:1,pr:5},pc:{n:'Подкалиберный',s:'ПК',pn:1.4,dm:.75,v:1.25,pr:12},he:{n:'Фугас',s:'ФУ',pn:.45,dm:1.6,v:1,pr:3}},SHK=['ap','pc','he'];
+const BOSS_TIME=300,BOSS_MIN=4; // секунд на убийство босса; сколько призванных боссом танков может быть одновременно
 const RW_MIN=.2,FIRST_MUL=.5; // награда за слабые волны: ступень врагов / ступень танка, но не меньше RW_MIN; бонус за первое прохождение волны
 const AP_FREE_TIER=3,REPAIR_COST=0,MINAM=.5,HE_SPL=1.2,HE_MIN=.15; // бронебойные бесплатны до этой ступени; цена ремонта (×ступень); минимум боекомплекта для боя; радиус осколков фугаса (клеток); минимум урона фугаса без пробития
 const TANKS=TD.map(a=>({id:a[0]+a[1]+a[2].toLowerCase(),c:a[0],t:a[1],v:a[2],n:a[3],hp:a[4]*10,sp:a[5],tt:a[6],dm:Math.round(a[7]*100)/10,cd:a[8],rk:a[9],r:{l:.5,m:.55,h:.65}[a[0]]+.01*(a[1]-1),wt:{l:8+1.5*(a[1]-1),m:22+2.5*(a[1]-1),h:40+4*(a[1]-1)}[a[0]],ab:Math.round(lerp(ARM[a[0]][0],ARM[a[0]][1],a[1])),pn:Math.round(lerp(PEN[a[0]][0],PEN[a[0]][1],a[1])),cal:Math.round(lerp(CAL[a[0]][0],CAL[a[0]][1],a[1]))}));
@@ -169,7 +171,7 @@ function rack(id){id=id||sv.tank;const t=TK(id),cap=capOf(t);let r=sv.am[id];
 const needAm=t=>Math.ceil(capOf(t)*MINAM);
 const repCost=t=>REPAIR_COST*t.t;
 function wselR(){const w=$('#wsel');if(!w)return;selW=Math.max(1,Math.min(selW,sv.mw+1));w.innerHTML='';for(let n=1;n<=sv.mw+1;n++){const b=document.createElement('button');b.textContent=n;if(n%5==0)b.innerHTML=n+'<sup>⚠</sup>';if(n==selW)b.className='on';b.onclick=()=>{selW=n;wselR()};w.appendChild(b)}const on=w.querySelector('.on');if(on)w.scrollLeft=on.offsetLeft-w.clientWidth/2+20}
-let RK=null,gdr=null,gdrId=null,selW=1,runFrom=1,atFront=true;
+let bossT=-1,tmo=false,RK=null,gdr=null,gdrId=null,selW=1,runFrom=1,atFront=true;
 const rewK=()=>Math.max(RW_MIN,Math.min(1,etier(wave)/TK().t)); // множитель монет и опыта
 
 let TKc=eff(TK());
@@ -308,10 +310,10 @@ function compose(){const n=Math.min(3+wave*2,WAVE_MAX),av=Object.keys(UNLOCK).fi
 function give(n){const t=Math.min(n,TKc.cap-rtot(RK));if(t<=0)return;RK.ap+=t;dtxt(p.x,p.y-p.r*S*2,'+'+t+' снарядов','#f2c14e')} // с врагов падают только базовые, и только в свободное место боекомплекта
 function pickShell(){if(RK[p.st]>0)return p.st;for(const k of SHK)if(RK[k]>0){p.st=k;return k}return null}
 function selShell(k){if(RK&&RK[k]>0&&p){p.st=k;sfx(3)}}
-function hudAm(){const T=rtot(RK),am=$('#am');am.textContent='🔸 '+T+' / '+TKc.cap;am.style.color=T<TKc.cap*.1?'#ff6a5a':'#f2c14e';document.querySelectorAll('#sh button').forEach(b=>{const k=b.dataset.k,n=RK[k];b.lastChild.textContent=n;b.classList.toggle('on',p.st==k);b.style.opacity=n>0?1:.35})}
+function hudAm(){{const b=$('#bt');if(bossT>=0){const q=Math.ceil(bossT);b.textContent='⏱ '+Math.floor(q/60)+':'+String(q%60).padStart(2,'0');b.style.color=bossT<30?'#ff6a5a':'#f2c14e'}else b.textContent=''}const T=rtot(RK),am=$('#am');am.textContent='🔸 '+T+' / '+TKc.cap;am.style.color=T<TKc.cap*.1?'#ff6a5a':'#f2c14e';document.querySelectorAll('#sh button').forEach(b=>{const k=b.dataset.k,n=RK[k];b.lastChild.textContent=n;b.classList.toggle('on',p.st==k);b.style.opacity=n>0?1:.35})}
 const penr=(pn,ar,h)=>{const roll=pn*(1+R(-PENVAR,PENVAR)),need=ar[h.z]/Math.cos(h.al);return{ok:roll>=need,f:roll/need}}; // как pens, но ещё отдаёт долю пробития
 function splash(b,e,d){P(b.x,b.y,0,0,.25,S*2.6,'g','255,170,60');for(const o of en)if(o!==e&&!o.dead&&Math.hypot(b.x-o.x,b.y-o.y)<HE_SPL*S+o.r*S){const dl=d*.5;o.hp-=dl;WS.d+=Math.min(dl,Math.max(o.hp+dl,0));dnum(o,dl);o.fl=.08;if(o.hp<=0)kill(o)}}
-function reset(){pload();TKc=eff(TK());NEC=TKc.nec||0;startRun();bosses=0;up={sp:0,hp:0,rt:0};p={x:GW/2,y:GH/2,a:-PI/2,t:-PI/2,r:TKc.r,sp:5,hp:100,mhp:100,rate:.22,dbl:0,sh:0,cd:0,rc:0,fl:0,tr:0,c:SK[psk()].c};RK=rack();p.st=RK.ap>0?'ap':RK.pc>0?'pc':RK.he>0?'he':'ap';pk=[];pause=0;rpN=0;setPause(0);$('#up').classList.add('h');applyUp();p.hp=p.mhp;p.dm=TKc.dm;al=[];mn=[];en=[];bl=[];pt=[];rg=[];wk=[];hb=[];ex=[];dn=[];queue=[];score=0;wave=selW-1;runFrom=selW;over=false;waitT=-1;spawnT=0;hurt=0;paintGround();ob=[];
+function reset(){pload();TKc=eff(TK());NEC=TKc.nec||0;startRun();bosses=0;up={sp:0,hp:0,rt:0};p={x:GW/2,y:GH/2,a:-PI/2,t:-PI/2,r:TKc.r,sp:5,hp:100,mhp:100,rate:.22,dbl:0,sh:0,cd:0,rc:0,fl:0,tr:0,c:SK[psk()].c};RK=rack();p.st=RK.ap>0?'ap':RK.pc>0?'pc':RK.he>0?'he':'ap';pk=[];pause=0;rpN=0;setPause(0);$('#up').classList.add('h');applyUp();p.hp=p.mhp;p.dm=TKc.dm;al=[];mn=[];en=[];bl=[];pt=[];rg=[];wk=[];hb=[];ex=[];dn=[];queue=[];score=0;bossT=-1;tmo=false;wave=selW-1;runFrom=selW;over=false;waitT=-1;spawnT=0;hurt=0;paintGround();ob=[];
  const NO=Math.round(14*OK),NS=Math.round(4*OK);for(let i=0;i<NO;i++){const st_=i<NS,w=st_?S*2:S*1.1,h=st_?S*1.2:S*1.1;let px,py,n=0;
   do{px=R(S,GW-S-w);py=R(S,GH-S-h)}while(n++<40&&(Math.hypot(px+w/2-GW/2,py+h/2-GH/2)<S*3.5||ob.some(o=>!(px>o.x+o.w+S||px+w<o.x-S||py>o.y+o.h+S||py+h<o.y-S))));
   ob.push({x:px,y:py,w,h,hp:st_?1e9:3,steel:st_})}
@@ -323,15 +325,16 @@ function moveT(e,dx,dy,dt){const r=e.r*S,px=e.x,py=e.y;e.x=C(e.x+dx*e.sp*S*dt,r,
  e.tr+=Math.hypot(e.x-px,e.y-py);if(e.tr>S*.5){e.tr=0;g.save();g.translate(e.x,e.y);g.rotate(e.a);g.fillStyle='rgba(12,15,9,.22)';g.fillRect(-r*.3,-r*.8,r*.35,r*.4);g.fillRect(-r*.3,r*.4,r*.35,r*.4);g.restore()}}
 function shoot(e,own,spread,q){let sk=null;if(e===p){sk=pickShell();if(!sk){if(!(p.nmT>0)){dtxt(p.x,p.y-p.r*S*2,'Нет снарядов!','#ff6a5a');p.nmT=1.2}return}RK[sk]--}const SH=sk?SHELL[sk]:null;const a=e.t+R(-spread,spread),r=e.r*S,mx=e.x+Math.cos(e.t)*r*1.3,my=e.y+Math.sin(e.t)*r*1.3,sp=own?17*S:9*S;
  const pw=e===p,W_=pw?WP.std:WA,np=own?W_.pel:1;for(let i=0;i<np;i++){const aa=own?e.t+R(-W_.spr,W_.spr):a,vm=own?W_.v:(e.vk||1);for(const o of pw&&p.dbl>0?[-.28,.28]:[0])bl.push({x:mx-Math.sin(e.t)*o*S,y:my+Math.cos(e.t)*o*S,vx:Math.cos(aa)*sp*vm*(SH?SH.v:1),vy:Math.sin(aa)*sp*vm*(SH?SH.v:1),own,life:own?W_.life:(e.blife||1.3),dm:own?p.dm*W_.d*(SH?SH.dm:1):1,he:sk=='he',ed:own?0:e.dmg,pl:pw&&own,bs:!own&&e.type=='B',pn:own?(pw?TKc.pn*SH.pn:TKc.pn*.6):e.pen})}if(!q){e.rc=r*.35;muzzle(mx,my,e.t,own);sfx(own?0:1)}}
-function kill(e){const rs=e.type!='B'&&al.length<3&&Math.random()<NEC;if(rs){P(e.x,e.y,0,0,.5,S*4,'g','80,255,200');spark(e.x,e.y);al.push({x:e.x,y:e.y,a:e.a,t:e.t,r:e.r*.9,sp:4.2,c:e.c,hp:1,cd:.4,rc:0,fl:0,tr:0,life:18})}else{wreck(e);boom(e.x,e.y,e.type=='B'?2.8:e.type=='h'?1.7:1)}score+=e.pts;e.dead=1;WS.k++;if(e.type=='B')WS.b++;{const k=rewK(),xp=Math.round(e.pts/10*k),co=Math.round(e.pts/50*k);WS.xp+=xp;WS.co+=co;addXP(xp);sv.co+=co}svs();if(e.type=='B'){bosses++;report(wave-1,score)}if(e.type=='R')pk.push({x:e.x,y:e.y,t:'r',l:14});else if(e.type=='B'||Math.random()<.2)pk.push({x:e.x,y:e.y,t:'rds'[R(3)|0],l:12});if(e.type=='B'||Math.random()<(rtot(RK)<TKc.cap*.25?.55:.25))pk.push({x:e.x+R(-.6,.6)*S,y:e.y+R(-.6,.6)*S,t:'a',n:Math.round(TKc.cap*(e.type=='B'?.10:.02)),l:14})}
+function kill(e){const rs=e.type!='B'&&al.length<3&&Math.random()<NEC;if(rs){P(e.x,e.y,0,0,.5,S*4,'g','80,255,200');spark(e.x,e.y);al.push({x:e.x,y:e.y,a:e.a,t:e.t,r:e.r*.9,sp:4.2,c:e.c,hp:1,cd:.4,rc:0,fl:0,tr:0,life:18})}else{wreck(e);boom(e.x,e.y,e.type=='B'?2.8:e.type=='h'?1.7:1)}score+=e.pts;e.dead=1;WS.k++;if(e.type=='B')WS.b++;if(!e.sm){const k=rewK(),xp=Math.round(e.pts/10*k),co=Math.round(e.pts/50*k);WS.xp+=xp;WS.co+=co;addXP(xp);sv.co+=co}svs();if(e.type=='B'){bosses++;report(wave-1,score)}if(e.sm){}else if(e.type=='R')pk.push({x:e.x,y:e.y,t:'r',l:14});else if(e.type=='B'||Math.random()<.2)pk.push({x:e.x,y:e.y,t:'rds'[R(3)|0],l:12});if(!e.sm&&(e.type=='B'||Math.random()<(rtot(RK)<TKc.cap*.25?.55:.25)))pk.push({x:e.x+R(-.6,.6)*S,y:e.y+R(-.6,.6)*S,t:'a',n:Math.round(TKc.cap*(e.type=='B'?.10:.02)),l:14})}
 function vec(s){const dx=s.x-s.ox,dy=s.y-s.oy,h=Math.hypot(dx,dy)||1,m=Math.min(1,h/(S*2.2));return{x:dx/h*m,y:dy/h*m,m}}
 
 function hitP(v,quiet){p.hp-=v;p.fl=.08;hurt=.3;shake=Math.max(shake,5);vib(30);if(!quiet)dnum(p,v,'#ff6a5a','-');if(p.hp<=0)die()}
-function die(){p.hp=0;over=true;if(atFront)selW=sv.mw+1;wselR();sv.brk[sv.tank]=1;svs();report(wave-1,score);wreck(p);boom(p.x,p.y,1.7);setTimeout(()=>{$('#t1').textContent='Танк уничтожен';$('#t2').textContent='Очки: '+score+' · Волна: '+wave+' · танк разбит — почините его в гараже';$('#go').textContent='Играть снова';$('#co').textContent=sv.co;$('#ov').classList.remove('h')},900)}
+function die(){p.hp=0;over=true;if(atFront)selW=sv.mw+1;wselR();sv.brk[sv.tank]=1;svs();report(wave-1,score);wreck(p);boom(p.x,p.y,1.7);setTimeout(()=>{$('#t1').textContent=tmo?'Время на босса вышло':'Танк уничтожен';$('#t2').textContent='Очки: '+score+' · Волна: '+wave+' · танк разбит — почините его в гараже';$('#go').textContent='Играть снова';$('#co').textContent=sv.co;$('#ov').classList.remove('h')},900)}
 // таран: чем тяжелее цель, тем меньше ей урона и тем больше ответный урон игроку
 function ram(e){e.ramT=.8;const k=Math.min(1,p.spd/(S*5)),wt=e.wt,dm=+(RAM_DMG*k*Math.sqrt((TKc.wt||10)/wt)).toFixed(1),bk=Math.min(RAM_CAP,RAM_BACK*Math.sqrt(wt/(TKc.wt||10)))*(TKc.inm||1);
  WS.d+=Math.min(dm,Math.max(e.hp,0));e.hp-=dm;e.fl=.1;dnum(e,dm);spark((p.x+e.x)/2,(p.y+e.y)/2);sfx(3);shake=Math.max(shake,3);if(e.hp<=0)kill(e);hitP(bk)}
 function update(dt){camUpd();
+ if(!over){const bo=en.find(e=>e.type=='B'&&!e.dead);if(bo){if(bossT<0)bossT=BOSS_TIME;bossT-=dt;if(bossT<=0){bossT=-1;tmo=true;banner('⏱ Время вышло!');die()}}else bossT=-1}
  if(!over){let mx=0,my=0,aim=null,fire=false;
   if(st.L){const v=vec(st.L);mx=v.x;my=v.y}
   mx+=(keys.d||keys.arrowright?1:0)-(keys.a||keys.arrowleft?1:0);my+=(keys.s||keys.arrowdown?1:0)-(keys.w||keys.arrowup?1:0);
@@ -374,9 +377,10 @@ function update(dt){camUpd();
    if(cr)dtxt(e.x,e.y-e.r*S*1.5-S*1.25,'КРИТ '+Math.round(dd*10)/10,'#ff8a2a',1);else dnum(e,dd);e.hp-=dd;if(b.he)splash(b,e,b.dm||1)}}if(e.hp<=0)kill(e);if(!b.pr)break}}
   else if(!over&&Math.hypot(b.x-p.x,b.y-p.y)<p.r*S){b.life=0;if(p.sh>0){spark(b.x,b.y);sfx(3);continue}
    if(TKc.rk&&(b.vx||b.vy)&&Math.abs(ad(Math.atan2(b.vy,b.vx),p.a+PI))<1.05&&Math.random()*100<TKc.rk){spark(b.x,b.y);sfx(3);dtxt(p.x,p.y-p.r*S*1.6,'РИКОШЕТ','#9fd8ff');continue} // попадание в лоб (±60°): шанс рикошета = броня танка
-   const hz=hitZone(p.a,b.vx,b.vy);if(b.pn!=null&&!pens(b.pn,TKc.ar,hz)){spark(b.x,b.y);sfx(3);if(!(p.npT>0)){dtxt(p.x,p.y-p.r*S*1.6,'НЕ ПРОБИЛ','#9fd8ff');p.npT=.6}continue}
-   const side=hz.z>0;let dm=(b.ed||100)*(TKc.inm||1),cr=false;
-   if(b.bs&&side&&Math.random()*100<BCRIT_CH){dm*=BCRIT_MUL;cr=true;dtxt(p.x,p.y-p.r*S*2.4,'КРИТ -'+Math.round(dm*10)/10,'#ff3b3b',1)} // босс бьёт в борт/корму
+   const hz=hitZone(p.a,b.vx,b.vy),pr=b.pn!=null?penr(b.pn,TKc.ar,hz):{ok:true,f:1},hef=!pr.ok&&!!b.bs;if(!pr.ok&&!hef){spark(b.x,b.y);sfx(3);if(!(p.npT>0)){dtxt(p.x,p.y-p.r*S*1.6,'НЕ ПРОБИЛ','#9fd8ff');p.npT=.6}continue}
+   const side=hz.z>0;let dm=(b.ed||100)*(TKc.inm||1)*(hef?Math.max(HE_MIN,pr.f):1),cr=false; // босс не пробил — бьёт фугасом: урон по доле пробития, не меньше HE_MIN
+   if(hef&&!(p.npT>0)){dtxt(p.x,p.y-p.r*S*1.6,'ФУГАС','#ffb347');p.npT=.6}
+   if(b.bs&&side&&!hef&&Math.random()*100<BCRIT_CH){dm*=BCRIT_MUL;cr=true;dtxt(p.x,p.y-p.r*S*2.4,'КРИТ -'+Math.round(dm*10)/10,'#ff3b3b',1)} // босс бьёт в борт/корму
    spark(b.x,b.y);sfx(3);hitP(dm,cr)}}
  bl=bl.filter(b=>b.life>0);en=en.filter(e=>!e.dead);ob=ob.filter(o=>!o.dead);
  for(const q of pt){q.x+=q.vx*dt;q.y+=q.vy*dt;q.l-=dt;const dr=q.t=='k'?1.5:q.t=='d'?2:3.2;q.vx*=1-dr*dt;q.vy*=1-dr*dt}pt=pt.filter(q=>q.l>0);
@@ -437,7 +441,7 @@ function arrows(){if(over||!started)return;const m=S*.9,cx=W/2,cy=H/2;
   x.save();x.translate(cx+dx*t,cy+dy*t);x.rotate(Math.atan2(dy,dx));x.globalAlpha=.9;x.fillStyle=e.aimT>0?'#ff3b3b':e.c;x.strokeStyle='rgba(0,0,0,.65)';x.lineWidth=2;
   x.beginPath();x.moveTo(S*.5*k,0);x.lineTo(-S*.3*k,-S*.38*k);x.lineTo(-S*.3*k,S*.38*k);x.closePath();x.fill();x.stroke();x.restore()}}
 function applyUp(){p.sp=TKc.sp;p.mhp=TKc.hp;p.rate=TKc.cd;p.ht=TKc.ht;p.wt=TKc.wt}
-function showUp(){report(wave,score);const first=wave>sv.mw,rk=rewK();let bn=0;if(first){bn=Math.ceil(WS.co*FIRST_MUL);const bx=Math.ceil(WS.xp*FIRST_MUL);sv.co+=bn;WS.co+=bn;addXP(bx);WS.xp+=bx;sv.mw=wave}svs();pause=1;p.hp=Math.min(p.mhp,p.hp+150);let fixed=0;const u=$('#up'),cost=()=>Math.ceil(10*Math.pow(1.15,rpN)),render=()=>{const c=cost();
+function showUp(){if(!(wave%5==0&&wave<=sv.mw))report(wave,score);const first=wave>sv.mw,rk=rewK();let bn=0;if(first){bn=Math.ceil(WS.co*FIRST_MUL);const bx=Math.ceil(WS.xp*FIRST_MUL);sv.co+=bn;WS.co+=bn;addXP(bx);WS.xp+=bx;sv.mw=wave}svs();pause=1;p.hp=Math.min(p.mhp,p.hp+150);let fixed=0;const u=$('#up'),cost=()=>Math.ceil(10*Math.pow(1.15,rpN)),render=()=>{const c=cost();
  u.innerHTML='<h2>Волна '+wave+' пройдена</h2><div class="ws"><span>Нанесено урона</span><b>'+Math.round(WS.d)+'</b><span>Уничтожено техники</span><b>'+WS.k+'</b><span>Убито боссов</span><b>'+WS.b+'</b><span>Опыт</span><b>+'+WS.xp+'</b><span>Монеты за волну</span><b>+'+WS.co+' 🪙</b><span>Броня</span><b>'+Math.round(p.hp/p.mhp*100)+'%</b>'+(first?'<span>Первое прохождение</span><b>+'+bn+' 🪙</b>':'')+(rk<1?'<span>Награда за слабую волну</span><b>×'+rk.toFixed(2)+'</b>':'')+'</div><p>Монет всего: '+sv.co+' 🪙</p><div class="cd"><button data-k="rp"'+(fixed||sv.co<c||p.hp>=p.mhp?' disabled':'')+'><b>🔧</b>Полный ремонт<small>'+c+' 🪙</small></button></div><button class="cl" data-k="nx">Следующая волна ▶</button>';u.classList.remove('h');
  u.querySelectorAll('button').forEach(b=>b.onclick=()=>{const k=b.dataset.k;
   if(k=='nx'){u.classList.add('h');pause=0;startWave();return}
@@ -459,7 +463,7 @@ function efire(e){const t0=e.t,ty=e.type;
  if(ty=='Q'){e.br=3;e.bc=0;return}
  if(ty=='B'){const ph=e.hp<e.mh/2;e.k=(e.k||0)+1;
   if(e.bv==1&&e.k%2){const n=ph?16:12;for(let i=0;i<n;i++){e.t=i*2*PI/n+e.k;shoot(e,false,0,i>0)}}
-  else{const n=ph?2:1;for(let i=-n;i<=n;i++){e.t=t0+i*.25;shoot(e,false,.03,i!=0)}if(e.bv==2&&e.k%3==0&&en.length<9)for(let i=0;i<2;i++){const m=mk('s');m.x=e.x+R(-S,S);m.y=e.y+R(S,2*S);en.push(m)}}
+  else{const n=ph?2:1;for(let i=-n;i<=n;i++){e.t=t0+i*.25;shoot(e,false,.03,i!=0)}if(e.bv==2&&e.k%3==0)for(let i=0;i<2;i++){if(en.filter(x=>x.sm&&!x.dead).length>=BOSS_MIN)break;const m=mk('s');m.sm=1;m.x=e.x+R(-S,S);m.y=e.y+R(S,2*S);en.push(m)}}
   e.t=t0;return}
  shoot(e,false,.1)}
 // ремонтник: идёт к самому раненому союзнику, держится подальше от игрока и лечит
