@@ -195,13 +195,16 @@ function skUp(t,k){const r=skR(t.id,k)+1;if(!own(t.id)||!maxed(t.id))return'На
 function skSel(t,k){if(own(t.id)&&maxed(t.id)&&skR(t.id,k)>0)(sv.sk[t.id]=sv.sk[t.id]||{on:''}).on=k}
 /* защита от нескольких вкладок: у сохранения есть номер ревизии. Устаревшая вкладка (открытая раньше, пока в другой шёл прогресс)
    больше не перезаписывает свежий прогресс, а перезагружается и берёт актуальный. Раз в 5 минут делается резервная копия в 'tk-bak'. */
-let myRev=sv.rev|0,bakT=0,staleF=0;
-function staleTab(){if(staleF&&!(!started||over))return;staleF=1;if(!started||over){try{sessionStorage.setItem('tk-msg','Прогресс был обновлён в другой вкладке — загружена свежая версия.')}catch(e){}location.reload()}else try{banner('Прогресс обновлён в другой вкладке — после забега страница перезагрузится')}catch(e){}}
-const svs=()=>{try{const raw=localStorage.getItem('tk');if(raw){let o=null;try{o=JSON.parse(raw)}catch(e){}if(o&&(o.rev|0)!==myRev){staleTab();return}
+let myRev=sv.rev|0,bakT=0,staleF=0,reloading=false,lastBody=JSON.stringify(Object.assign({},sv,{rev:0}));
+const storedRev=()=>{try{return(JSON.parse(localStorage.getItem('tk')||'{}').rev|0)}catch(e){return myRev}};
+// перезагрузка не чаще раза в 15 секунд и только если сохранение в другой вкладке действительно новее — иначе вкладки гоняли бы друг друга по кругу
+function staleTab(){if(reloading)return;if(!started||over){let t=0;try{t=+sessionStorage.getItem('tk-rl')||0}catch(e){}if(Date.now()-t<15000)return;reloading=true;try{sessionStorage.setItem('tk-rl',Date.now());sessionStorage.setItem('tk-msg','Прогресс был обновлён в другой вкладке — загружена свежая версия.')}catch(e){}location.reload()}else if(!staleF){staleF=1;try{banner('Прогресс обновлён в другой вкладке — после забега страница перезагрузится')}catch(e){}}}
+// записываем только при реальных изменениях и никогда поверх более новой записи или во время перезагрузки
+const svs=()=>{if(reloading)return;try{const body=JSON.stringify(Object.assign({},sv,{rev:0}));const raw=localStorage.getItem('tk');if(raw){let o=null;try{o=JSON.parse(raw)}catch(e){}if(o&&(o.rev|0)>myRev){staleTab();return}if(body===lastBody&&o&&(o.rev|0)===myRev)return;
   if(Date.now()-bakT>3e5){localStorage.setItem('tk-bak',raw);bakT=Date.now()}}
-  sv.rev=++myRev;localStorage.setItem('tk',JSON.stringify(sv))}catch(e){}};
-addEventListener('storage',e=>{if(e.key=='tk'&&(!started||over))staleTab()});
-document.addEventListener('visibilitychange',()=>{if(!document.hidden&&(!started||over)){try{const o=JSON.parse(localStorage.getItem('tk')||'{}');if((o.rev|0)!==myRev)staleTab()}catch(e){}}});
+  sv.rev=++myRev;localStorage.setItem('tk',JSON.stringify(sv));lastBody=body}catch(e){}};
+addEventListener('storage',e=>{if(e.key=='tk'&&(!started||over)&&storedRev()>myRev)staleTab()});
+document.addEventListener('visibilitychange',()=>{if(!document.hidden&&(!started||over)&&storedRev()>myRev)staleTab()});
 
 /* ===== вход через Steam (общий с меню и маджонгом) и рейтинг волн ===== */
 const API='https://rust-mahjong-api.rust-pve.workers.dev';
@@ -226,7 +229,12 @@ function report(w,sc){if(runFrom>1)return;if(tok&&runTok)api('/api/tank',{run:ru
 
 /* ===== Картинки танков: папка img/tanks/ рядом с index.html. Чего нет — рисуется кодом ===== */
 const TIMG='img/tanks/',TVER='1',TI={},TSZ=2.4; // TVER — меняйте при замене картинок (сброс кэша); TSZ — размер танка относительно его радиуса
-function tload(k,f,...alt){const im=new Image();im.onload=()=>{TI[k]=im;if(k=='ground'&&GW)paintGround();if(k[0]=='s'&&k[1]=='i'&&k[2]=='-'&&typeof gsk!='undefined'&&gsk&&gtk&&!$('#up').classList.contains('h'))garage()};im.onerror=()=>{if(alt.length)tload(k,...alt)};im.src=TIMG+f+'?v='+TVER} // f — основной путь, дальше запасные (старые имена файлов)
+/* Отсутствующие файлы (404) запоминаются в браузере на MISS_TTL, чтобы не стучаться за ними при каждом заходе (GitHub Pages ограничивает частоту запросов).
+   Добавили новые картинки — подождите час или откройте игру со ссылкой ...tanki.html#tex, чтобы проверить заново. Другие ошибки (нет сети, лимит 429) не запоминаются. */
+const MISS_TTL=36e5;let MISS={};try{MISS=location.hash=='#tex'?{}:JSON.parse(localStorage.getItem('tk-miss')||'{}');const n=Date.now();for(const u in MISS)if(n-MISS[u]>MISS_TTL)delete MISS[u]}catch(e){MISS={}}
+let missT=0;function missAdd(u){MISS[u]=Date.now();clearTimeout(missT);missT=setTimeout(()=>{try{localStorage.setItem('tk-miss',JSON.stringify(MISS))}catch(e){}},400)}
+function tload(k,f,...alt){if(MISS[f]){if(alt.length)tload(k,...alt);return}
+ fetch(TIMG+f+'?v='+TVER).then(r=>{if(r.status==404){missAdd(f);throw 0}if(!r.ok)throw 0;return r.blob()}).then(bl=>{const im=new Image();im.onload=()=>{TI[k]=im;if(k=='ground'&&GW)paintGround();if(k[0]=='s'&&k[1]=='i'&&k[2]=='-'&&typeof gsk!='undefined'&&gsk&&gtk&&!$('#up').classList.contains('h'))garage()};im.src=URL.createObjectURL(bl)}).catch(()=>{if(alt.length)tload(k,...alt)})} // f — основной путь, дальше запасные (старые имена файлов)
 /* Структура папок (внутри img/tanks/):
    light|medium|heavy/ID/  hull.png tur.png wreck.png  + скины hull-d.png tur-d.png (d,n,b,v; g — по желанию)
    boss/1-shturmovik|2-karatel|3-komandir/  hull.png tur.png wreck.png
@@ -235,10 +243,6 @@ function tload(k,f,...alt){const im=new Image();im.onload=()=>{TI[k]=im;if(k=='g
    Старые имена файлов в корне img/tanks/ работают как запасные. */
 const TDIR=t=>({l:'light',m:'medium',h:'heavy'}[t.c])+'/'+t.id+'/',BDIR=['1-shturmovik','2-karatel','3-komandir'];
 function tinit(){
- ['g','d','n','b','v'].forEach(s=>{tload('p-'+s+'-hull','player-'+s+'-hull.png');tload('p-'+s+'-tur','player-'+s+'-tur.png')});
- TANKS.forEach(t=>{const d=TDIR(t);tload('p-hull-'+t.id,d+'hull.png','player-hull-'+t.id+'.png');tload('p-tur-'+t.id,d+'tur.png','player-tur-'+t.id+'.png')});
-  Object.keys(ENM).forEach(t=>eload(t,1));
- BDIR.forEach((n,i)=>{const d='boss/'+n+'/';tload('e-b'+i+'-hull',d+'hull.png','boss-hull.png');tload('e-b'+i+'-tur',d+'tur.png','boss-tur.png');tload('w-b'+i,d+'wreck.png','wreck-boss.png');tload('wh-b'+i,d+'wreck-hull.png');tload('wt-b'+i,d+'wreck-tur.png')});
  const c=(k,f,...a)=>tload(k,'common/'+f,f,...a);
  c('w-p','wreck-player.png');c('wreck','wreck.png');
  c('ground','ground.jpg','common/ground.png','ground.png');
@@ -248,13 +252,14 @@ function tinit(){
  c('pa','pick-ammo.png');c('pr','pick-repair.png');c('pd','pick-damage.png');c('ps','pick-shield.png');c('explosion','explosion.png')}
 const TL={},TT={};
 // картинки скина игрока: player-hull-ID-СКИН.png / player-tur-ID-СКИН.png (грузятся только для выбранного танка); нет файла — базовая картинка танка красится цветом скина
-function pload(){const t=TK(),id=t.id,k=psk(),d=TDIR(t);for(const part of['hull','tur']){const key='p-'+part+'-'+id+'-'+k;if(!TL[key]){TL[key]=1;tload(key,d+part+'-'+k+'.png','player-'+part+'-'+id+'-'+k+'.png')}}for(const part of['hull','tur']){const q=(part=='hull'?'wh':'wt')+'-p-'+id;if(!TL[q]){TL[q]=1;tload(q,d+'wreck-'+part+'.png')}const q2=q+'-'+k;if(!TL[q2]){TL[q2]=1;tload(q2,d+'wreck-'+part+'-'+k+'.png',d+'wreck-'+part+'.png')}}if(!TL['w'+id]){TL['w'+id]=1;tload('w-p-'+id,d+'wreck.png')}if(!TL['w'+id+k]){TL['w'+id+k]=1;tload('w-p-'+id+'-'+k,d+'wreck-'+k+'.png',d+'wreck.png')}}
+function pload(){const t=TK(),id=t.id,k=psk(),d=TDIR(t);if(!TL['pb'+id]){TL['pb'+id]=1;tload('p-hull-'+id,d+'hull.png','player-hull-'+id+'.png');tload('p-tur-'+id,d+'tur.png','player-tur-'+id+'.png')}if(!TL['pk'+k]){TL['pk'+k]=1;tload('p-'+k+'-hull','player-'+k+'-hull.png');tload('p-'+k+'-tur','player-'+k+'-tur.png')}for(const part of['hull','tur']){const key='p-'+part+'-'+id+'-'+k;if(!TL[key]){TL[key]=1;tload(key,d+part+'-'+k+'.png','player-'+part+'-'+id+'-'+k+'.png')}}for(const part of['hull','tur']){const q=(part=='hull'?'wh':'wt')+'-p-'+id;if(!TL[q]){TL[q]=1;tload(q,d+'wreck-'+part+'.png')}const q2=q+'-'+k;if(!TL[q2]){TL[q2]=1;tload(q2,d+'wreck-'+part+'-'+k+'.png',d+'wreck-'+part+'.png')}}if(!TL['w'+id]){TL['w'+id]=1;tload('w-p-'+id,d+'wreck.png')}if(!TL['w'+id+k]){TL['w'+id+k]=1;tload('w-p-'+id+'-'+k,d+'wreck-'+k+'.png',d+'wreck.png')}}
 function tint(im,sk){if(!im||sk=='g')return im||null;const key=sk+im.src;if(TT[key])return TT[key];const c=document.createElement('canvas');c.width=im.width;c.height=im.height;const q=c.getContext('2d');q.drawImage(im,0,0);q.globalCompositeOperation='source-atop';q.globalAlpha=.4;q.fillStyle=SK[sk].c;q.fillRect(0,0,c.width,c.height);return TT[key]=c}
 function pimg(part){const id=sv.tank,sk=psk();return TI['p-'+part+'-'+id+'-'+sk]||tint(TI['p-'+part+'-'+id],sk)||TI['p-'+sk+'-'+part]}
 const ic=(k,fb)=>TI[k]?`<img src='${TI[k].src}' alt='' style='width:46px;height:46px;object-fit:contain;display:block;margin:0 auto 4px'>`:fb;
 // картинки врагов: enemy/ТИП/tСТУПЕНЬ/hull.png → enemy/ТИП/hull.png → старые имена; грузятся, когда такой враг впервые появляется
 const ENM={s:['light','s'],n:['medium','n'],h:['heavy','h'],Q:['shooter','q'],M:['miner','m'],Z:['sniper','z'],R:['repair','r']};
 const ekey=e=>e.type=='B'?'b'+(e.bv|0):e.type.toLowerCase()+'t'+(e.tier||1);
+function bload(i){const n=BDIR[i];if(n===undefined||TL['b'+i])return;TL['b'+i]=1;const d='boss/'+n+'/';tload('e-b'+i+'-hull',d+'hull.png','boss-hull.png');tload('e-b'+i+'-tur',d+'tur.png','boss-tur.png');tload('w-b'+i,d+'wreck.png','wreck-boss.png');tload('wh-b'+i,d+'wreck-hull.png');tload('wt-b'+i,d+'wreck-tur.png')}
 function eload(t,tier){const m=ENM[t];if(!m)return;const k=t.toLowerCase()+'t'+tier;if(TL['e'+k])return;TL['e'+k]=1;const d='enemy/'+m[0]+'/t'+tier+'/',g='enemy/'+m[0]+'/',o='enemy/'+m[1]+'/';
  tload('e-'+k+'-hull',d+'hull.png',g+'hull.png',o+'hull.png','enemy-'+m[1]+'-hull.png');tload('e-'+k+'-tur',d+'tur.png',g+'tur.png',o+'tur.png','enemy-'+m[1]+'-tur.png');
  tload('wh-'+k,d+'wreck-hull.png',g+'wreck-hull.png',o+'wreck-hull.png');tload('wt-'+k,d+'wreck-tur.png',g+'wreck-tur.png',o+'wreck-tur.png');tload('w-'+k,d+'wreck.png',g+'wreck.png',o+'wreck.png','wreck-'+m[1]+'.png')}
@@ -313,7 +318,7 @@ function hitZone(ang,vx,vy){const d=Math.abs(ad(Math.atan2(vy,vx),ang+PI));retur
 const pens=(pn,ar,h)=>pn*(1+R(-PENVAR,PENVAR))>=ar[h.z]/Math.cos(h.al); // пробитие ±25% против брони зоны / cos угла
 const etier=w=>Math.max(1,Math.min(10,1+Math.floor((w-1)/ETIER_WAVES)));
 const refT=(c,t)=>TANKS.find(q=>q.c==c&&q.t==t&&q.v!='B')||TANKS[0]; // танк игрока того же класса и ступени — эталон для врага
-function mk(t){const Y=TY[t],r=Y.r*S;const[px,py]=spawnPos(r);const et=etier(wave),f=refT(Y.cl,et),bv=((wave/5|0)-1)%3,H_=Math.max(1,Math.ceil(f.dm*HK*Y.hpk)),ab=f.ab*Y.ark;eload(t,et);
+function mk(t){const Y=TY[t],r=Y.r*S;const[px,py]=spawnPos(r);const et=etier(wave),f=refT(Y.cl,et),bv=((wave/5|0)-1)%3,H_=Math.max(1,Math.ceil(f.dm*HK*Y.hpk)),ab=f.ab*Y.ark;eload(t,et);if(t=='B')bload(bv);
  return{type:t,tier:et,hp:H_,mh:H_,bv,sp:+(f.sp*Y.spk).toFixed(2),c:t=='B'?['#8c1f1f','#a0501a','#1f5a8c'][bv]:Y.c,r:Y.r,pts:Math.round(Y.pts*(1+.5*(et-1))),cdMax:Y.cd,x:px,y:py,a:PI/2,t:PI/2,cd:R(1,2),ph:R(6),w:0,rc:0,fl:0,tr:0,ar:[ab,ab*ASIDE,ab*AREAR],pen:f.pn*Y.pnk,dmg:f.hp/HD*Y.dmk,wt:f.wt*Y.wtk,vk:Y.vk||1,blife:Y.bl||1.3,aimT:0}}
 // состав волны: какие типы врагов открыты к этой волне; снайперов не больше 1 (с 40-й волны 2), ремонтников не больше 2
 function compose(){const n=Math.min(3+wave*2,WAVE_MAX),av=Object.keys(UNLOCK).filter(k=>wave>=UNLOCK[k]),cnt={},list=[],cap=k=>k=='Z'?(wave<40?1:2):k=='R'?2:99;
@@ -325,7 +330,7 @@ function selShell(k){if(RK&&RK[k]>0&&p){p.st=k;sfx(3)}}
 function hudAm(){{const b=$('#bt');if(bossT>=0){const q=Math.ceil(bossT);b.textContent='⏱ '+Math.floor(q/60)+':'+String(q%60).padStart(2,'0');b.style.color=bossT<30?'#ff6a5a':'#f2c14e'}else b.textContent=''}const T=rtot(RK),am=$('#am');am.textContent='🔸 '+T+' / '+TKc.cap;am.style.color=T<TKc.cap*.1?'#ff6a5a':'#f2c14e';document.querySelectorAll('#sh button').forEach(b=>{const k=b.dataset.k,n=RK[k];b.lastChild.textContent=n;b.classList.toggle('on',p.st==k);b.style.opacity=n>0?1:.35})}
 const penr=(pn,ar,h)=>{const roll=pn*(1+R(-PENVAR,PENVAR)),need=ar[h.z]/Math.cos(h.al);return{ok:roll>=need,f:roll/need}}; // как pens, но ещё отдаёт долю пробития
 function splash(b,e,d){P(b.x,b.y,0,0,.25,S*2.6,'g','255,170,60');for(const o of en)if(o!==e&&!o.dead&&Math.hypot(b.x-o.x,b.y-o.y)<HE_SPL*S+o.r*S){const dl=d*.5;o.hp-=dl;WS.d+=Math.min(dl,Math.max(o.hp+dl,0));dnum(o,dl);o.fl=.08;if(o.hp<=0)kill(o)}}
-function reset(){pload();TKc=eff(TK());NEC=TKc.nec||0;startRun();bosses=0;up={sp:0,hp:0,rt:0};p={x:GW/2,y:GH/2,a:-PI/2,t:-PI/2,r:TKc.r,sp:5,hp:100,mhp:100,rate:.22,dbl:0,sh:0,cd:0,rc:0,fl:0,tr:0,c:SK[psk()].c};RK=rack();p.st=RK.ap>0?'ap':RK.pc>0?'pc':RK.he>0?'he':'ap';pk=[];pause=0;rpN=0;setPause(0);$('#up').classList.add('h');applyUp();p.hp=p.mhp;p.dm=TKc.dm;al=[];mn=[];en=[];bl=[];pt=[];rg=[];wk=[];hb=[];ex=[];dn=[];queue=[];score=0;bossT=-1;tmo=false;wave=selW-1;runFrom=selW;over=false;waitT=-1;spawnT=0;hurt=0;paintGround();ob=[];
+function reset(){pload();TKc=eff(TK());NEC=TKc.nec||0;startRun();bosses=0;up={sp:0,hp:0,rt:0};p={x:GW/2,y:GH/2,a:-PI/2,t:-PI/2,r:TKc.r,sp:5,hp:100,mhp:100,rate:.22,dbl:0,sh:0,cd:0,rc:0,fl:0,tr:0,c:SK[psk()].c};RK=rack();p.st=RK.ap>0?'ap':RK.pc>0?'pc':RK.he>0?'he':'ap';pk=[];pause=0;rpN=0;setPause(0);$('#up').classList.add('h');applyUp();p.hp=p.mhp;p.dm=TKc.dm;al=[];mn=[];en=[];bl=[];pt=[];rg=[];wk=[];hb=[];ex=[];dn=[];queue=[];score=0;bossT=-1;tmo=false;wave=selW-1;runFrom=selW;for(const t in ENM)if(wave+1>=(UNLOCK[t]||1))eload(t,etier(wave+1));over=false;waitT=-1;spawnT=0;hurt=0;paintGround();ob=[];
  const NO=Math.round(14*OK),NS=Math.round(4*OK);for(let i=0;i<NO;i++){const st_=i<NS,w=st_?S*2:S*1.1,h=st_?S*1.2:S*1.1;let px,py,n=0;
   do{px=R(S,GW-S-w);py=R(S,GH-S-h)}while(n++<40&&(Math.hypot(px+w/2-GW/2,py+h/2-GH/2)<S*3.5||ob.some(o=>!(px>o.x+o.w+S||px+w<o.x-S||py>o.y+o.h+S||py+h<o.y-S))));
   ob.push({x:px,y:py,w,h,hp:st_?1e9:3,steel:st_})}
@@ -607,4 +612,4 @@ tinit();renderAuth();ovStat();try{const m=sessionStorage.getItem('tk-msg');if(m)
 requestAnimationFrame(loop);
 </script>
 </body>
- </html>
+</html>
