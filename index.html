@@ -52,6 +52,12 @@ a.btn{display:inline-block;background:#1b2838;color:#fff;text-decoration:none;bo
 .lb tr.me td{color:var(--rustHi);font-weight:700}
 .lb .av{width:22px;height:22px;border-radius:50%;vertical-align:middle;margin-right:8px}
 .lb a{color:inherit;text-decoration:none}
+.box.wide{max-width:640px}
+.lb .ab{color:var(--muted);font-size:.8rem;letter-spacing:.06em;text-align:center;width:15%}.lb .ab.hi{color:var(--rustHi);font-weight:700}
+.lb .lab{text-align:left;color:var(--muted);font-size:.85rem}.lb .num{text-align:center;font-variant-numeric:tabular-nums}
+.lb .sum{display:block;font-size:.8rem;color:var(--rustHi);font-weight:400;margin-top:2px}
+.lb tr.ch td,.lb tr.cm td{border-bottom:0;padding-top:4px;padding-bottom:4px}.lb tr.ch td{padding-top:9px}
+.lb tr.ce td{padding-top:4px;padding-bottom:9px}.lb td.rk{vertical-align:top;padding-top:11px}
 @media (max-width:700px){h1{font-size:1.8rem}.top{justify-content:center}}
 </style>
 </head>
@@ -71,11 +77,11 @@ a.btn{display:inline-block;background:#1b2838;color:#fff;text-decoration:none;bo
   <p class="note">Вход через Steam один на все игры: после входа ваши результаты попадают в общий рейтинг.</p>
 </div>
 
-<div class="ov" id="lbov"><div class="box">
+<div class="ov" id="lbov"><div class="box" id="lbbox">
   <h2>Рейтинг</h2>
   <div class="row" id="tabs" style="margin-bottom:10px"></div>
   <p id="lbdesc"></p>
-  <div class="lbwrap"><table class="lb"><thead><tr><th>#</th><th>Игрок</th><th id="lbh"></th></tr></thead><tbody id="lbb"></tbody></table></div>
+  <div class="lbwrap"><table class="lb"><thead id="lbhead"><tr><th>#</th><th>Игрок</th><th id="lbh"></th></tr></thead><tbody id="lbb"></tbody></table></div>
   <p id="lbmsg"></p>
   <button id="lbclose">Закрыть</button>
 </div></div>
@@ -124,19 +130,33 @@ function fmtMs(ms){var s=Math.round(ms/1000),h=Math.floor(s/3600),m=Math.floor(s
 var MODES=[
   {id:'mj', tab:'Маджонг: прохождения',url:'/api/leaderboard',   h:'Прошёл', d:'Сколько раз игрок прошёл маджонг целиком',               v:function(p){return p.c}},
   {id:'mjs',tab:'Маджонг: скорость',   url:'/api/speed',         h:'Время',  d:'Лучшее время прохождения всех уровней маджонга подряд',  v:function(p){return fmtMs(p.ms)}},
-  {id:'tkw',tab:'Танчики: волны',      url:'/api/tanks?by=wave', h:'Волн · танк',d:'Максимально пройденная волна и танк, на котором она пройдена. Нажмите на строку — волны и убийства по классам',v:function(p){var C={l:'ЛТ',m:'СТ',h:'ТТ'};return p.w+(p.tn?' · '+(C[p.tc]||'')+' '+p.tn:'')},more:function(p){var C=['ЛТ','СТ','ТТ'],x=p.x||[0,0,0],k=p.k||[0,0,0];return C.map(function(c,i){return c+': волн '+x[i]+' · уничтожено '+k[i]}).join('\n')}},
+  {id:'tkw',tab:'Танчики: волны',      url:'/api/tanks?by=wave', h:'',d:'Рейтинг — максимальная пройденная волна и танк. ЛТ — лёгкие, СТ — средние, ТТ — тяжёлые',cards:true},
   {id:'tkb',tab:'Танчики: боссы',      url:'/api/tanks?by=boss', h:'Боссов', d:'Сколько боссов убито в танчиках за всё время',        v:function(p){return p.b}}
 ];
 var lbMode='mj';
+function cardRows(p,i,body){
+  var X=p.x||[0,0,0],K=p.k||[0,0,0],N=['ЛТ','СТ','ТТ'],top=['l','m','h'].indexOf(p.tc),isMe=me&&p.id===me.sid;
+  function cell(t,c,tr){var d=document.createElement('td');if(c)d.className=c;d.textContent=t;tr.appendChild(d);return d}
+  function row(c){var r=document.createElement('tr');r.className=c+(isMe?' me':'');body.appendChild(r);return r}
+  var A=row('ch'),rk=cell(i+1,'rk',A);rk.rowSpan=3;
+  var nm=document.createElement('td');
+  if(p.a&&p.a.indexOf('https://')===0){var im=document.createElement('img');im.className='av';im.src=p.a;im.alt='';nm.appendChild(im)}
+  var a=document.createElement('a');a.textContent=p.n;a.href='https://steamcommunity.com/profiles/'+p.id;a.target='_blank';a.rel='noopener';nm.appendChild(a);
+  var sm=document.createElement('span');sm.className='sum';sm.textContent='Рекорд: волна '+p.w+(p.tn?' · '+N[top<0?0:top]+' '+p.tn:'');nm.appendChild(sm);A.appendChild(nm);
+  N.forEach(function(n,k){cell(n,'ab'+(k===top?' hi':''),A)});
+  var B=row('cm');cell('Пройдено волн','lab',B);X.forEach(function(v){cell(v,'num',B)});
+  var C=row('ce');cell('Уничтожено врагов','lab',C);K.forEach(function(v){cell(v,'num',C)});
+}
 function loadLb(id){
   lbMode=id;
   var M=MODES.filter(function(x){return x.id===id})[0],body=$('lbb'),msg=$('lbmsg');
-  body.innerHTML='';msg.textContent='Загрузка…';$('lbh').textContent=M.h;$('lbdesc').textContent=M.d;
+  body.innerHTML='';msg.textContent='Загрузка…';$('lbh').textContent=M.h;$('lbdesc').textContent=M.d;$('lbhead').style.display=M.cards?'none':'';$('lbbox').className=M.cards?'box wide':'box';
   Array.prototype.forEach.call($('tabs').children,function(b){b.className=b.getAttribute('data-id')===id?'':'alt'});
   api(M.url).then(function(j){
     if(lbMode!==id)return;
     msg.textContent=j.players.length?'':'Пока нет результатов.';
     j.players.forEach(function(p,i){
+      if(M.cards){cardRows(p,i,body);return}
       var tr=document.createElement('tr');if(me&&p.id===me.sid)tr.className='me';
       var c1=document.createElement('td');c1.textContent=i+1;
       var c2=document.createElement('td');
