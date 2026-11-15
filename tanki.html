@@ -238,7 +238,7 @@ function checkSeason(){return fetch(API+'/api/seasons').then(r=>r.json()).then(j
  if(old!==null){if(started)return;sv=defSv();wrapCo();qPend=0;qIn=null;prt={};sent={};TKc=eff(TK());svs();$('#co').textContent=sv.co;$('#t2').textContent='Начался новый сезон: прогресс сброшен. Удачи!'}
  try{localStorage.setItem('tk-season',cur)}catch(e){}}).catch(()=>{})}
 function startRun(){runTok=null;if(!tok)return;api('/api/start',{game:'tk'}).then(j=>{runTok=j.run}).catch(()=>{})}
-function report(w,sc,fin){if(runFrom>1)return;if(tok&&runTok){const t=TK();api('/api/tank',{run:runTok,wave:w,score:sc,bosses,cls:t.c,tn:t.n,kills:runKills,fin:fin?1:0}).catch(()=>{})}}
+function report(w,sc,fin){if(tok&&runTok){const t=TK();api('/api/tank',{run:runTok,wave:w,score:sc,bosses,cls:t.c,tn:t.n,kills:runKills,from:runFrom,fin:fin?1:0}).catch(()=>{})}}
 
 /* ===== Облачное сохранение (Cloudflare D1): работает после входа через Steam; без входа прогресс только в этом браузере =====
    Разделы независимы (у каждого своя версия на сервере): tanks, xp, mods, skills, ammo, waves; монеты — журнал операций. */
