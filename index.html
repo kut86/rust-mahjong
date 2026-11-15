@@ -53,6 +53,10 @@ a.btn{display:inline-block;background:#1b2838;color:#fff;text-decoration:none;bo
 .lb .av{width:22px;height:22px;border-radius:50%;vertical-align:middle;margin-right:8px}
 .lb a{color:inherit;text-decoration:none}
 .box.wide{max-width:640px}
+.tabs2{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}.tabs2 button{width:100%;font-size:.9rem;padding:8px 6px}
+#lbdesc{min-height:3.2em;margin:0 0 8px}.lbwrap{min-height:200px}
+.gpick{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:14px 0 8px}.gpick button{display:flex;flex-direction:column;align-items:center;gap:6px;padding:18px 8px;line-height:1.2}
+.gpick .gi{font-size:2rem}.gpick small{opacity:.75;font-size:.75rem;font-weight:400}
 .lb .ab{color:var(--muted);font-size:.8rem;letter-spacing:.06em;text-align:center;width:15%}.lb .ab.hi{color:var(--rustHi);font-weight:700}
 .lb .lab{text-align:left;color:var(--muted);font-size:.85rem}.lb .num{text-align:center;font-variant-numeric:tabular-nums}
 .lb .sum{display:block;font-size:.8rem;color:var(--rustHi);font-weight:400;margin-top:2px}
@@ -79,10 +83,14 @@ a.btn{display:inline-block;background:#1b2838;color:#fff;text-decoration:none;bo
 
 <div class="ov" id="lbov"><div class="box" id="lbbox">
   <h2>Рейтинг</h2>
-  <div class="row" id="tabs" style="margin-bottom:10px"></div>
+  <div id="lbpick"></div>
+  <div id="lbview" style="display:none">
+  <button class="alt" id="lbback" style="font-size:.85rem;padding:5px 12px;margin-bottom:8px">‹ Назад</button>
+  <div class="tabs2" id="tabs"></div>
   <p id="lbdesc"></p>
   <div class="lbwrap"><table class="lb"><thead id="lbhead"><tr><th>#</th><th>Игрок</th><th id="lbh"></th></tr></thead><tbody id="lbb"></tbody></table></div>
   <p id="lbmsg"></p>
+  </div>
   <button id="lbclose">Закрыть</button>
 </div></div>
 
@@ -128,12 +136,23 @@ function renderAuth(){
 // ====== Рейтинг: все таблицы в одном окне ======
 function fmtMs(ms){var s=Math.round(ms/1000),h=Math.floor(s/3600),m=Math.floor(s%3600/60),r=s%60;return (h?h+':'+('0'+m).slice(-2):m)+':'+('0'+r).slice(-2)}
 var MODES=[
-  {id:'mj', tab:'Маджонг: прохождения',url:'/api/leaderboard',   h:'Прошёл', d:'Сколько раз игрок прошёл маджонг целиком',               v:function(p){return p.c}},
-  {id:'mjs',tab:'Маджонг: скорость',   url:'/api/speed',         h:'Время',  d:'Лучшее время прохождения всех уровней маджонга подряд',  v:function(p){return fmtMs(p.ms)}},
-  {id:'tkw',tab:'Танчики: волны',      url:'/api/tanks?by=wave', h:'',d:'Рейтинг — максимальная пройденная волна и танк. ЛТ — лёгкие, СТ — средние, ТТ — тяжёлые',cards:true},
-  {id:'tkb',tab:'Танчики: боссы',      url:'/api/tanks?by=boss', h:'Боссов', d:'Сколько боссов убито в танчиках за всё время',        v:function(p){return p.b}}
+  {id:'mj', g:'mj',tab:'Прохождения',url:'/api/leaderboard',   h:'Прошёл', d:'Сколько раз игрок прошёл маджонг целиком',               v:function(p){return p.c}},
+  {id:'mjs',g:'mj',tab:'Скорость',   url:'/api/speed',         h:'Время',  d:'Лучшее время прохождения всех уровней маджонга подряд',  v:function(p){return fmtMs(p.ms)}},
+  {id:'tkw',g:'tk',tab:'Волны',      url:'/api/tanks?by=wave', h:'',d:'Максимальная пройденная волна. ЛТ — лёгкие, СТ — средние, ТТ — тяжёлые танки',cards:true},
+  {id:'tkb',g:'tk',tab:'Боссы',      url:'/api/tanks?by=boss', h:'Боссов', d:'Сколько боссов убито в танчиках за всё время',        v:function(p){return p.b}}
 ];
 var lbMode='mj';
+var GAMES=[{id:'mj',name:'Маджонг',icon:'🀄',sub:'Прохождения · скорость'},{id:'tk',name:'Танчики',icon:'🛡️',sub:'Волны · боссы'}];
+function showPick(){$('lbpick').style.display='';$('lbview').style.display='none';$('lbbox').className='box'}
+function showGame(g){
+  $('lbpick').style.display='none';$('lbview').style.display='';
+  var t=$('tabs');t.innerHTML='';
+  MODES.filter(function(M){return M.g===g}).forEach(function(M){
+    var b=document.createElement('button');b.textContent=M.tab;b.setAttribute('data-id',M.id);b.onclick=function(){loadLb(M.id)};t.appendChild(b)});
+  loadLb(MODES.filter(function(M){return M.g===g})[0].id);
+}
+GAMES.forEach(function(G){var b=document.createElement('button');b.innerHTML='<span class="gi">'+G.icon+'</span><span>'+G.name+'</span><small>'+G.sub+'</small>';b.onclick=function(){showGame(G.id)};$('lbpick').appendChild(b)});
+$('lbpick').className='gpick';$('lbback').onclick=showPick;
 function cardRows(p,i,body){
   var X=p.x||[0,0,0],K=p.k||[0,0,0],N=['ЛТ','СТ','ТТ'],top=['l','m','h'].indexOf(p.tc),isMe=me&&p.id===me.sid;
   function cell(t,c,tr){var d=document.createElement('td');if(c)d.className=c;d.textContent=t;tr.appendChild(d);return d}
@@ -142,7 +161,7 @@ function cardRows(p,i,body){
   var nm=document.createElement('td');
   if(p.a&&p.a.indexOf('https://')===0){var im=document.createElement('img');im.className='av';im.src=p.a;im.alt='';nm.appendChild(im)}
   var a=document.createElement('a');a.textContent=p.n;a.href='https://steamcommunity.com/profiles/'+p.id;a.target='_blank';a.rel='noopener';nm.appendChild(a);
-  var sm=document.createElement('span');sm.className='sum';sm.textContent='Рекорд: волна '+p.w+(p.tn?' · '+N[top<0?0:top]+' '+p.tn:'');nm.appendChild(sm);A.appendChild(nm);
+  A.appendChild(nm);
   N.forEach(function(n,k){cell(n,'ab'+(k===top?' hi':''),A)});
   var B=row('cm');cell('Пройдено волн','lab',B);X.forEach(function(v){cell(v,'num',B)});
   var C=row('ce');cell('Уничтожено врагов','lab',C);K.forEach(function(v){cell(v,'num',C)});
@@ -150,7 +169,7 @@ function cardRows(p,i,body){
 function loadLb(id){
   lbMode=id;
   var M=MODES.filter(function(x){return x.id===id})[0],body=$('lbb'),msg=$('lbmsg');
-  body.innerHTML='';msg.textContent='Загрузка…';$('lbh').textContent=M.h;$('lbdesc').textContent=M.d;$('lbhead').style.display=M.cards?'none':'';$('lbbox').className=M.cards?'box wide':'box';
+  body.innerHTML='';msg.textContent='Загрузка…';$('lbh').textContent=M.h;$('lbdesc').textContent=M.d;$('lbhead').style.display=M.cards?'none':'';$('lbbox').className=M.g==='tk'?'box wide':'box';
   Array.prototype.forEach.call($('tabs').children,function(b){b.className=b.getAttribute('data-id')===id?'':'alt'});
   api(M.url).then(function(j){
     if(lbMode!==id)return;
@@ -168,11 +187,7 @@ function loadLb(id){
     });
   }).catch(function(){if(lbMode===id)msg.textContent='Не удалось загрузить рейтинг. Проверьте адрес сервера в начале скрипта.'});
 }
-MODES.forEach(function(M){
-  var b=document.createElement('button');b.textContent=M.tab;b.setAttribute('data-id',M.id);b.style.fontSize='.85rem';b.style.padding='6px 10px';
-  b.onclick=function(){loadLb(M.id)};$('tabs').appendChild(b);
-});
-$('lb').onclick=function(){$('lbov').classList.add('show');loadLb(lbMode)};
+$('lb').onclick=function(){$('lbov').classList.add('show');showPick()};
 $('lbclose').onclick=function(){$('lbov').classList.remove('show')};
 
 loadSession();renderAuth();
