@@ -85,7 +85,7 @@ a.btn{display:inline-block;background:#1b2838;color:#fff;text-decoration:none;bo
 var API='https://rust-mahjong-api.rust-pve.workers.dev';
 var $=function(i){return document.getElementById(i)};
 
-// ====== Вход через Steam (токен общий для всех игр, хранится в localStorage ) ======
+// ====== Вход через Steam (токен общий для всех игр, хранится в localStorage) ======
 var tok=null,me=null;
 function b64d(s){s=s.replace(/-/g,'+').replace(/_/g,'/');var b=atob(s),u=new Uint8Array(b.length);for(var i=0;i<b.length;i++)u[i]=b.charCodeAt(i);return new TextDecoder().decode(u)}
 function setTok(t){
@@ -124,7 +124,7 @@ function fmtMs(ms){var s=Math.round(ms/1000),h=Math.floor(s/3600),m=Math.floor(s
 var MODES=[
   {id:'mj', tab:'Маджонг: прохождения',url:'/api/leaderboard',   h:'Прошёл', d:'Сколько раз игрок прошёл маджонг целиком',               v:function(p){return p.c}},
   {id:'mjs',tab:'Маджонг: скорость',   url:'/api/speed',         h:'Время',  d:'Лучшее время прохождения всех уровней маджонга подряд',  v:function(p){return fmtMs(p.ms)}},
-  {id:'tkw',tab:'Танчики: волны',      url:'/api/tanks?by=wave', h:'Волн · очки',d:'Больше всего волн за один забег, рядом очки этого рекорда',v:function(p){return p.w+' · '+p.s+' оч.'}},
+  {id:'tkw',tab:'Танчики: волны',      url:'/api/tanks?by=wave', h:'Волн · танк',d:'Максимально пройденная волна и танк, на котором она пройдена. Нажмите на строку — волны и убийства по классам',v:function(p){var C={l:'ЛТ',m:'СТ',h:'ТТ'};return p.w+(p.tn?' · '+(C[p.tc]||'')+' '+p.tn:'')},more:function(p){var C=['ЛТ','СТ','ТТ'],x=p.x||[0,0,0],k=p.k||[0,0,0];return C.map(function(c,i){return c+': волн '+x[i]+' · уничтожено '+k[i]}).join('\n')}},
   {id:'tkb',tab:'Танчики: боссы',      url:'/api/tanks?by=boss', h:'Боссов', d:'Сколько боссов убито в танчиках за всё время',        v:function(p){return p.b}}
 ];
 var lbMode='mj';
@@ -144,6 +144,7 @@ function loadLb(id){
       var a=document.createElement('a');a.textContent=p.n;a.href='https://steamcommunity.com/profiles/'+p.id;a.target='_blank';a.rel='noopener';c2.appendChild(a);
       var c3=document.createElement('td');c3.textContent=M.v(p);
       tr.appendChild(c1);tr.appendChild(c2);tr.appendChild(c3);body.appendChild(tr);
+      if(M.more){tr.style.cursor='pointer';var mr=null;tr.onclick=function(e){if(e.target.tagName==='A')return;if(mr){mr.remove();mr=null;return}mr=document.createElement('tr');var d=document.createElement('td');d.colSpan=3;d.style.cssText='white-space:pre-line;font-size:.85rem;opacity:.85;text-align:left';d.textContent=M.more(p);mr.appendChild(d);tr.after(mr)}}
     });
   }).catch(function(){if(lbMode===id)msg.textContent='Не удалось загрузить рейтинг. Проверьте адрес сервера в начале скрипта.'});
 }
