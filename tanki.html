@@ -42,7 +42,8 @@ html,body{height:100%;margin:0;background:#1d2219;overflow:hidden;touch-action:n
 #au a.sm{color:var(--acc);text-decoration:underline;font-size:13px}
 #mn,#ps{position:fixed;left:10px;top:calc(env(safe-area-inset-top,0px) + 54px);z-index:3;display:none;width:54px;height:44px;border-radius:12px;border:0;background:rgba(255,255,255,.16);color:var(--tx);font-size:18px;font-weight:700;touch-action:none}
 #ps{left:74px}
-#dz{position:fixed;inset:0;z-index:5;background:rgba(12,14,10,.7);display:none;align-items:center;justify-content:center;padding:12px}#dz.s{display:flex}.dzb{background:#2e3528;border:2px solid #3a4030;border-radius:14px;padding:16px 20px;max-width:380px;text-align:center;display:flex;flex-direction:column;gap:10px}.dzb h2{margin:0}.dzb p{margin:0;font-size:14px;line-height:1.4}.dzb .cd{justify-content:center;margin:0}.dzb button{background:var(--acc);color:var(--btx);border:0;border-radius:12px;font-size:16px;font-weight:700;padding:12px 22px}
+#pp{position:fixed;inset:0;z-index:6;background:rgba(12,14,10,.75);display:none;align-items:center;justify-content:center;padding:12px}#pp.s{display:flex}
+#dz{position:fixed;inset:0;z-index:5;background:rgba(12,14,10,.7);display:none;align-items:center;justify-content:center;padding:12px}#dz.s{display:flex}.dzb{background:#2e3528;border:2px solid #3a4030;border-radius:14px;padding:16px 20px;max-width:380px;text-align:center;display:flex;flex-direction:column;gap:10px}.dzb h2{margin:0}.dzb p{margin:0;font-size:14px;line-height:1.4}.dzb .cd{justify-content:center;margin:0}.dzb .cd{flex-wrap:wrap}.dzb button{background:var(--acc);color:var(--btx);border:0;border-radius:12px;font-size:16px;font-weight:700;padding:12px 22px}
 #pz{position:fixed;inset:0;z-index:2;background:rgba(12,14,10,.55);display:none;align-items:center;justify-content:center}#pz.s{display:flex}#pz button{background:var(--acc);color:var(--btx);border:0;border-radius:14px;font-size:22px;font-weight:700;padding:18px 44px}
 #up{position:fixed;inset:0;z-index:6;background:#12150f;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;text-align:center;padding:14px;overflow:auto}#up.h{display:none}#up{justify-content:flex-start!important}#up>:first-child{margin-top:auto}#up>:last-child{margin-bottom:auto}#up h2{margin:0;font-size:24px}#up p{margin:0;color:var(--mut)}.cd{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin:8px 0}#up button{background:#2e3528;color:var(--tx);border:2px solid transparent;border-radius:14px;padding:12px 16px;min-width:118px;font-size:15px;font-weight:600;display:flex;flex-direction:column;align-items:center;gap:4px}#up button b{font-size:28px}#up button small{color:var(--mut);font-weight:400;letter-spacing:2px}#up button:disabled{opacity:.4;filter:grayscale(1)}#up .cl{background:var(--acc);color:var(--btx);margin-top:6px}.tr{overflow:auto;max-width:100%;touch-action:pan-x pan-y;margin:6px 0;padding-bottom:6px;-webkit-overflow-scrolling:touch}
 #up{touch-action:pan-x pan-y}#up>*{flex-shrink:0}#up button.mo.dn:disabled{opacity:1;filter:none}
@@ -71,8 +72,9 @@ html,body{height:100%;margin:0;background:#1d2219;overflow:hidden;touch-action:n
 <div id="up" class="h"></div>
 <button id="mn" aria-label="Меню">☰</button><button id="ps" aria-label="Пауза">⏸</button>
 <div id="pz"><button id="rs">▶ Продолжить</button></div>
+<div id="pp"><div class="dzb"><h2 id="pph"></h2><p id="ppt"></p><div class="cd" id="ppb"></div></div></div>
 <div id="dz"><div class="dzb"><h2>Меню</h2><p>Дезертировать? Награды текущей волны будут потеряны, забег засчитается как поражение, а танк будет разбит.</p><div class="cd"><button id="dsr" style="background:#8c3a2a;color:#fff">Дезертировать</button><button id="dcn">Отмена</button></div></div></div>
-<div id="sh"><button data-k="ap"><b>БР</b><i></i></button><button data-k="pc"><b>ПК</b><i></i></button><button data-k="he"><b>ФУ</b><i></i></button></div><div id='sb'><button data-s='x'>💥 25</button><button data-s='s'>🛡 20</button><button data-s='d'>⚡ 15</button></div>
+<div id="sh"><button data-k="ap"><b>ББ</b><i></i></button><button data-k="pc"><b>БП</b><i></i></button><button data-k="he"><b>ОФ</b><i></i></button></div><div id='sb'><button data-s='x'>💥 25</button><button data-s='s'>🛡 20</button><button data-s='d'>⚡ 15</button></div>
 <div id="rot"><b>📱</b>Поверните телефон горизонтально<a href="index.html" style="margin-top:6px;color:var(--tx);background:#3a4030;border-radius:14px;padding:12px 28px;font-size:16px;font-weight:700;text-decoration:none">☰ Меню игр</a></div>
 <div id="ov"><h1 id="t1">🪖 Танчики</h1><p id="t2">Левый палец — движение, правый — прицел и огонь. На компьютере: WASD, мышь, клик.</p><div class="tg" style="margin-top:2px">Стартовая волна</div><div id="wsel"></div><button id="go">Играть</button><button id="fs" style="display:none;background:#3a4030;color:var(--tx);margin-top:4px;font-size:16px"></button><p id="fsh" class="tg" style="display:none;max-width:320px;line-height:1.5"></p><button id="shop" style="background:#3a4030;color:var(--tx);margin-top:4px;font-size:16px">🔧 Гараж · <span id="co">0</span> 🪙</button><a class="lk" href="index.html">☰ Меню игр</a><div id="au"></div></div>
 <script>
@@ -126,7 +128,7 @@ const ARM={l:[20,70],m:[35,140],h:[50,260]},PEN={l:[30,110],m:[45,170],h:[65,250
 const ASIDE=.7,AREAR=.5,PENVAR=.25;           // толщина борта и кормы от лба; разброс пробития ±25%
 const AMMOT=385; // вместимость боекомплекта = 385 выстрелов непрерывной стрельбы (Шакал 2500)
 // типы снарядов: pn/dm — множители пробития и урона, v — скорость полёта, pr — цена за 100 шт. при калибре 20 мм (дальше × калибр/20)
-const SHELL={ap:{n:'Бронебойный',s:'БР',pn:1,dm:1,v:1,pr:5},pc:{n:'Подкалиберный',s:'ПК',pn:1.4,dm:.75,v:1.25,pr:12},he:{n:'Фугас',s:'ФУ',pn:.45,dm:1.6,v:1,pr:3}},SHK=['ap','pc','he'];
+const SHELL={ap:{n:'Бронебойный (базовый)',s:'ББ',pn:1,dm:1,v:1,pr:5},pc:{n:'Бронебойный подкалиберный',s:'БП',pn:1.4,dm:.75,v:1.25,pr:12},he:{n:'Осколочно-фугасный',s:'ОФ',pn:.45,dm:1.6,v:1,pr:3}},SHK=['ap','pc','he'];
 const BOSS_TIME=300,BOSS_MIN=4; // секунд на убийство босса; сколько призванных боссом танков может быть одновременно
 const RW_MIN=.2,FIRST_MUL=.5; // награда за слабые волны: ступень врагов / ступень танка, но не меньше RW_MIN; бонус за первое прохождение волны
 const AP_FREE_TIER=3,REPAIR_COST=0,MINAM=.5,HE_SPL=1.2,HE_MIN=.15; // бронебойные бесплатны до этой ступени; цена ремонта (×ступень); минимум боекомплекта для боя; радиус осколков фугаса (клеток); минимум урона фугаса без пробития
@@ -331,11 +333,20 @@ function kill(e){const rs=e.type!='B'&&al.length<3&&Math.random()<NEC;if(rs){P(e
 function vec(s){const dx=s.x-s.ox,dy=s.y-s.oy,h=Math.hypot(dx,dy)||1,m=Math.min(1,h/(S*2.2));return{x:dx/h*m,y:dy/h*m,m}}
 
 function hitP(v,quiet){p.hp-=v;p.fl=.08;hurt=.3;shake=Math.max(shake,5);vib(30);if(!quiet)dnum(p,v,'#ff6a5a','-');if(p.hp<=0)die()}
-function endScr(t1,t2){over=true;bossT=-1;if(atFront)selW=sv.mw+1;wselR();svs();setPause(0);$('#t1').textContent=t1;$('#t2').textContent=t2;$('#go').textContent='Играть снова';$('#co').textContent=sv.co;$('#ov').classList.remove('h')}
+function ovStat(){const t=TK(),e=$('#t2'),br=!!sv.brk[sv.tank];e.textContent='Танк «'+t.n+'» '+(br?'разбит — почините его в гараже':'к бою готов');e.style.color=br?'#ff8a7a':'#8fd48a'}
+function ppShow(h,t,btns){$('#pph').textContent=h;$('#ppt').textContent=t;const b=$('#ppb');b.innerHTML='';for(const[l,fn,c]of btns){const x=document.createElement('button');x.textContent=l;if(c)x.style.cssText=c;x.onclick=()=>{$('#pp').classList.remove('s');if(fn)fn()};b.appendChild(x)}$('#pp').classList.add('s')}
+function quickFill(t){const r=rack(),cap=capOf(t),pr=shp(t,'ap'),need=cap-rtot(r);if(need>0){const n=pr>0?Math.min(need,Math.floor(sv.co*100/pr)):need;sv.co-=pr>0?Math.ceil(n*pr/100):0;r.ap+=n}if(rtot(r)<needAm(t))r.ap+=needAm(t)-rtot(r);svs();$('#co').textContent=sv.co}
+function tryGo(){const t=TK(),r=rack(),T=rtot(r),cap=capOf(t),pr=shp(t,'ap');
+ if(sv.brk[sv.tank]){ppShow('Танк разбит','Танк «'+t.n+'» нужно починить в гараже (карточка танка → «Ремонт»).',[['В гараж',()=>$('#shop').click()],['Отмена']]);return}
+ if(T>=cap){startBattle();return}
+ const full=Math.ceil((cap-T)*pr/100),afford=pr==0||sv.co>=full,any=pr==0||sv.co*100>=pr,lbl=T<needAm(t)&&!any?'Паёк штаба · бесплатно':'Пополнить · '+(pr==0?'бесплатно':afford?full+' 🪙':'на '+sv.co+' 🪙');
+ const btns=[];if(T>=needAm(t))btns.push(['В бой',startBattle]);btns.push([lbl,()=>{quickFill(t);tryGo()}]);btns.push(['Отмена']);
+ ppShow('Ваш боекомплект не полный',(T<needAm(t)?'Заряжено '+T+' из '+cap+'. Для боя нужно минимум '+needAm(t)+'.':'Заряжено '+T+' из '+cap+'. Выйти в бой с неполным боекомплектом?'),btns)}
+function endScr(t1,t2){over=true;bossT=-1;if(atFront)selW=sv.mw+1;wselR();svs();setPause(0);$('#t1').textContent=t1;ovStat();$('#go').textContent='Играть снова';$('#co').textContent=sv.co;$('#ov').classList.remove('h')}
 function desert(){if(!started||over)return;sv.co=Math.max(0,sv.co-WS.co);const t=TK();if(hasWork(t))sv.xp[t.id]=Math.max(0,(sv.xp[t.id]||0)-WS.xp);else sv.fx=Math.max(0,sv.fx-WS.xp);
  sv.brk[sv.tank]=1;report(wave-1,score);$('#dz').classList.remove('s');endScr('Дезертирство','Забег проигран · волна '+wave+' · награды волны потеряны · танк разбит — почините его в гараже')}
 let dzWas=0;function dzOpen(){if(!started||over||pause)return;dzWas=paused;paused=1;st.L=st.R=null;ms.down=0;$('#dz').classList.add('s')}
-function die(){p.hp=0;over=true;if(atFront)selW=sv.mw+1;wselR();sv.brk[sv.tank]=1;svs();report(wave-1,score);wreck(p);boom(p.x,p.y,1.7);setTimeout(()=>{$('#t1').textContent=tmo?'Время на босса вышло':'Танк уничтожен';$('#t2').textContent='Очки: '+score+' · Волна: '+wave+' · танк разбит — почините его в гараже';$('#go').textContent='Играть снова';$('#co').textContent=sv.co;$('#ov').classList.remove('h')},900)}
+function die(){p.hp=0;over=true;if(atFront)selW=sv.mw+1;wselR();sv.brk[sv.tank]=1;svs();report(wave-1,score);wreck(p);boom(p.x,p.y,1.7);setTimeout(()=>{$('#t1').textContent=tmo?'Время на босса вышло':'Танк уничтожен';ovStat();$('#go').textContent='Играть снова';$('#co').textContent=sv.co;$('#ov').classList.remove('h')},900)}
 // таран: чем тяжелее цель, тем меньше ей урона и тем больше ответный урон игроку
 function ram(e){e.ramT=.8;const k=Math.min(1,p.spd/(S*5)),wt=e.wt,dm=+(RAM_DMG*k*Math.sqrt((TKc.wt||10)/wt)).toFixed(1),bk=Math.min(RAM_CAP,RAM_BACK*Math.sqrt(wt/(TKc.wt||10)))*(TKc.inm||1);
  WS.d+=Math.min(dm,Math.max(e.hp,0));e.hp-=dm;e.fl=.1;dnum(e,dm);spark((p.x+e.x)/2,(p.y+e.y)/2);sfx(3);shake=Math.max(shake,3);if(e.hp<=0)kill(e);hitP(bk)}
@@ -385,7 +396,7 @@ function update(dt){camUpd();
    if(TKc.rk&&(b.vx||b.vy)&&Math.abs(ad(Math.atan2(b.vy,b.vx),p.a+PI))<1.05&&Math.random()*100<TKc.rk){spark(b.x,b.y);sfx(3);dtxt(p.x,p.y-p.r*S*1.6,'РИКОШЕТ','#9fd8ff');continue} // попадание в лоб (±60°): шанс рикошета = броня танка
    const hz=hitZone(p.a,b.vx,b.vy),pr=b.pn!=null?penr(b.pn,TKc.ar,hz):{ok:true,f:1},hef=!pr.ok&&!!b.bs;if(!pr.ok&&!hef){spark(b.x,b.y);sfx(3);if(!(p.npT>0)){dtxt(p.x,p.y-p.r*S*1.6,'НЕ ПРОБИЛ','#9fd8ff');p.npT=.6}continue}
    const side=hz.z>0;let dm=(b.ed||100)*(TKc.inm||1)*(hef?Math.max(HE_MIN,pr.f):1),cr=false; // босс не пробил — бьёт фугасом: урон по доле пробития, не меньше HE_MIN
-   if(hef&&!(p.npT>0)){dtxt(p.x,p.y-p.r*S*1.6,'ФУГАС','#ffb347');p.npT=.6}
+   if(hef&&!(p.npT>0)){dtxt(p.x,p.y-p.r*S*1.6,'ОФ','#ffb347');p.npT=.6}
    if(b.bs&&side&&!hef&&Math.random()*100<BCRIT_CH){dm*=BCRIT_MUL;cr=true;dtxt(p.x,p.y-p.r*S*2.4,'КРИТ -'+Math.round(dm*10)/10,'#ff3b3b',1)} // босс бьёт в борт/корму
    spark(b.x,b.y);sfx(3);hitP(dm,cr)}}
  bl=bl.filter(b=>b.life>0);en=en.filter(e=>!e.dead);ob=ob.filter(o=>!o.dead);
@@ -534,6 +545,7 @@ function garage(){const u=$('#up');let h='',body='';
  else if(gtk){const tt=TK(gtk);h=`<div class='cd'><button data-a='back' style='min-width:0'>← К дереву</button><button data-a='skins' style='min-width:0;border-color:${gsk?'#e8a73a':'transparent'}'>${gsk?'Модули и навыки':'Скины'}</button></div>`;body=`<p style='min-height:20px;color:#e8a73a'>${gmsg}</p>`+(gsk?skinsHTML(tt):cardHTML(tt))}
  else{const n=Math.floor(sv.fx/XFX);h=`<p>Свободный опыт: ${sv.fx} · Опыт копится на танке, на котором играете</p>`;
   body=`<div class='cd'>${Object.entries(CL).map(([k,nm])=>`<button data-c='${k}' style='border-color:${gcl==k?'#e8a73a':'transparent'}'>${nm}</button>`).join('')}</div>${treeHTML(gcl)}<div class='cd'><button data-x='1'${n<1?' disabled':''}>Обменять свободный опыт<span class='st'>${n} 🪙 за ${n*XFX} оп.</span></button><button data-a='shop'>🛒 Магазин<span class='st'>пока нет предложений</span></button></div>`}
+ovStat();$('#t1').textContent='🪖 Танчики';
  u.innerHTML=`<h2>Гараж · ${sv.co} 🪙</h2>${h}${body}<button class='cl'>Назад</button>`;u.classList.remove('h');
  const sync=()=>{svs();TKc=eff(TK());$('#co').textContent=sv.co};
  u.querySelectorAll("[data-a='shop']").forEach(b=>b.onclick=()=>{gshop=1;gmsg='';garage()});
@@ -575,17 +587,15 @@ let wasL=innerWidth>innerHeight;addEventListener('resize',()=>{resize();const l=
 (()=>{const standalone=matchMedia('(display-mode: fullscreen)').matches||matchMedia('(display-mode: standalone)').matches||navigator.standalone,d=document.documentElement,fsf=d.requestFullscreen||d.webkitRequestFullscreen,b=$('#fs'),h=$('#fsh');if(standalone)return;b.style.display='block';
  if(fsf){b.textContent='⛶ Во весь экран';b.onclick=()=>{try{Promise.resolve(fsf.call(d)).then(()=>screen.orientation.lock('landscape')).catch(()=>{})}catch(_){}}}
  else{b.textContent='📲 Открыть на весь экран';const ios=/iPhone|iPad|iPod/.test(navigator.userAgent);b.onclick=()=>{h.style.display=h.style.display=='block'?'none':'block';h.innerHTML=ios?'Нажмите «Поделиться» <b>⬆</b> внизу браузера → «На экран "Домой"» → «Добавить». Потом запускайте игру с иконки — она откроется без адресной строки, на весь экран.':'В меню браузера выберите «Установить приложение» или «Добавить на главный экран», потом запускайте игру с иконки.'}}})();
-$('#go').onclick=()=>{const t0=TK(),r0=rack(),T0=rtot(r0),cap0=capOf(t0);
- if(sv.brk[sv.tank]){$('#t2').textContent='Танк «'+t0.n+'» разбит. Почините его в гараже (карточка танка → «Ремонт»).';return}
- if(T0<needAm(t0)){$('#t2').textContent='Мало снарядов: '+T0+' / '+cap0+'. Нужно минимум '+needAm(t0)+' — пополните боекомплект в гараже.';return}
+function startBattle(){
  atFront=selW==sv.mw+1;
- if(T0<cap0)setTimeout(()=>{if(started&&!over)banner('⚠ Боекомплект не полный: '+T0+' / '+cap0)},1500);
- try{const d=document.documentElement,fs=d.requestFullscreen||d.webkitRequestFullscreen;(fs?Promise.resolve(fs.call(d)):Promise.reject()).then(()=>screen.orientation.lock('landscape')).catch(()=>{try{screen.orientation.lock('landscape').catch(()=>{})}catch(_){}})}catch(_){}A();if(ac&&ac.state==='suspended')ac.resume();$('#ov').classList.add('h');$('#sb').style.display='flex';$('#sh').style.display='flex';$('#mn').style.display='block';$('#ps').style.display='block';reset();started=true};
+ try{const d=document.documentElement,fs=d.requestFullscreen||d.webkitRequestFullscreen;(fs?Promise.resolve(fs.call(d)):Promise.reject()).then(()=>screen.orientation.lock('landscape')).catch(()=>{try{screen.orientation.lock('landscape').catch(()=>{})}catch(_){}})}catch(_){}A();if(ac&&ac.state==='suspended')ac.resume();$('#ov').classList.add('h');$('#sb').style.display='flex';$('#sh').style.display='flex';$('#mn').style.display='block';$('#ps').style.display='block';reset();started=true}
+$('#go').onclick=tryGo;
 function setPause(v){paused=v?1:0;$('#pz').classList.toggle('s',!!paused);$('#ps').textContent=paused?'▶':'⏸';st.L=st.R=null;ms.down=0}
 $('#ps').onclick=()=>{if(started&&!over&&!pause)setPause(!paused)};$('#rs').onclick=()=>setPause(0);
 $('#mn').onpointerdown=e=>e.stopPropagation();$('#mn').onclick=dzOpen;$('#dcn').onclick=()=>{$('#dz').classList.remove('s');setPause(dzWas)};$('#dsr').onclick=desert;$('#dz').onpointerdown=e=>e.stopPropagation();
 resize();p={x:GW/2,y:GH/2,a:-PI/2,t:-PI/2,r:.55,hp:100,rc:0,fl:0,c:'#4f9d62'};en=[];bl=[];pt=[];rg=[];ob=[];queue=[];pk=[];up={sp:0,hp:0,rt:0};over=true;
-tinit();renderAuth();checkSeason();
+tinit();renderAuth();ovStat();checkSeason();
 requestAnimationFrame(loop);
 </script>
 </body>
