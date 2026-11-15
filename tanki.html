@@ -146,8 +146,15 @@ const PCRIT_MUL=2,BCRIT_CH=15,BCRIT_MUL=1.5; // крит: множитель у�
 const RAM_DMG=10,RAM_BACK=25,RAM_CAP=60;      // таран: урон врагу на полной скорости, ответный урон игроку и его потолок
 const defSv=()=>({v:3,rev:0,mw:{l:0,m:0,h:0},kl:{l:0,m:0,h:0},lt:{},am:{},brk:{},co:0,tank:'l1',tk:['l1'],xp:{},fx:0,mod:{},eq:{},sk:{},sks:{}});
 let sv=defSv();try{const o=JSON.parse(localStorage.getItem('tk')||'{}');if(o.v>=2)Object.assign(sv,o);else{sv.co=+o.co||0}}catch(e){}
-sv.tk=(sv.tk||[]).filter(id=>TANKS.some(t=>t.id==id));if(!sv.tk.includes('l1'))sv.tk.unshift('l1');if(!sv.tk.includes(sv.tank))sv.tank='l1';sv.xp=sv.xp||{};sv.fx=+sv.fx||0;sv.mod=sv.mod||{};sv.eq=sv.eq||{};sv.sk=sv.sk||{};sv.sks=sv.sks||{};if(typeof sv.am=='number'&&Number.isFinite(sv.am))sv.lg=sv.am;if(!sv.am||typeof sv.am!='object')sv.am={};sv.brk=sv.brk&&typeof sv.brk=='object'?sv.brk:{};if(typeof sv.mw!='object'||!sv.mw){const old=Math.max(0,Math.floor(+sv.mw||0)),c0=(TANKS.find(t=>t.id==sv.tank)||{c:'l'}).c;sv.mw={l:0,m:0,h:0};sv.mw[c0]=old} // старый общий рекорд переходит классу выбранного танка
-sv.kl=sv.kl&&typeof sv.kl=='object'?sv.kl:{};sv.lt=sv.lt&&typeof sv.lt=='object'?sv.lt:{};for(const c of['l','m','h']){sv.mw[c]=Math.max(0,Math.floor(+sv.mw[c]||0));sv.kl[c]=Math.max(0,Math.floor(+sv.kl[c]||0))}
+function normSv(){sv.tk=(sv.tk||[]).filter(id=>TANKS.some(t=>t.id==id));if(!sv.tk.includes('l1'))sv.tk.unshift('l1');if(!sv.tk.includes(sv.tank))sv.tank='l1';sv.xp=sv.xp||{};sv.fx=+sv.fx||0;sv.mod=sv.mod||{};sv.eq=sv.eq||{};sv.sk=sv.sk||{};sv.sks=sv.sks||{};if(typeof sv.am=='number'&&Number.isFinite(sv.am))sv.lg=sv.am;if(!sv.am||typeof sv.am!='object')sv.am={};sv.brk=sv.brk&&typeof sv.brk=='object'?sv.brk:{};if(typeof sv.mw!='object'||!sv.mw){const old=Math.max(0,Math.floor(+sv.mw||0)),c0=(TANKS.find(t=>t.id==sv.tank)||{c:'l'}).c;sv.mw={l:0,m:0,h:0};sv.mw[c0]=old} // старый общий рекорд переходит классу выбранного танка
+sv.kl=sv.kl&&typeof sv.kl=='object'?sv.kl:{};sv.lt=sv.lt&&typeof sv.lt=='object'?sv.lt:{};for(const c of['l','m','h']){sv.mw[c]=Math.max(0,Math.floor(+sv.mw[c]||0));sv.kl[c]=Math.max(0,Math.floor(+sv.kl[c]||0))}}normSv();
+/* Монеты ведутся как журнал: любое изменение sv.co копится в qPend (сумма ещё не отправленных операций), а сервер складывает их сам.
+   Так устаревшая вкладка или повторная отправка не могут перезаписать баланс. coSilent — выставить баланс без записи операции (после ответа сервера). */
+let qPend=0,qIn=null,coV=0,prt={},sent={},cloudSt='',cloudBusy=false,cloudOn=false,cloudT=0,cloudFly=false,adoptQ=null;
+try{const q=JSON.parse(localStorage.getItem('tk-q')||'{}');qPend=Math.round(+q.pend||0);qIn=q.inflight&&q.inflight.op?q.inflight:null}catch(e){}
+function wrapCo(){coV=Math.max(0,Math.floor(+sv.co||0));Object.defineProperty(sv,'co',{enumerable:true,configurable:true,get:()=>coV,set:x=>{x=Math.max(0,Math.floor(+x||0));if(x!==coV){qPend+=x-coV;coV=x}}})}
+const coSilent=x=>{coV=Math.max(0,Math.floor(+x||0))};
+wrapCo();
 const TK=id=>TANKS.find(t=>t.id==(id||sv.tank)),own=id=>sv.tk.includes(id),preds=t=>TANKS.filter(s=>s.c==t.c&&s.t==t.t-1);
 /* ----- скины: у каждого танка свои (куплены/выбран); «Зелёный» есть у всех бесплатно; цена растёт со ступенью ----- */
 const skinOf=id=>{const o=sv.sks[id];return o&&SK[o.sel]?o.sel:'g'},psk=()=>skinOf(sv.tank),skOwn=(id,k)=>k=='g'||!!(sv.sks[id]&&sv.sks[id].own.includes(k)),SKP=(t,k)=>Math.round(SK[k].p*(1+.3*(t.t-1)));
@@ -208,7 +215,7 @@ function staleTab(){if(reloading)return;if(!started||over){let t=0;try{t=+sessio
 // записываем только при реальных изменениях и никогда поверх более новой записи или во время перезагрузки
 const svs=()=>{if(reloading)return;try{const body=JSON.stringify(Object.assign({},sv,{rev:0}));const raw=localStorage.getItem('tk');if(raw){let o=null;try{o=JSON.parse(raw)}catch(e){}if(o&&(o.rev|0)>myRev){staleTab();return}if(body===lastBody&&o&&(o.rev|0)===myRev)return;
   if(Date.now()-bakT>3e5){localStorage.setItem('tk-bak',raw);bakT=Date.now()}}
-  sv.rev=++myRev;localStorage.setItem('tk',JSON.stringify(sv));lastBody=body}catch(e){}};
+  sv.rev=++myRev;localStorage.setItem('tk',JSON.stringify(sv));lastBody=body;persistQ();cloudDirty()}catch(e){}};
 addEventListener('storage',e=>{if(e.key=='tk'&&(!started||over)&&storedRev()>myRev)staleTab()});
 document.addEventListener('visibilitychange',()=>{if(!document.hidden&&(!started||over)&&storedRev()>myRev)staleTab()});
 
@@ -217,21 +224,52 @@ const API='https://rust-mahjong-api.rust-pve.workers.dev';
 let tok=null,me=null,runTok=null,bosses=0;
 function b64d(s){s=s.replace(/-/g,'+').replace(/_/g,'/');const b=atob(s),u=new Uint8Array(b.length);for(let i=0;i<b.length;i++)u[i]=b.charCodeAt(i);return new TextDecoder().decode(u)}
 try{const t=localStorage.getItem('rm-token');if(t){const q=JSON.parse(b64d(t.split('.')[0]));if(q.k==='s'&&q.exp>Date.now()){tok=t;me=q}else localStorage.removeItem('rm-token')}}catch(e){}
-function api(path,body){const o={method:body?'POST':'GET',headers:{}};if(tok)o.headers.Authorization='Bearer '+tok;if(body){o.headers['Content-Type']='application/json';o.body=JSON.stringify(body)}
+function api(path,body,opt){const o={method:body?'POST':'GET',headers:{}};if(opt&&opt.ka)o.keepalive=true;if(tok)o.headers.Authorization='Bearer '+tok;if(body){o.headers['Content-Type']='application/json';o.body=JSON.stringify(body)}
  return fetch(API+path,o).then(r=>{if(r.status===401)logout();return r.json().then(j=>{if(!r.ok)throw j;return j})})}
 function logout(){tok=me=runTok=null;try{localStorage.removeItem('rm-token')}catch(e){}renderAuth()}
 function renderAuth(){const a=$('#au');a.innerHTML='';
  if(me){if(me.a&&me.a.indexOf('https://')===0){const im=document.createElement('img');im.src=me.a;im.alt='';a.appendChild(im)}
-  const n=document.createElement('span');n.textContent=me.n+' · рекорды идут в рейтинг';a.appendChild(n);
+  const n=document.createElement('span');n.textContent=me.n+' · рекорды идут в рейтинг';a.appendChild(n);const cs=document.createElement('span');cs.className='cs sm';cs.textContent=cloudSt;a.appendChild(cs);
   const o=document.createElement('a');o.href='#';o.className='sm';o.textContent='Выйти';o.onclick=e=>{e.preventDefault();logout()};a.appendChild(o)}
  else{const l=document.createElement('a');l.className='lk';l.textContent='Войти через Steam для рейтинга';l.href=API+'/auth/steam';l.onclick=()=>{try{sessionStorage.setItem('rm-back','tanki.html')}catch(e){}};a.appendChild(l)}}
 /* сезон прогресса: если владелец сменил TANK_PROGRESS_SEASON на сервере, сохранённый прогресс сбрасывается при заходе */
-function checkSeason(){fetch(API+'/api/seasons').then(r=>r.json()).then(j=>{const cur=String(j.tank);let old=null;try{old=localStorage.getItem('tk-season')}catch(e){}
+function checkSeason(){return fetch(API+'/api/seasons').then(r=>r.json()).then(j=>{const cur=String(j.tank);let old=null;try{old=localStorage.getItem('tk-season')}catch(e){}
  if(old===cur)return;
- if(old!==null){if(started)return;sv=defSv();TKc=eff(TK());svs();$('#co').textContent=sv.co;$('#t2').textContent='Начался новый сезон: прогресс сброшен. Удачи!'}
+ if(old!==null){if(started)return;sv=defSv();wrapCo();qPend=0;qIn=null;prt={};sent={};TKc=eff(TK());svs();$('#co').textContent=sv.co;$('#t2').textContent='Начался новый сезон: прогресс сброшен. Удачи!'}
  try{localStorage.setItem('tk-season',cur)}catch(e){}}).catch(()=>{})}
 function startRun(){runTok=null;if(!tok)return;api('/api/start',{game:'tk'}).then(j=>{runTok=j.run}).catch(()=>{})}
 function report(w,sc,fin){if(runFrom>1)return;if(tok&&runTok){const t=TK();api('/api/tank',{run:runTok,wave:w,score:sc,bosses,cls:t.c,tn:t.n,kills:runKills,fin:fin?1:0}).catch(()=>{})}}
+
+/* ===== Облачное сохранение (Cloudflare D1): работает после входа через Steam; без входа прогресс только в этом браузере =====
+   Разделы независимы (у каждого своя версия на сервере): tanks, xp, mods, skills, ammo, waves; монеты — журнал операций. */
+const PARTS={tanks:['tk','tank','lt'],xp:['xp','fx'],mods:['mod','eq'],skills:['sk','sks'],ammo:['am','brk','lg'],waves:['mw','kl']};
+const partOf=k=>{const o={};for(const f of PARTS[k])if(sv[f]!==undefined)o[f]=sv[f];return o};
+const uid=()=>crypto.randomUUID?crypto.randomUUID():Math.random().toString(36).slice(2)+Date.now().toString(36);
+const persistQ=()=>{try{localStorage.setItem('tk-q',JSON.stringify({pend:qPend,inflight:qIn}))}catch(e){}};
+function cloudUI(m){cloudSt=m;const e=document.querySelector('#au .cs');if(e)e.textContent=m}
+function cloudDirty(){if(tok&&cloudOn&&!cloudT)cloudT=setTimeout(()=>{cloudT=0;cloudFlush()},8000)}
+function applyPart(k,v){for(const f of PARTS[k])if(v&&v[f]!==undefined)sv[f]=v[f]}
+function cloudRefresh(){normSv();TKc=eff(TK());svs();$('#co').textContent=sv.co;wselR();ovStat();if(!$('#ov').classList.contains('h')&&!$('#up').classList.contains('h'))garage()}
+function cloudApplyQ(){if(!adoptQ)return;const q=adoptQ;adoptQ=null;for(const k in q)applyPart(k,q[k]);cloudRefresh()}
+function cloudFlush(ka){if(!tok||!cloudOn||cloudFly)return;if(cloudT){clearTimeout(cloudT);cloudT=0}
+ if(!qIn&&qPend!==0){qIn={op:uid(),d:qPend};qPend=0}
+ const parts=[],js={};for(const k in PARTS){const j=JSON.stringify(partOf(k));if(j!==sent[k]){parts.push({k,base:prt[k]||0,v:partOf(k)});js[k]=j}}
+ if(!qIn&&!parts.length)return;
+ cloudFly=true;persistQ();const op=qIn;
+ api('/api/tkp',{ops:op?[op]:[],parts},{ka}).then(j=>{cloudFly=false;if(qIn===op)qIn=null;coSilent(j.bal+qPend);persistQ();let ch=false;
+  for(const k in j.parts){const r=j.parts[k];prt[k]=r.rev;
+   if(r.v){if(started&&!over){adoptQ=adoptQ||{};adoptQ[k]=r.v;sent[k]=js[k]}else{applyPart(k,r.v);sent[k]=JSON.stringify(partOf(k));ch=true}}else sent[k]=js[k]}
+  if(ch)cloudRefresh();cloudUI('☁ синхронизировано');cloudDirty()}).catch(e=>{cloudFly=false;cloudUI('☁ нет связи');if(!cloudT)cloudT=setTimeout(()=>{cloudT=0;cloudFlush()},30000)})}
+function cloudLoad(){if(!tok)return Promise.resolve();cloudBusy=true;cloudUI('☁ загрузка…');
+ const t0=setTimeout(()=>{if(cloudBusy){cloudBusy=false;cloudUI('☁ нет связи')}},5000);
+ return api('/api/tkp',{ops:qIn?[qIn]:[],load:1}).then(j=>{clearTimeout(t0);const sentOp=qIn;qIn=null;cloudOn=true;
+  if(j.empty){qIn={op:'init-'+uid(),d:Math.max(0,sv.co-(sentOp?j.bal:0))};qPend=0;cloudFlush()} // на сервере пусто — загружаем локальный прогресс
+  else{const loc={};for(const k in PARTS)loc[k]=JSON.parse(JSON.stringify(partOf(k)));
+   for(const k in j.all){applyPart(k,j.all[k].v);prt[k]=j.all[k].rev;sent[k]=JSON.stringify(partOf(k))}
+   if(j.all.tanks){sv.tk=[...new Set([...sv.tk,...(loc.tanks.tk||[])])];sv.lt=Object.assign({},loc.tanks.lt,sv.lt)}
+   if(j.all.waves)for(const f of['mw','kl'])for(const c of['l','m','h'])sv[f][c]=Math.max(sv[f][c]||0,(loc.waves[f]||{})[c]||0);
+   coSilent(j.bal+qPend);persistQ();cloudRefresh()}
+  cloudBusy=false;cloudUI('☁ синхронизировано')}).catch(e=>{clearTimeout(t0);cloudBusy=false;cloudUI(e&&e.error=='no_db'?'☁ база не подключена':'☁ нет связи');setTimeout(cloudLoad,30000)})}
 
 /* ===== Картинки танков: папка img/tanks/ рядом с index.html. Чего нет — рисуется кодом ===== */
 const TIMG='img/tanks/',TVER='1',TI={},TSZ=2.4; // TVER — меняйте при замене картинок (сброс кэша); TSZ — размер танка относительно его радиуса
@@ -355,17 +393,17 @@ function hitP(v,quiet){p.hp-=v;p.fl=.08;hurt=.3;shake=Math.max(shake,5);vib(30);
 function ovStat(){const t=TK(),e=$('#t2'),br=!!sv.brk[sv.tank];e.textContent='Танк «'+t.n+'» '+(br?'разбит — почините его в гараже':'к бою готов');e.style.color=br?'#ff8a7a':'#8fd48a'}
 function ppShow(h,t,btns){$('#pph').textContent=h;$('#ppt').textContent=t;const b=$('#ppb');b.innerHTML='';for(const[l,fn,c]of btns){const x=document.createElement('button');x.textContent=l;if(c)x.style.cssText=c;x.onclick=()=>{$('#pp').classList.remove('s');if(fn)fn()};b.appendChild(x)}$('#pp').classList.add('s')}
 function quickFill(t){const r=rack(),cap=capOf(t),pr=shp(t,'ap'),need=cap-rtot(r);if(need>0){const n=pr>0?Math.min(need,Math.floor(sv.co*100/pr)):need;sv.co-=pr>0?Math.ceil(n*pr/100):0;r.ap+=n}if(rtot(r)<needAm(t))r.ap+=needAm(t)-rtot(r);svs();$('#co').textContent=sv.co}
-function tryGo(){const t=TK(),r=rack(),T=rtot(r),cap=capOf(t),pr=shp(t,'ap');
+function tryGo(){if(cloudBusy){$('#t2').textContent='Загрузка прогресса…';$('#t2').style.color='#f2c14e';return}const t=TK(),r=rack(),T=rtot(r),cap=capOf(t),pr=shp(t,'ap');
  if(sv.brk[sv.tank]){ppShow('Танк разбит','Танк «'+t.n+'» нужно починить в гараже (карточка танка → «Ремонт»).',[['В гараж',()=>$('#shop').click()],['Отмена']]);return}
  if(T>=cap){startBattle();return}
  const full=Math.ceil((cap-T)*pr/100),afford=pr==0||sv.co>=full,any=pr==0||sv.co*100>=pr,lbl=T<needAm(t)&&!any?'Паёк штаба · бесплатно':'Пополнить · '+(pr==0?'бесплатно':afford?full+' 🪙':'на '+sv.co+' 🪙');
  const btns=[];if(T>=needAm(t))btns.push(['В бой',startBattle]);btns.push([lbl,()=>{quickFill(t);tryGo()}]);btns.push(['Отмена']);
  ppShow('Ваш боекомплект не полный',(T<needAm(t)?'Заряжено '+T+' из '+cap+'. Для боя нужно минимум '+needAm(t)+'.':'Заряжено '+T+' из '+cap+'. Выйти в бой с неполным боекомплектом?'),btns)}
-function endScr(t1,t2){over=true;bossT=-1;if(atFront)selW=MW()+1;wselR();svs();setPause(0);$('#t1').textContent=t1;ovStat();$('#go').textContent='Играть снова';$('#co').textContent=sv.co;$('#ov').classList.remove('h')}
+function endScr(t1,t2){over=true;bossT=-1;if(atFront)selW=MW()+1;wselR();svs();cloudApplyQ();cloudFlush();setPause(0);$('#t1').textContent=t1;ovStat();$('#go').textContent='Играть снова';$('#co').textContent=sv.co;$('#ov').classList.remove('h')}
 function desert(){if(!started||over)return;sv.co=Math.max(0,sv.co-WS.co);const t=TK();if(hasWork(t))sv.xp[t.id]=Math.max(0,(sv.xp[t.id]||0)-WS.xp);else sv.fx=Math.max(0,sv.fx-WS.xp);
  sv.brk[sv.tank]=1;report(wave-1,score,1);$('#dz').classList.remove('s');endScr('Дезертирство','Забег проигран · волна '+wave+' · награды волны потеряны · танк разбит — почините его в гараже')}
 let dzWas=0;function dzOpen(){if(!started||over||pause)return;dzWas=paused;paused=1;st.L=st.R=null;ms.down=0;$('#dz').classList.add('s')}
-function die(){p.hp=0;over=true;if(atFront)selW=MW()+1;wselR();sv.brk[sv.tank]=1;svs();report(wave-1,score,1);wreck(p);boom(p.x,p.y,1.7);setTimeout(()=>{$('#t1').textContent=tmo?'Время на босса вышло':'Танк уничтожен';ovStat();$('#go').textContent='Играть снова';$('#co').textContent=sv.co;$('#ov').classList.remove('h')},900)}
+function die(){p.hp=0;over=true;if(atFront)selW=MW()+1;wselR();sv.brk[sv.tank]=1;svs();cloudFlush();report(wave-1,score,1);wreck(p);boom(p.x,p.y,1.7);setTimeout(()=>{$('#t1').textContent=tmo?'Время на босса вышло':'Танк уничтожен';ovStat();$('#go').textContent='Играть снова';$('#co').textContent=sv.co;$('#ov').classList.remove('h')},900)}
 // таран: чем тяжелее цель, тем меньше ей урона и тем больше ответный урон игроку
 function ram(e){e.ramT=.8;const k=Math.min(1,p.spd/(S*5)),wt=e.wt,dm=+(RAM_DMG*k*Math.sqrt((TKc.wt||10)/wt)).toFixed(1),bk=Math.min(RAM_CAP,RAM_BACK*Math.sqrt(wt/(TKc.wt||10)))*(TKc.inm||1);
  WS.d+=Math.min(dm,Math.max(e.hp,0));e.hp-=dm;e.fl=.1;dnum(e,dm);spark((p.x+e.x)/2,(p.y+e.y)/2);sfx(3);shake=Math.max(shake,3);if(e.hp<=0)kill(e);hitP(bk)}
@@ -477,7 +515,7 @@ function arrows(){if(over||!started)return;const m=S*.9,cx=W/2,cy=H/2;
   x.save();x.translate(cx+dx*t,cy+dy*t);x.rotate(Math.atan2(dy,dx));x.globalAlpha=.9;x.fillStyle=e.aimT>0?'#ff3b3b':e.c;x.strokeStyle='rgba(0,0,0,.65)';x.lineWidth=2;
   x.beginPath();x.moveTo(S*.5*k,0);x.lineTo(-S*.3*k,-S*.38*k);x.lineTo(-S*.3*k,S*.38*k);x.closePath();x.fill();x.stroke();x.restore()}}
 function applyUp(){p.sp=TKc.sp;p.mhp=TKc.hp;p.rate=TKc.cd;p.ht=TKc.ht;p.wt=TKc.wt}
-function showUp(){if(!(wave%5==0&&wave<=MW()))report(wave,score);const first=wave>MW(),rk=rewK();let bn=0;if(first){bn=Math.ceil(WS.co*FIRST_MUL);const bx=Math.ceil(WS.xp*FIRST_MUL);sv.co+=bn;WS.co+=bn;addXP(bx);WS.xp+=bx;sv.mw[TK().c]=wave}svs();pause=1;p.hp=Math.min(p.mhp,p.hp+150);let fixed=0;const u=$('#up'),cost=()=>Math.ceil(10*Math.pow(1.15,rpN)),render=()=>{const c=cost();
+function showUp(){if(!(wave%5==0&&wave<=MW()))report(wave,score);const first=wave>MW(),rk=rewK();let bn=0;if(first){bn=Math.ceil(WS.co*FIRST_MUL);const bx=Math.ceil(WS.xp*FIRST_MUL);sv.co+=bn;WS.co+=bn;addXP(bx);WS.xp+=bx;sv.mw[TK().c]=wave}svs();cloudFlush();pause=1;p.hp=Math.min(p.mhp,p.hp+150);let fixed=0;const u=$('#up'),cost=()=>Math.ceil(10*Math.pow(1.15,rpN)),render=()=>{const c=cost();
  u.innerHTML='<h2>Волна '+wave+' пройдена</h2><div class="ws"><span>Нанесено урона</span><b>'+Math.round(WS.d)+'</b><span>Уничтожено техники</span><b>'+WS.k+'</b><span>Убито боссов</span><b>'+WS.b+'</b><span>Опыт</span><b>+'+WS.xp+'</b><span>Монеты за волну</span><b>+'+WS.co+' 🪙</b><span>Броня</span><b>'+Math.round(p.hp/p.mhp*100)+'%</b>'+(first?'<span>Первое прохождение</span><b>+'+bn+' 🪙</b>':'')+(rk<1?'<span>Награда за слабую волну</span><b>×'+rk.toFixed(2)+'</b>':'')+'</div><p>Монет всего: '+sv.co+' 🪙</p><div class="cd"><button data-k="rp"'+(fixed||sv.co<c||p.hp>=p.mhp?' disabled':'')+'><b>🔧</b>Полный ремонт<small>'+c+' 🪙</small></button></div><div class="cd" style="margin-top:8px"><button class="cl" data-k="nx" style="margin:0">Следующая волна ▶</button><button data-k="ex">Выход</button></div>';u.classList.remove('h');
  u.querySelectorAll('button').forEach(b=>b.onclick=()=>{const k=b.dataset.k;
   if(k=='nx'){u.classList.add('h');pause=0;startWave();return}
@@ -494,7 +532,7 @@ function buildMap(l){ob=[];paintGround();bl=[];mn=[];wk=[];const B=(a,b,w,h,s)=>
  else for(let i=0;i<N(14*OK);i++){const s=i<N(4*OK),ww=s?S*2:w,h=s?S*1.2:w;B(R(S,GW-S-ww),R(S,GH-S-h),ww,h,s)}
  fixCrates(); ob=ob.filter(o=>Math.hypot(o.x+o.w/2-p.x,o.y+o.h/2-p.y)>S*3+Math.max(o.w,o.h)/2)}
 $('#shop').onclick=()=>{gdr=null;gcl=TK().c;gtk=null;gmsg='';gsk=0;gshop=0;garage()}
-selW=MW()+1;wselR();addEventListener('pagehide',()=>{svs()});addEventListener('visibilitychange',()=>{if(document.hidden)svs()});;$('#co').textContent=sv.co;
+selW=MW()+1;wselR();addEventListener('pagehide',()=>{svs();cloudFlush(true)});addEventListener('visibilitychange',()=>{if(document.hidden){svs();cloudFlush(true)}});;$('#co').textContent=sv.co;
 function efire(e){const t0=e.t,ty=e.type;
  if(ty=='M'){mn.push({x:e.x,y:e.y,l:25,a:.8,d:e.dmg*2.5});if(mn.length>12)mn.shift();return}
  if(ty=='Q'){e.br=3;e.bc=0;return}
@@ -615,7 +653,7 @@ function setPause(v){paused=v?1:0;$('#pz').classList.toggle('s',!!paused);$('#ps
 $('#ps').onclick=()=>{if(started&&!over&&!pause)setPause(!paused)};$('#rs').onclick=()=>setPause(0);
 $('#mn').onpointerdown=e=>e.stopPropagation();$('#mn').onclick=dzOpen;$('#dcn').onclick=()=>{$('#dz').classList.remove('s');setPause(dzWas)};$('#dsr').onclick=desert;$('#dz').onpointerdown=e=>e.stopPropagation();
 resize();p={x:GW/2,y:GH/2,a:-PI/2,t:-PI/2,r:.55,hp:100,rc:0,fl:0,c:'#4f9d62'};en=[];bl=[];pt=[];rg=[];ob=[];queue=[];pk=[];up={sp:0,hp:0,rt:0};over=true;
-tinit();renderAuth();ovStat();try{const m=sessionStorage.getItem('tk-msg');if(m){sessionStorage.removeItem('tk-msg');$('#t2').textContent=m;$('#t2').style.color='#f2c14e'}}catch(e){}checkSeason();
+tinit();renderAuth();ovStat();try{const m=sessionStorage.getItem('tk-msg');if(m){sessionStorage.removeItem('tk-msg');$('#t2').textContent=m;$('#t2').style.color='#f2c14e'}}catch(e){}checkSeason().then(cloudLoad,cloudLoad);
 requestAnimationFrame(loop);
 </script>
 </body>
