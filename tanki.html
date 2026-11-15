@@ -141,7 +141,7 @@ const XFX=10;                     // сколько свободного опы�
 let NEC=0;                        // шанс союзника-некроманта (из навыка)
 const PCRIT_MUL=2,BCRIT_CH=15,BCRIT_MUL=1.5; // крит: множитель урона игрока; шанс и множитель крита босса по игроку (удар в борт/корму)
 const RAM_DMG=10,RAM_BACK=25,RAM_CAP=60;      // таран: урон врагу на полной скорости, ответный урон игроку и его потолок
-const defSv=()=>({v:3,mw:0,am:{},brk:{},co:0,tank:'l1',tk:['l1'],xp:{},fx:0,mod:{},eq:{},sk:{},sks:{}});
+const defSv=()=>({v:3,rev:0,mw:0,am:{},brk:{},co:0,tank:'l1',tk:['l1'],xp:{},fx:0,mod:{},eq:{},sk:{},sks:{}});
 let sv=defSv();try{const o=JSON.parse(localStorage.getItem('tk')||'{}');if(o.v>=2)Object.assign(sv,o);else{sv.co=+o.co||0}}catch(e){}
 sv.tk=(sv.tk||[]).filter(id=>TANKS.some(t=>t.id==id));if(!sv.tk.includes('l1'))sv.tk.unshift('l1');if(!sv.tk.includes(sv.tank))sv.tank='l1';sv.xp=sv.xp||{};sv.fx=+sv.fx||0;sv.mod=sv.mod||{};sv.eq=sv.eq||{};sv.sk=sv.sk||{};sv.sks=sv.sks||{};if(typeof sv.am=='number'&&Number.isFinite(sv.am))sv.lg=sv.am;if(!sv.am||typeof sv.am!='object')sv.am={};sv.brk=sv.brk&&typeof sv.brk=='object'?sv.brk:{};sv.mw=Math.max(0,Math.floor(+sv.mw||0));
 const TK=id=>TANKS.find(t=>t.id==(id||sv.tank)),own=id=>sv.tk.includes(id),preds=t=>TANKS.filter(s=>s.c==t.c&&s.t==t.t-1);
@@ -193,7 +193,15 @@ function research(t,m){const L=modLv(t.id,m)+1;if(!own(t.id))return'Сначал
 function install(t,m,L){if(own(t.id)&&L>=1&&L<=modLv(t.id,m))(sv.eq[t.id]=sv.eq[t.id]||{})[m]=L}
 function skUp(t,k){const r=skR(t.id,k)+1;if(!own(t.id)||!maxed(t.id))return'Навыки открываются после прокачки всех модулей';if(r>5)return'';const x=SXP(t,r),g=SGD(t,r);if((sv.xp[t.id]||0)<x)return'Не хватает опыта на этом танке';if(sv.co<g)return'Не хватает монет';sv.xp[t.id]-=x;sv.co-=g;const o=sv.sk[t.id]=sv.sk[t.id]||{on:''};o[k]=r;if(!o.on)o.on=k;return''}
 function skSel(t,k){if(own(t.id)&&maxed(t.id)&&skR(t.id,k)>0)(sv.sk[t.id]=sv.sk[t.id]||{on:''}).on=k}
-const svs=()=>{try{localStorage.setItem('tk',JSON.stringify(sv))}catch(e){}};
+/* защита от нескольких вкладок: у сохранения есть номер ревизии. Устаревшая вкладка (открытая раньше, пока в другой шёл прогресс)
+   больше не перезаписывает свежий прогресс, а перезагружается и берёт актуальный. Раз в 5 минут делается резервная копия в 'tk-bak'. */
+let myRev=sv.rev|0,bakT=0,staleF=0;
+function staleTab(){if(staleF&&!(!started||over))return;staleF=1;if(!started||over){try{sessionStorage.setItem('tk-msg','Прогресс был обновлён в другой вкладке — загружена свежая версия.')}catch(e){}location.reload()}else try{banner('Прогресс обновлён в другой вкладке — после забега страница перезагрузится')}catch(e){}}
+const svs=()=>{try{const raw=localStorage.getItem('tk');if(raw){let o=null;try{o=JSON.parse(raw)}catch(e){}if(o&&(o.rev|0)!==myRev){staleTab();return}
+  if(Date.now()-bakT>3e5){localStorage.setItem('tk-bak',raw);bakT=Date.now()}}
+  sv.rev=++myRev;localStorage.setItem('tk',JSON.stringify(sv))}catch(e){}};
+addEventListener('storage',e=>{if(e.key=='tk'&&(!started||over))staleTab()});
+document.addEventListener('visibilitychange',()=>{if(!document.hidden&&(!started||over)){try{const o=JSON.parse(localStorage.getItem('tk')||'{}');if((o.rev|0)!==myRev)staleTab()}catch(e){}}});
 
 /* ===== вход через Steam (общий с меню и маджонгом) и рейтинг волн ===== */
 const API='https://rust-mahjong-api.rust-pve.workers.dev';
@@ -595,8 +603,8 @@ function setPause(v){paused=v?1:0;$('#pz').classList.toggle('s',!!paused);$('#ps
 $('#ps').onclick=()=>{if(started&&!over&&!pause)setPause(!paused)};$('#rs').onclick=()=>setPause(0);
 $('#mn').onpointerdown=e=>e.stopPropagation();$('#mn').onclick=dzOpen;$('#dcn').onclick=()=>{$('#dz').classList.remove('s');setPause(dzWas)};$('#dsr').onclick=desert;$('#dz').onpointerdown=e=>e.stopPropagation();
 resize();p={x:GW/2,y:GH/2,a:-PI/2,t:-PI/2,r:.55,hp:100,rc:0,fl:0,c:'#4f9d62'};en=[];bl=[];pt=[];rg=[];ob=[];queue=[];pk=[];up={sp:0,hp:0,rt:0};over=true;
-tinit();renderAuth();ovStat();checkSeason();
+tinit();renderAuth();ovStat();try{const m=sessionStorage.getItem('tk-msg');if(m){sessionStorage.removeItem('tk-msg');$('#t2').textContent=m;$('#t2').style.color='#f2c14e'}}catch(e){}checkSeason();
 requestAnimationFrame(loop);
 </script>
 </body>
-</html>
+ </html>
