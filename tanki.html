@@ -230,8 +230,8 @@ function logout(){tok=me=runTok=null;try{localStorage.removeItem('rm-token')}cat
 function renderAuth(){const a=$('#au');a.innerHTML='';
  if(me){if(me.a&&me.a.indexOf('https://')===0){const im=document.createElement('img');im.src=me.a;im.alt='';a.appendChild(im)}
   const n=document.createElement('span');n.textContent=me.n+' · рекорды идут в рейтинг';a.appendChild(n);const cs=document.createElement('span');cs.className='cs sm';cs.textContent=cloudSt;a.appendChild(cs);
-  const o=document.createElement('a');o.href='#';o.className='sm';o.textContent='Выйти';o.onclick=e=>{e.preventDefault();logout()};a.appendChild(o)}
- else{const l=document.createElement('a');l.className='lk';l.textContent='Войти через Steam для рейтинга';l.href=API+'/auth/steam';l.onclick=()=>{try{sessionStorage.setItem('rm-back','tanki.html')}catch(e){}};a.appendChild(l)}}
+  const o=document.createElement('a');o.href='index.html#profile';o.className='sm';o.textContent='Профиль';a.appendChild(o)}
+ else{const l=document.createElement('a');l.className='lk';l.textContent='Войти для рейтинга';l.href='index.html';l.onclick=()=>{try{sessionStorage.setItem('rm-back','tanki.html|'+Date.now())}catch(e){}};a.appendChild(l)}}
 /* сезон прогресса: если владелец сменил TANK_PROGRESS_SEASON на сервере, сохранённый прогресс сбрасывается при заходе */
 function checkSeason(){return fetch(API+'/api/seasons').then(r=>r.json()).then(j=>{const cur=String(j.tank);let old=null;try{old=localStorage.getItem('tk-season')}catch(e){}
  if(old===cur)return;
@@ -660,4 +660,4 @@ tinit();renderAuth();ovStat();try{const m=sessionStorage.getItem('tk-msg');if(m)
 requestAnimationFrame(loop);
 </script>
 </body>
-                                    </html>
+</html>
