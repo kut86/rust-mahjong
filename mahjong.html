@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="ru">
-<head> 
+<head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <link rel="manifest" href="manifest.json">
@@ -456,7 +456,7 @@ function loadLb(mode){
       var c1=document.createElement('td');c1.textContent=i+1;
       var c2=document.createElement('td');
       if(p.a&&p.a.indexOf('https://')===0){var im=document.createElement('img');im.className='av';im.src=p.a;im.alt='';c2.appendChild(im)}
-      var a=document.createElement('a');a.textContent=p.n;a.href='https://steamcommunity.com/profiles/'+p.id;a.target='_blank';a.rel='noopener';c2.appendChild(a);
+      var a=document.createElement('a');a.textContent=p.n;if(/^\d{17}$/.test(p.id)){a.href='https://steamcommunity.com/profiles/'+p.id;a.target='_blank';a.rel='noopener'}c2.appendChild(a);
       var c3=document.createElement('td');c3.textContent=mode==='speed'?fmtMs(p.ms):p.c;
       tr.appendChild(c1);tr.appendChild(c2);tr.appendChild(c3);body.appendChild(tr);
     });
