@@ -59,7 +59,10 @@ a.btn{display:inline-block;background:#1b2838;color:#fff;text-decoration:none;bo
 .pf h3{margin:0 0 12px}.pf .lnk{display:flex;align-items:center;justify-content:space-between;gap:10px;border-top:1px solid var(--line);padding:10px 2px;text-align:left}
 .pf .lnk b{display:block}.pf .lnk small{color:var(--muted)}.pf .okk{color:#6fe08a;white-space:nowrap}
 .pf #pfmsg{min-height:1.3em;color:var(--rustHi);font-size:.9rem;margin:8px 0}.pf .row2{display:flex;gap:10px;justify-content:center;margin-top:8px}
-#gbtn,#gbtn2{display:inline-block;vertical-align:middle;min-height:34px}
+#gbtn,#gbtn2{display:inline-block;vertical-align:middle}
+.gw{position:relative;display:inline-block;vertical-align:middle;overflow:hidden;border-radius:8px}
+.gw .gi{position:absolute;left:0;top:0;opacity:.01;z-index:2;overflow:hidden}
+.gw .gv{display:inline-block;cursor:pointer;font:inherit}
 .tabs2{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}.tabs2 button{width:100%;font-size:.9rem;padding:8px 6px}
 #lbdesc{min-height:3.2em;margin:0 0 8px}.lbwrap{min-height:200px}
 .gpick{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:14px 0 8px}.gpick button{display:flex;flex-direction:column;align-items:center;gap:6px;padding:18px 8px;line-height:1.2}
@@ -85,7 +88,7 @@ a.btn{display:inline-block;background:#1b2838;color:#fff;text-decoration:none;bo
     <a class="gc" href="mahjong.html"><span class="ge">🀄</span><b>МАДЖОНГ</b><small>5 уровней, промокоды для магазина, рейтинг по прохождениям и скорости</small></a>
     <a class="gc" href="tanki.html"><span class="ge">🪖</span><b>ТАНЧИКИ</b><small>Волны врагов, боссы, гараж и скины, рейтинг по волнам и убитым боссам</small></a>
   </div>
-  <p class="note">Вход через Steam один на все игры: после входа ваши результаты попадают в общий рейтинг.</p>
+  <p class="note">Вход один на все игры (Steam или Google): после входа ваши результаты попадают в общий рейтинг.</p>
 </div>
 
 <div class="ov" id="pfov"><div class="box pf">
@@ -147,8 +150,17 @@ function gInit(cb){
   if(!document.getElementById('gsi')){var sc=document.createElement('script');sc.id='gsi';sc.src='https://accounts.google.com/gsi/client';sc.async=true;sc.onload=function(){go()};document.head.appendChild(sc)}
   else{var t=setInterval(function(){if(go())clearInterval(t)},300)}
 }
-function gButton(el,mode,text){
-  gInit(function(){gMode=mode;el.innerHTML='';google.accounts.id.renderButton(el,{theme:'filled_black',size:'large',text:text,shape:'pill',locale:'ru'})});
+function gButton(el,mode,label,cls){
+  // Видимая кнопка в стиле Steam; настоящая кнопка Google лежит поверх неё почти прозрачной и принимает нажатие
+  el.innerHTML='';el.className='gw';
+  var v=document.createElement(cls==='btn'?'a':'button');v.className=cls==='btn'?'btn gv':'gv';v.textContent=label;
+  var i=document.createElement('div');i.className='gi';el.appendChild(v);el.appendChild(i);
+  gInit(function(){
+    gMode=mode;var w=Math.max(120,Math.min(400,v.offsetWidth||200)),h=v.offsetHeight||40;
+    i.style.width=w+'px';i.style.height=h+'px';
+    google.accounts.id.renderButton(i,{theme:'filled_black',size:'large',text:'signin_with',shape:'rectangular',width:w,locale:'ru'});
+    i.onmouseenter=function(){gMode=mode};i.ontouchstart=function(){gMode=mode};
+  });
 }
 function gGot(resp){
   if(gMode==='link'){
@@ -156,7 +168,7 @@ function gGot(resp){
     api('/api/link-google',{credential:resp.credential}).then(function(){pfMsg('Google привязан ✓');pfLoad()})
       .catch(function(e){pfMsg(e&&e.error==='conflict'?'Этот Google уже привязан к другому аккаунту.':e&&e.error==='other'?'К аккаунту уже привязан другой Google.':'Не удалось привязать Google.')});
   }else{
-    api('/auth/google',{credential:resp.credential}).then(function(j){setTok(j.token);if(tok){try{localStorage.setItem('rm-token',tok)}catch(e){}}renderAuth()})
+    api('/auth/google',{credential:resp.credential}).then(function(j){setTok(j.token);if(tok){try{localStorage.setItem('rm-token',tok)}catch(e){}}renderAuth();goBack()})
       .catch(function(){var b=$('auth');b.appendChild(document.createTextNode(' Не удалось войти через Google'))});
   }
 }
@@ -167,10 +179,10 @@ function pfLoad(){
     $('pfg').textContent=j.google?'Привязан':'Не привязан';
     var sb=$('pfsb');sb.innerHTML='';
     if(j.steam){sb.className='okk';sb.textContent='✓'}
-    else{sb.className='';var b=document.createElement('button');b.textContent='Привязать';b.onclick=function(){pfMsg('Открываю Steam…');api('/api/link-start',{}).then(function(r){try{sessionStorage.setItem('rm-back','index.html')}catch(e){}location.href=r.url}).catch(function(){pfMsg('Не удалось начать привязку.')})};sb.appendChild(b)}
+    else{sb.className='';var b=document.createElement('button');b.textContent='Привязать';b.onclick=function(){pfMsg('Открываю Steam…');api('/api/link-start',{}).then(function(r){location.href=r.url}).catch(function(){pfMsg('Не удалось начать привязку.')})};sb.appendChild(b)}
     var gb=$('pfgb');gb.innerHTML='';
     if(j.google){gb.className='okk';gb.textContent='✓'}
-    else{gb.className='';var d=document.createElement('span');d.id='gbtn2';gb.appendChild(d);gButton(d,'link','continue_with')}
+    else{gb.className='';var d=document.createElement('span');d.id='gbtn2';gb.appendChild(d);gButton(d,'link','Привязать','')}
   }).catch(function(){pfMsg('Не удалось загрузить профиль.')});
 }
 function openProfile(msg){
@@ -188,8 +200,8 @@ function renderAuth(){
     b.onclick=function(){openProfile()};a.appendChild(b);
   }else{
     var l=document.createElement('a');l.className='btn';l.textContent='Войти через Steam';l.href=API+'/auth/steam';
-    l.onclick=function(){try{sessionStorage.setItem('rm-back','index.html')}catch(e){}};a.appendChild(l);
-    var g=document.createElement('span');g.id='gbtn';g.style.marginLeft='8px';a.appendChild(g);gButton(g,'login','signin_with');
+    a.appendChild(l);
+    var g=document.createElement('span');g.id='gbtn';g.style.marginLeft='8px';a.appendChild(g);gButton(g,'login','Google auth','btn');
   }
 }
 
@@ -257,11 +269,17 @@ if(_lk&&me)openProfile('Steam привязан ✓');
 else if(_er==='link_conflict'&&me)openProfile('У этого Steam уже есть свой аккаунт с прогрессом, привязать его нельзя. Войдите через Steam отдельно.');
 else if(_er==='link_other'&&me)openProfile('К аккаунту уже привязан другой Steam.');
 if(_lk||_er)try{history.replaceState(null,'',location.pathname+location.search)}catch(e){}
-// После входа возвращаем игрока на ту страницу, откуда он нажал «Войти через Steam»
-try{
-  var back=sessionStorage.getItem('rm-back');
-  if(back){sessionStorage.removeItem('rm-back');if(tok&&/^[a-z]+\.html$/.test(back)&&back!=='index.html')location.replace(back)}
-}catch(e){}
+// После входа возвращаем игрока в ту игру, откуда он пришёл войти (запись живёт 10 минут)
+function goBack(){
+  try{
+    var back=sessionStorage.getItem('rm-back');if(!back)return;
+    var p=back.split('|'),name=p[0],t=+p[1]||0;
+    if(Date.now()-t>600000||!/^[a-z]+\.html$/.test(name)||name==='index.html'){sessionStorage.removeItem('rm-back');return}
+    if(tok){sessionStorage.removeItem('rm-back');location.replace(name)}
+  }catch(e){}
+}
+if(!_lk&&!_er)goBack();
+if(/[#&]profile/.test(_h)&&me){openProfile();try{history.replaceState(null,'',location.pathname+location.search)}catch(e){}}
 </script>
 </body>
 </html>
