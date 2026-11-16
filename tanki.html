@@ -260,9 +260,13 @@ function cloudFlush(ka){if(!tok||!cloudOn||cloudFly)return;if(cloudT){clearTimeo
   for(const k in j.parts){const r=j.parts[k];prt[k]=r.rev;
    if(r.v){if(started&&!over){adoptQ=adoptQ||{};adoptQ[k]=r.v;sent[k]=js[k]}else{applyPart(k,r.v);sent[k]=JSON.stringify(partOf(k));ch=true}}else sent[k]=js[k]}
   if(ch)cloudRefresh();cloudUI('☁ синхронизировано');cloudDirty()}).catch(e=>{cloudFly=false;cloudUI('☁ нет связи');if(!cloudT)cloudT=setTimeout(()=>{cloudT=0;cloudFlush()},30000)})}
-function cloudLoad(){if(!tok)return Promise.resolve();cloudBusy=true;cloudUI('☁ загрузка…');
+/* Локальный прогресс принадлежит аккаунту ('tk-own'). Гостевой прогресс (владельца нет) забирает первый вошедший аккаунт;
+   прогресс другого аккаунта не смешивается с текущим: локальные данные сбрасываются, берётся только облако этого аккаунта. */
+function bindOwner(){let own=null;try{own=localStorage.getItem('tk-own')}catch(e){}
+ if(own&&me&&own!==me.sid){sv=defSv();wrapCo();qPend=0;qIn=null;prt={};sent={};adoptQ=null;try{localStorage.removeItem('tk-bak')}catch(e){}normSv();TKc=eff(TK());svs();persistQ();$('#co').textContent=sv.co}}
+function cloudLoad(){if(!tok)return Promise.resolve();bindOwner();cloudBusy=true;cloudUI('☁ загрузка…');
  const t0=setTimeout(()=>{if(cloudBusy){cloudBusy=false;cloudUI('☁ нет связи')}},5000);
- return api('/api/tkp',{ops:qIn?[qIn]:[],load:1}).then(j=>{clearTimeout(t0);const sentOp=qIn;qIn=null;cloudOn=true;
+ return api('/api/tkp',{ops:qIn?[qIn]:[],load:1}).then(j=>{clearTimeout(t0);const sentOp=qIn;qIn=null;cloudOn=true;try{localStorage.setItem('tk-own',me.sid)}catch(e){}
   if(j.empty){qIn={op:'init-'+uid(),d:Math.max(0,sv.co-(sentOp?j.bal:0))};qPend=0;cloudFlush()} // на сервере пусто — загружаем локальный прогресс
   else{const loc={};for(const k in PARTS)loc[k]=JSON.parse(JSON.stringify(partOf(k)));
    for(const k in j.all){applyPart(k,j.all[k].v);prt[k]=j.all[k].rev;sent[k]=JSON.stringify(partOf(k))}
