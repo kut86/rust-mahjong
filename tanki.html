@@ -599,7 +599,6 @@ function cardHTML(t){const mine=own(t.id),e=eff(t),o=openInfo(t),on=sv.tank==t.i
 const SL={};function sload(t){const d=TDIR(t);if(SL[t.id])return;SL[t.id]=1;for(const k in SK)tload('si-'+t.id+'-'+k,d+'icon-'+k+'.png',d+'hull-'+k+'.png','common/skin-'+k+'.png','skin-'+k+'.png')}
 function skinsHTML(t){const mine=own(t.id);sload(t);
  return `<p class='tg' style='margin:2px 0 8px'>Скин для «${t.n}»: цвет танка, выстрелов и взрывов${mine?'':' · сначала откройте танк'}</p><div class='cd'>${Object.entries(SK).map(([k,s])=>{const ow=skOwn(t.id,k),sel=skinOf(t.id)==k;return `<button data-i='${k}' ${mine?'':'disabled'} style='border-color:${sel?'#e8a73a':'transparent'}'>${ic('si-'+t.id+'-'+k,`<b style='color:${s.c}'>■</b>`)}${s.n}<small>${sel?'выбран':ow?'выбрать':SKP(t,k)+' 🪙'}</small></button>`}).join('')}</div>`}
-const statsHTML=()=>`<table class='stt'><tr><th></th><th>Пройдено волн</th><th>Уничтожено</th></tr>${['l','m','h'].map(c=>`<tr><td><b>${CN[c]}</b></td><td>${sv.mw[c]}</td><td>${sv.kl[c]}</td></tr>`).join('')}</table>`;
 function garage(){const u=$('#up');let h='',body='';
  if(gshop){
   h=`<div class='cd'><button data-a='shopback' style='min-width:0'>← К дереву</button></div>`;
@@ -608,7 +607,7 @@ function garage(){const u=$('#up');let h='',body='';
  else{const n=Math.floor(sv.fx/XFX);h=`<p>Свободный опыт: ${sv.fx} · Опыт копится на танке, на котором играете</p>`;
   body=`<div class='cd'>${Object.entries(CL).map(([k,nm])=>`<button data-c='${k}' style='border-color:${gcl==k?'#e8a73a':'transparent'}'>${nm}</button>`).join('')}</div>${treeHTML(gcl)}<div class='cd'><button data-x='1'${n<1?' disabled':''}>Обменять свободный опыт<span class='st'>${n} 🪙 за ${n*XFX} оп.</span></button><button data-a='shop'>🛒 Магазин<span class='st'>пока нет предложений</span></button></div>`}
 ovStat();wselR();$('#t1').textContent='🪖 Танчики';
- u.innerHTML=`<h2>Гараж · ${sv.co} 🪙</h2>${gshop?'':statsHTML()}${h}${body}<button class='cl'>Назад</button>`;u.classList.remove('h');
+ u.innerHTML=`<h2>Гараж · ${sv.co} 🪙</h2>${h}${body}<button class='cl'>Назад</button>`;u.classList.remove('h');
  const sync=()=>{svs();TKc=eff(TK());$('#co').textContent=sv.co};
  u.querySelectorAll("[data-a='shop']").forEach(b=>b.onclick=()=>{gshop=1;gmsg='';garage()});
  u.querySelectorAll("[data-a='shopback']").forEach(b=>b.onclick=()=>{gshop=0;gmsg='';garage()});
@@ -661,4 +660,4 @@ tinit();renderAuth();ovStat();try{const m=sessionStorage.getItem('tk-msg');if(m)
 requestAnimationFrame(loop);
 </script>
 </body>
-</html>
+                                    </html>
