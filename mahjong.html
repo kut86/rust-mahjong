@@ -28,7 +28,8 @@ button{font:inherit;background:var(--rust);color:#fff;border:0;border-radius:8px
 button.alt{background:var(--panel);border:1px solid var(--line);color:var(--text)}
 button:disabled{opacity:.5;cursor:default}
 button:focus-visible{outline:3px solid var(--text);outline-offset:2px}
-#stage{position:absolute;z-index:1;left:0;right:0;top:96px;bottom:0;display:flex;align-items:center;justify-content:center}
+#authbar{position:fixed;left:0;right:0;bottom:8px;z-index:6;display:flex;justify-content:center;pointer-events:none}#authbar .user{pointer-events:auto;flex-wrap:wrap;justify-content:center}
+#stage{position:absolute;z-index:1;left:0;right:0;top:96px;bottom:52px;display:flex;align-items:center;justify-content:center}
 #board{position:relative}
 .tile{position:absolute;background:linear-gradient(145deg,#f1e8cf,var(--face));border-radius:9px;
   box-shadow:3px 4px 0 var(--edge),5px 7px 8px rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;
@@ -53,7 +54,7 @@ button:focus-visible{outline:3px solid var(--text);outline-offset:2px}
 .box input{width:100%;font:700 1.1rem Consolas,Menlo,monospace;text-align:center;background:var(--bg);color:var(--rustHi);
   border:1px solid var(--line);border-radius:8px;padding:12px;margin-bottom:12px}
 .row{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
-@media (max-width:700px){#codes{top:auto;bottom:10px;max-height:none;flex-direction:row;width:calc(100% - 20px);overflow-x:auto;overflow-y:hidden}.card{min-width:150px;flex:none}#stage{top:128px;bottom:100px}}
+@media (max-width:700px){#codes{top:auto;bottom:58px;max-height:none;flex-direction:row;width:calc(100% - 20px);overflow-x:auto;overflow-y:hidden}.card{min-width:150px;flex:none}#stage{top:128px;bottom:158px}}
 .user{display:flex;align-items:center;gap:8px;font-size:.9rem}
 .user img{width:28px;height:28px;border-radius:50%;border:2px solid var(--rust)}
 a.btn{display:inline-block;background:#1b2838;color:#fff;text-decoration:none;border-radius:8px;padding:8px 14px;border:1px solid #3d5a7a}
@@ -79,9 +80,9 @@ a.btn{display:inline-block;background:#1b2838;color:#fff;text-decoration:none;bo
   <button class="alt" id="rest">Заново</button>
   <button class="alt" id="mute" aria-label="Звук">🔊</button>
   <button class="alt" id="lb">Рейтинг</button>
-  <span id="auth" class="user"></span>
 </header>
 <div id="stage"><div id="board"></div></div>
+<div id="authbar"><span id="auth" class="user"></span></div>
 <div id="codes" aria-live="polite"></div>
 <div id="toast" role="status"></div>
 
@@ -261,7 +262,7 @@ function build(){
   });
   L.types=typesFor(L,tiles.length);
   assign(tiles,L.types);
-  var aw=Math.min(window.innerWidth-(window.innerWidth>700?250:24),980),ah=window.innerHeight-96-20-(window.innerWidth>700?0:132);
+  var aw=Math.min(window.innerWidth-(window.innerWidth>700?250:24),980),ah=window.innerHeight-96-20-(window.innerWidth>700?52:190);
   tw=Math.floor(Math.max(30,Math.min(aw/W,ah/(H*1.2),74)));th=Math.round(tw*1.2);
   board.style.width=(W*tw+16)+'px';board.style.height=(H*th+16)+'px';
   tiles.forEach(function(t){
@@ -431,9 +432,9 @@ function renderAuth(){
   if(me){
     if(me.a&&me.a.indexOf('https://')===0){var im=document.createElement('img');im.src=me.a;im.alt='';a.appendChild(im)}
     var n=document.createElement('span');n.textContent=me.n;a.appendChild(n);
-    var b=document.createElement('button');b.className='alt';b.textContent='Выйти';b.onclick=logout;a.appendChild(b);
+    var b=document.createElement('button');b.className='alt';b.textContent='Профиль';b.onclick=function(){location.href='index.html#profile'};a.appendChild(b);
   }else{
-    var l=document.createElement('a');l.className='btn';l.textContent='Войти через Steam';l.href=API+'/auth/steam';l.onclick=function(){try{sessionStorage.setItem('rm-back','mahjong.html')}catch(e){}};a.appendChild(l);
+    var l=document.createElement('a');l.className='btn';l.textContent='Войти для рейтинга';l.href='index.html';l.onclick=function(){try{sessionStorage.setItem('rm-back','mahjong.html|'+Date.now())}catch(e){}};a.appendChild(l);
   }
 }
 function startRun(){
