@@ -105,6 +105,7 @@ a.btn{display:inline-block;background:#1b2838;color:#fff;text-decoration:none;bo
   <p style="margin:0 0 4px;color:var(--muted);font-size:.85rem">Способы входа в аккаунт. Входя любым из них, вы попадаете в один и тот же аккаунт с одним прогрессом.</p>
   <div class="lnk"><div><b>Steam</b><small id="pfs"></small></div><span id="pfsb"></span></div>
   <div class="lnk"><div><b>Google</b><small id="pfg"></small></div><span id="pfgb"></span></div>
+  <div class="lnk"><div><b>Discord</b><small id="pfd"></small></div><span id="pfdb"></span></div>
   <p id="pfmsg"></p>
   <div class="row2"><button class="alt" id="pflo">Выйти</button><button id="pfcl">Закрыть</button></div>
 </div></div>
@@ -186,6 +187,10 @@ function pfLoad(){
     rememberMethods(j);
     $('pfs').textContent=j.steam?'Привязан':'Не привязан';
     $('pfg').textContent=j.google?'Привязан':'Не привязан';
+    $('pfd').textContent=j.discord?'Привязан':'Не привязан';
+    var db=$('pfdb');db.innerHTML='';
+    if(j.discord){db.className='okk';db.textContent='✓'}
+    else{db.className='';var bd=document.createElement('button');bd.textContent='Привязать';bd.onclick=function(){pfMsg('Открываю Discord…');api('/api/link-start',{p:'discord'}).then(function(r){location.href=r.url}).catch(function(){pfMsg('Не удалось начать привязку.')})};db.appendChild(bd)}
     var sb=$('pfsb');sb.innerHTML='';
     if(j.steam){sb.className='okk';sb.textContent='✓'}
     else{sb.className='';var b=document.createElement('button');b.textContent='Привязать';b.onclick=function(){pfMsg('Открываю Steam…');api('/api/link-start',{}).then(function(r){location.href=r.url}).catch(function(){pfMsg('Не удалось начать привязку.')})};sb.appendChild(b)}
@@ -197,25 +202,26 @@ function pfLoad(){
 function openProfile(msg){
   if(!me)return;
   var im=$('pfav');if(me.a&&me.a.indexOf('https://')===0){im.src=me.a;im.style.display='block'}else im.style.display='none';
-  $('pfn').textContent=me.n;pfMsg(msg||'');$('pfs').textContent='…';$('pfg').textContent='…';$('pfsb').innerHTML='';$('pfgb').innerHTML='';
+  $('pfn').textContent=me.n;pfMsg(msg||'');$('pfs').textContent='…';$('pfg').textContent='…';$('pfd').textContent='…';$('pfsb').innerHTML='';$('pfgb').innerHTML='';$('pfdb').innerHTML='';
   $('pfov').classList.add('show');pfLoad();
 }
 // Какие способы входа привязаны к аккаунту, под которым играли на этом устройстве (хранится только в браузере)
-function rememberMethods(j){try{localStorage.setItem('rm-methods',JSON.stringify({steam:!!j.steam,google:!!j.google}))}catch(e){}}
-function knownMethods(){try{var m=JSON.parse(localStorage.getItem('rm-methods')||'null');return m&&(m.steam||m.google)?m:null}catch(e){return null}}
-var NAMES={steam:'Steam',google:'Google'};
+function rememberMethods(j){try{localStorage.setItem('rm-methods',JSON.stringify({steam:!!j.steam,google:!!j.google,discord:!!j.discord}))}catch(e){}}
+function knownMethods(){try{var m=JSON.parse(localStorage.getItem('rm-methods')||'null');return m&&(m.steam||m.google||m.discord)?m:null}catch(e){return null}}
+var NAMES={steam:'Steam',google:'Google',discord:'Discord'};
 function openLogin(){
   if(me)return;
   var box=$('lgm'),known=knownMethods(),all=!known;
   function build(showAll){
     box.innerHTML='';
     var ks=known?Object.keys(known).filter(function(k){return known[k]}):[];
-    var show=showAll||!known?['steam','google']:ks;
+    var show=showAll||!known?['steam','google','discord']:ks;
     $('lghint').textContent=known&&!showAll
       ?'Вы входили через '+ks.map(function(k){return NAMES[k]}).join(' / ')+'. Другие способы можно добавить в профиле.'
       :'Если вы уже играли, входите тем способом, которым заходили раньше: другой способ создаст новый аккаунт. Второй способ можно привязать в профиле после входа.';
     show.forEach(function(k){
       if(k==='steam'){var l=document.createElement('a');l.className='btn';l.textContent='Войти через Steam';l.href=API+'/auth/steam';box.appendChild(l)}
+      else if(k==='discord'){var d=document.createElement('a');d.className='btn';d.textContent='Discord auth';d.href=API+'/auth/discord';box.appendChild(d)}
       else{var g=document.createElement('span');g.id='gbtn';box.appendChild(g)}
     });
     $('lgmore').style.display=known&&!showAll?'inline':'none';
@@ -294,7 +300,7 @@ function loadLb(id){
 $('lb').onclick=function(){$('lbov').classList.add('show');showPick()};
 $('lbclose').onclick=function(){$('lbov').classList.remove('show')};
 
-var _h=location.hash,_lk=/[#&]linked=steam/.test(_h),_er=(_h.match(/[#&]error=([a-z_]+)/)||[])[1];
+var _h=location.hash,_lk=/[#&]linked=(steam|discord)/.test(_h),_lkw=(_h.match(/[#&]linked=([a-z]+)/)||[])[1],_er=(_h.match(/[#&]error=([a-z_]+)/)||[])[1];
 loadSession();renderAuth();
 $('pfcl').onclick=function(){$('pfov').classList.remove('show')};$('lgcl').onclick=function(){$('lgov').classList.remove('show')};
 if(tok)api('/api/me').then(rememberMethods).catch(function(){});$('pflo').onclick=function(){
@@ -302,9 +308,13 @@ if(tok)api('/api/me').then(rememberMethods).catch(function(){});$('pflo').onclic
   try{['tk','tk-q','tk-bak','tk-own'].forEach(function(k){localStorage.removeItem(k)})}catch(e){}
   logout();
 };
-if(_lk&&me)openProfile('Steam привязан ✓');
+if(_lk&&me)openProfile((_lkw==='discord'?'Discord':'Steam')+' привязан ✓');
 else if(_er==='link_conflict'&&me)openProfile('У этого Steam уже есть свой аккаунт с прогрессом, привязать его нельзя. Войдите через Steam отдельно.');
 else if(_er==='link_other'&&me)openProfile('К аккаунту уже привязан другой Steam.');
+else if(_er==='dlink_conflict'&&me)openProfile('Этот Discord уже привязан к другому аккаунту, привязать его нельзя.');
+else if(_er==='dlink_other'&&me)openProfile('К аккаунту уже привязан другой Discord.');
+else if(_er==='discord_off')alert('Вход через Discord пока не настроен.');
+else if(_er==='discord')alert('Не удалось войти через Discord. Попробуйте ещё раз.');
 if(_lk||_er)try{history.replaceState(null,'',location.pathname+location.search)}catch(e){}
 // После входа возвращаем игрока в ту игру, откуда он пришёл войти (запись живёт 10 минут)
 function goBack(){
