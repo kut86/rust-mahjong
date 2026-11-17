@@ -102,10 +102,11 @@ a.btn{display:inline-block;background:#1b2838;color:#fff;text-decoration:none;bo
 <div class="ov" id="pfov"><div class="box pf">
   <img class="av2" id="pfav" alt="" style="display:none">
   <h3 id="pfn"></h3>
-  <p style="margin:0 0 4px;color:var(--muted);font-size:.85rem">Способы входа в аккаунт. Входя любым из них, вы попадаете в один и тот же аккаунт с одним прогрессом.</p>
+  <p style="margin:0 0 4px;color:var(--muted);font-size:.85rem">Способы входа в аккаунт. Привяжите другие, чтобы входить любым из них, прогресс у них общий.</p>
   <div class="lnk"><div><b>Steam</b><small id="pfs"></small></div><span id="pfsb"></span></div>
   <div class="lnk"><div><b>Google</b><small id="pfg"></small></div><span id="pfgb"></span></div>
   <div class="lnk"><div><b>Discord</b><small id="pfd"></small></div><span id="pfdb"></span></div>
+  <div id="pfrole" style="display:none;margin:6px 0 0;padding:8px 10px;border:1px solid var(--line,#33373b);border-radius:8px;font-size:.85rem;color:var(--muted)"></div>
   <p id="pfmsg"></p>
   <div class="row2"><button class="alt" id="pflo">Выйти</button><button id="pfcl">Закрыть</button></div>
 </div></div>
@@ -191,6 +192,17 @@ function pfLoad(){
     var db=$('pfdb');db.innerHTML='';
     if(j.discord){db.className='okk';db.textContent='✓'}
     else{db.className='';var bd=document.createElement('button');bd.textContent='Привязать';bd.onclick=function(){pfMsg('Открываю Discord…');api('/api/link-start',{p:'discord'}).then(function(r){location.href=r.url}).catch(function(){pfMsg('Не удалось начать привязку.')})};db.appendChild(bd)}
+    var rb=$('pfrole');rb.style.display='none';rb.innerHTML='';
+    if(j.bot&&j.discord){
+      rb.style.display='block';
+      if(j.beta)rb.textContent='🎖 Роль «бета тестер» у вас есть на сервере Discord.';
+      else if(j.left<=0)rb.textContent='Роль «бета тестер»: места закончились.';
+      else{
+        rb.appendChild(document.createTextNode('Роль «бета тестер» на сервере Discord — осталось мест: '+j.left+'. Нужно быть участником сервера. '));
+        var rbt=document.createElement('button');rbt.textContent='Получить роль';
+        rbt.onclick=function(){rbt.disabled=true;api('/api/discord-role',{}).then(function(r){var m={ok:'Роль выдана ✓',already:'Роль уже у вас ✓',full:'Места закончились.',not_member:'Вы не на сервере Discord. Вступите и нажмите снова.',err:'Не получилось выдать роль, попробуйте позже.'};pfMsg(m[r.r]||'Не получилось.');pfLoad()}).catch(function(){pfMsg('Не получилось.');rbt.disabled=false})};
+        rb.appendChild(rbt)}
+    }
     var sb=$('pfsb');sb.innerHTML='';
     if(j.steam){sb.className='okk';sb.textContent='✓'}
     else{sb.className='';var b=document.createElement('button');b.textContent='Привязать';b.onclick=function(){pfMsg('Открываю Steam…');api('/api/link-start',{}).then(function(r){location.href=r.url}).catch(function(){pfMsg('Не удалось начать привязку.')})};sb.appendChild(b)}
@@ -308,7 +320,7 @@ if(tok)api('/api/me').then(rememberMethods).catch(function(){});$('pflo').onclic
   try{['tk','tk-q','tk-bak','tk-own'].forEach(function(k){localStorage.removeItem(k)})}catch(e){}
   logout();
 };
-if(_lk&&me)openProfile((_lkw==='discord'?'Discord':'Steam')+' привязан ✓');
+if(_lk&&me)openProfile((_lkw==='discord'?'Discord':'Steam')+' привязан ✓'+(/[#&]role=1/.test(_h)?' Роль «бета тестер» выдана!':''));
 else if(_er==='link_conflict'&&me)openProfile('У этого Steam уже есть свой аккаунт с прогрессом, привязать его нельзя. Войдите через Steam отдельно.');
 else if(_er==='link_other'&&me)openProfile('К аккаунту уже привязан другой Steam.');
 else if(_er==='dlink_conflict'&&me)openProfile('Этот Discord уже привязан к другому аккаунту, привязать его нельзя.');
