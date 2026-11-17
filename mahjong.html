@@ -434,7 +434,7 @@ function renderAuth(){
     var n=document.createElement('span');n.textContent=me.n;a.appendChild(n);
     var b=document.createElement('button');b.className='alt';b.textContent='Профиль';b.onclick=function(){location.href='index.html#profile'};a.appendChild(b);
   }else{
-    var l=document.createElement('a');l.className='btn';l.textContent='Войти для рейтинга';l.href='index.html';l.onclick=function(){try{sessionStorage.setItem('rm-back','mahjong.html|'+Date.now())}catch(e){}};a.appendChild(l);
+    var l=document.createElement('a');l.className='btn';l.textContent='Войти для рейтинга';l.href='index.html#login';l.onclick=function(){try{sessionStorage.setItem('rm-back','mahjong.html|'+Date.now())}catch(e){}};a.appendChild(l);
   }
 }
 function startRun(){
