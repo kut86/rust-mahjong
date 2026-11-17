@@ -88,9 +88,17 @@ a.btn{display:inline-block;background:#1b2838;color:#fff;text-decoration:none;bo
     <a class="gc" href="mahjong.html"><span class="ge">🀄</span><b>МАДЖОНГ</b><small>5 уровней, промокоды для магазина, рейтинг по прохождениям и скорости</small></a>
     <a class="gc" href="tanki.html"><span class="ge">🪖</span><b>ТАНЧИКИ</b><small>Волны врагов, боссы, гараж и скины, рейтинг по волнам и убитым боссам</small></a>
   </div>
-  <p class="note">Вход один на все игры (Steam или Google): после входа ваши результаты попадают в общий рейтинг.</p>
+  <p class="note">Вход один на все игры: после входа ваши результаты попадают в общий рейтинг.</p>
 </div>
 
+<div class="ov" id="lgov"><div class="box pf">
+  <h3>Вход в аккаунт</h3>
+  <p id="lghint" style="margin:0 0 12px;color:var(--muted);font-size:.9rem"></p>
+  <div id="lgm" style="display:flex;flex-direction:column;align-items:center;gap:10px"></div>
+  <p style="margin:10px 0 0"><a href="#" id="lgmore" style="color:var(--muted);font-size:.85rem;display:none">Другие способы входа</a></p>
+  <p id="lgmsg" style="min-height:1.2em;color:var(--rustHi);font-size:.9rem;margin:8px 0"></p>
+  <div class="row2"><button id="lgcl">Закрыть</button></div>
+</div></div>
 <div class="ov" id="pfov"><div class="box pf">
   <img class="av2" id="pfav" alt="" style="display:none">
   <h3 id="pfn"></h3>
@@ -168,13 +176,14 @@ function gGot(resp){
     api('/api/link-google',{credential:resp.credential}).then(function(){pfMsg('Google привязан ✓');pfLoad()})
       .catch(function(e){pfMsg(e&&e.error==='conflict'?'Этот Google уже привязан к другому аккаунту.':e&&e.error==='other'?'К аккаунту уже привязан другой Google.':'Не удалось привязать Google.')});
   }else{
-    api('/auth/google',{credential:resp.credential}).then(function(j){setTok(j.token);if(tok){try{localStorage.setItem('rm-token',tok)}catch(e){}}renderAuth();goBack()})
-      .catch(function(){var b=$('auth');b.appendChild(document.createTextNode(' Не удалось войти через Google'))});
+    api('/auth/google',{credential:resp.credential}).then(function(j){setTok(j.token);if(tok){try{localStorage.setItem('rm-token',tok)}catch(e){}}$('lgov').classList.remove('show');renderAuth();goBack();if(tok)api('/api/me').then(rememberMethods).catch(function(){})})
+      .catch(function(){$('lgmsg').textContent='Не удалось войти через Google. Попробуйте ещё раз.'});
   }
 }
 function pfMsg(t){$('pfmsg').textContent=t||''}
 function pfLoad(){
   api('/api/me').then(function(j){
+    rememberMethods(j);
     $('pfs').textContent=j.steam?'Привязан':'Не привязан';
     $('pfg').textContent=j.google?'Привязан':'Не привязан';
     var sb=$('pfsb');sb.innerHTML='';
@@ -191,6 +200,31 @@ function openProfile(msg){
   $('pfn').textContent=me.n;pfMsg(msg||'');$('pfs').textContent='…';$('pfg').textContent='…';$('pfsb').innerHTML='';$('pfgb').innerHTML='';
   $('pfov').classList.add('show');pfLoad();
 }
+// Какие способы входа привязаны к аккаунту, под которым играли на этом устройстве (хранится только в браузере)
+function rememberMethods(j){try{localStorage.setItem('rm-methods',JSON.stringify({steam:!!j.steam,google:!!j.google}))}catch(e){}}
+function knownMethods(){try{var m=JSON.parse(localStorage.getItem('rm-methods')||'null');return m&&(m.steam||m.google)?m:null}catch(e){return null}}
+var NAMES={steam:'Steam',google:'Google'};
+function openLogin(){
+  if(me)return;
+  var box=$('lgm'),known=knownMethods(),all=!known;
+  function build(showAll){
+    box.innerHTML='';
+    var ks=known?Object.keys(known).filter(function(k){return known[k]}):[];
+    var show=showAll||!known?['steam','google']:ks;
+    $('lghint').textContent=known&&!showAll
+      ?'Вы входили через '+ks.map(function(k){return NAMES[k]}).join(' / ')+'. Другие способы можно добавить в профиле.'
+      :'Если вы уже играли, входите тем способом, которым заходили раньше: другой способ создаст новый аккаунт. Второй способ можно привязать в профиле после входа.';
+    show.forEach(function(k){
+      if(k==='steam'){var l=document.createElement('a');l.className='btn';l.textContent='Войти через Steam';l.href=API+'/auth/steam';box.appendChild(l)}
+      else{var g=document.createElement('span');g.id='gbtn';box.appendChild(g)}
+    });
+    $('lgmore').style.display=known&&!showAll?'inline':'none';
+    $('lgov').classList.add('show');
+    if(show.indexOf('google')>=0)gButton($('gbtn'),'login','Google auth','btn');
+  }
+  $('lgmore').onclick=function(e){e.preventDefault();build(true)};
+  $('lgmsg').textContent='';build(false);
+}
 function renderAuth(){
   var a=$('auth');a.innerHTML='';
   if(me){
@@ -199,9 +233,7 @@ function renderAuth(){
     var n=document.createElement('span');n.textContent=me.n;b.appendChild(n);
     b.onclick=function(){openProfile()};a.appendChild(b);
   }else{
-    var l=document.createElement('a');l.className='btn';l.textContent='Войти через Steam';l.href=API+'/auth/steam';
-    a.appendChild(l);
-    var g=document.createElement('span');g.id='gbtn';g.style.marginLeft='8px';a.appendChild(g);gButton(g,'login','Google auth','btn');
+    var l=document.createElement('button');l.className='alt';l.textContent='Войти';l.onclick=openLogin;a.appendChild(l);
   }
 }
 
@@ -264,7 +296,8 @@ $('lbclose').onclick=function(){$('lbov').classList.remove('show')};
 
 var _h=location.hash,_lk=/[#&]linked=steam/.test(_h),_er=(_h.match(/[#&]error=([a-z_]+)/)||[])[1];
 loadSession();renderAuth();
-$('pfcl').onclick=function(){$('pfov').classList.remove('show')};$('pflo').onclick=function(){
+$('pfcl').onclick=function(){$('pfov').classList.remove('show')};$('lgcl').onclick=function(){$('lgov').classList.remove('show')};
+if(tok)api('/api/me').then(rememberMethods).catch(function(){});$('pflo').onclick=function(){
   if(!confirm('Выйти из аккаунта?\nПрогресс сохранён в облаке, а на этом устройстве будет очищен. При следующем входе он вернётся.'))return;
   try{['tk','tk-q','tk-bak','tk-own'].forEach(function(k){localStorage.removeItem(k)})}catch(e){}
   logout();
@@ -284,6 +317,7 @@ function goBack(){
 }
 if(!_lk&&!_er)goBack();
 if(/[#&]profile/.test(_h)&&me){openProfile();try{history.replaceState(null,'',location.pathname+location.search)}catch(e){}}
+if(/[#&]login/.test(_h)&&!me){openLogin();try{history.replaceState(null,'',location.pathname+location.search)}catch(e){}}
 </script>
 </body>
 </html>
