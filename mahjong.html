@@ -73,6 +73,7 @@ a.btn{display:inline-block;background:#1b2838;color:#fff;text-decoration:none;bo
   #tomenu,.stat{grid-column:1}.stat{font-size:.85rem;margin:0}
   #shuf,#rest,#mute,#lb{grid-column:3}header button{width:100%;padding:6px 8px;font-size:.85rem}
   #stage{top:6px;bottom:6px;left:156px;right:156px}
+  #board{transform:rotate(-90deg)}.tile>img,.tile>span{transform:rotate(90deg)}
   #authbar{left:6px;right:auto;width:auto;bottom:6px}#auth{flex-direction:column;gap:6px}#auth span{display:none}#auth img{width:32px;height:32px}
   #auth a.btn,#auth button{font-size:0;width:34px;height:34px;padding:0;border-radius:50%;display:flex;align-items:center;justify-content:center}
   #auth a.btn::before{content:'🔑';font-size:16px}#auth button::before{content:'⚙';font-size:17px}
@@ -193,8 +194,8 @@ var LEVELS=[
  {time:320,types:40,layers:pyramid(6,6,4)},                                   // 6x6, 4 слоя: 86
  {time:400,types:46,layers:pyramid(7,7,4).concat([[3,2,2,2.5,4]])}            // 7x7, 5 слоёв: 132
 ];
-// Телефон лёжа: всё поле повёрнуто на 90° (логика уровня та же, плитки не перемешиваются).
-// Левый край поля уходит вниз, верх — влево; плитка свободна, если открыта сверху или снизу на экране.
+// Телефон лёжа: всё поле поворачивается CSS на 90° (логика и размеры плиток те же, ничего не перемешивается),
+// картинки внутри плиток поворачиваются обратно, чтобы остаться прямыми. Свободна плитка, открытая сверху или снизу на экране.
 function isWide(){return window.matchMedia('(orientation:landscape) and (max-height:520px)').matches}
 // Из описания слоёв делает список плиток; ширину и высоту поля записывает в bW, bH
 function layoutTiles(layers){
@@ -299,21 +300,16 @@ function mountTiles(){
 function fit(){
   if(!tiles.length)return;
   var rot=isWide(),r=$('stage').getBoundingClientRect(),sp;
-  if(rot){ // поле повёрнуто на 90°: плитка лежит (1.2 в ширину, 1 в высоту), столбцы поля идут снизу вверх, ряды слева направо
-    var aw=r.width-16,ah=r.height-16;
-    th=Math.floor(Math.max(22,Math.min(aw/(bH*1.2),ah/bW,90)));tw=Math.round(th*1.2);
-    board.style.width=(bH*tw+16)+'px';board.style.height=(bW*th+16)+'px';
-    tiles.forEach(function(t){
-      var d=t.el,cx=t.x/2,cy=t.y/2;
-      d.style.width=tw+'px';d.style.height=th+'px';
-      d.style.left=(cy*tw-t.z*4)+'px';d.style.top=((bW-1-cx)*th-t.z*4)+'px';
-      sp=d.querySelector('span');if(sp)sp.style.fontSize=Math.round(th*.58)+'px';
-    });
-    return;
+  var aw,ah;
+  if(rot){ // доска остаётся «вертикальной», а на экране её поворачивает CSS на 90°: ширина доски упирается в высоту экрана и наоборот
+    ah=r.width-16;aw=r.height-16;
+    tw=Math.floor(Math.max(22,Math.min(aw/bW,ah/(bH*1.2),90)));
+  }else{
+    var wide=window.innerWidth>700;
+    aw=Math.min(window.innerWidth-(wide?250:24),980);ah=r.height-20;
+    tw=Math.floor(Math.max(22,Math.min(aw/bW,ah/(bH*1.2),74)));
   }
-  var wide=window.innerWidth>700;
-  var aw2=Math.min(window.innerWidth-(wide?250:24),980),ah2=r.height-20;
-  tw=Math.floor(Math.max(22,Math.min(aw2/bW,ah2/(bH*1.2),74)));th=Math.round(tw*1.2);
+  th=Math.round(tw*1.2);
   board.style.width=(bW*tw+16)+'px';board.style.height=(bH*th+16)+'px';
   tiles.forEach(function(t){
     var d=t.el;d.style.width=tw+'px';d.style.height=th+'px';
