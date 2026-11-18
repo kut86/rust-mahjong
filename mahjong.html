@@ -69,8 +69,12 @@ a.btn{display:inline-block;background:#1b2838;color:#fff;text-decoration:none;bo
 @media (max-width:700px){header{gap:6px 10px}header button,a.btn{padding:6px 10px;font-size:.9rem}h1{font-size:1.1rem}}
 @media (orientation:landscape) and (max-height:520px){ /* телефон лёжа: шапка в одну строку, поле во всю высоту */
   header{flex-wrap:nowrap;gap:4px 8px;padding:4px 8px}header h1{display:none}.stat{font-size:.8rem;white-space:nowrap}header button{padding:5px 9px;font-size:.8rem;white-space:nowrap}
-  #stage{top:46px;bottom:6px}#authbar{left:auto;right:8px;bottom:6px;justify-content:flex-end}
-  #codes{top:50px;bottom:auto;max-height:calc(100% - 56px);flex-direction:column;width:min(210px,44vw);overflow-x:hidden;overflow-y:auto}.card{min-width:0}
+  header{overflow-x:auto;scrollbar-width:none}
+  #stage{top:46px;bottom:6px;left:0}body.hasc #stage{left:220px}
+  #authbar{left:4px;right:auto;width:auto;bottom:4px}#auth{flex-direction:column;gap:6px}#auth span{display:none}#auth img{width:32px;height:32px}
+  #auth a.btn,#auth button{font-size:0;width:34px;height:34px;padding:0;border-radius:50%;display:flex;align-items:center;justify-content:center}
+  #auth a.btn::before{content:'🔑';font-size:16px}#auth button::before{content:'⚙';font-size:17px}
+  #codes{top:50px;bottom:auto;max-height:calc(100% - 104px);flex-direction:column;width:min(210px,44vw);overflow-x:hidden;overflow-y:auto}.card{min-width:0}
 }
 
 </style>
@@ -181,12 +185,30 @@ function pyramid(c,r,n){
   return a;
 }
 var LEVELS=[
- {time:150,types:22,layers:[[6,6,0,0,0],[5,6,.5,0,1]]},                       // 6x6, 2 слоя: 66 плиток
- {time:200,types:28,layers:[[6,6,0,0,0],[5,6,.5,0,1],[4,5,1,.5,2]]},          // 6x6, 3 слоя: 86
- {time:260,types:34,layers:pyramid(6,6,4)},                                   // 6x6, 4 слоя: 86
- {time:320,types:40,layers:pyramid(6,6,4)},                                   // 6x6, 4 слоя: 86
- {time:400,types:46,layers:pyramid(7,7,4).concat([[3,2,2,2.5,4]])}            // 7x7, 5 слоёв: 132
+ // wide — раскладка для телефона в горизонтальном положении (шире, чем выше). Плиток не меньше, чем в обычной, число чётное.
+ {time:150,types:22,layers:[[6,6,0,0,0],[5,6,.5,0,1]],                        // 6x6, 2 слоя: 66 плиток
+  wide:[[9,4,0,0,0],[8,4,.5,0,1]]},                                           // 9x4: 68
+ {time:200,types:28,layers:[[6,6,0,0,0],[5,6,.5,0,1],[4,5,1,.5,2]],           // 6x6, 3 слоя: 86
+  wide:[[10,4,0,0,0],[9,4,.5,0,1],[6,2,2,1,2]]},                              // 10x4: 88
+ {time:260,types:34,layers:pyramid(6,6,4),                                    // 6x6, 4 слоя: 86
+  wide:[[10,4,0,0,0],[9,3,.5,.5,1],[8,2,1,1,2],[3,1,3.5,1.5,3]]},             // 10x4: 86
+ {time:320,types:40,layers:pyramid(6,6,4),                                    // 6x6, 4 слоя: 86
+  wide:[[10,4,0,0,0],[9,3,.5,.5,1],[8,2,1,1,2],[3,1,3.5,1.5,3]]},
+ {time:400,types:46,layers:pyramid(7,7,4).concat([[3,2,2,2.5,4]]),            // 7x7, 5 слоёв: 132
+  wide:pyramid(11,5,4)}                                                       // 11x5: 138
 ];
+// Телефон лёжа: игровое поле широкое, чтобы плитки были крупнее
+function isWide(){return window.matchMedia('(orientation:landscape) and (max-height:520px)').matches}
+function layersFor(L){return isWide()&&L.wide?L.wide:L.layers}
+// Из описания слоёв делает список плиток; ширину и высоту поля записывает в bW, bH
+function layoutTiles(layers){
+  var a=[],W=0,H=0;
+  layers.forEach(function(ly){
+    for(var c=0;c<ly[0];c++)for(var r=0;r<ly[1];r++)a.push({x:(ly[2]+c)*2,y:(ly[3]+r)*2,z:ly[4],t:0,gone:false});
+    W=Math.max(W,ly[2]+ly[0]);H=Math.max(H,ly[3]+ly[1]);
+  });
+  bW=W;bH=H;return a;
+}
 
 
 // ====== Звуки (синтезируются, файлов не нужно) ======
@@ -253,40 +275,57 @@ function assign(list,nTypes){
       shuffle(fr);var ty=pool[k++%pool.length];fr[0].t=ty;fr[1].t=ty;
       rem.splice(rem.indexOf(fr[0]),1);rem.splice(rem.indexOf(fr[1]),1);
     }
-    if(ok)return;
+    if(ok)return true;
   }
+  return false;
 }
 
 function build(){
   $('onext').disabled=false;board.innerHTML='';tiles=[];sel=null;
-  var L=LEVELS[lvl],W=0,H=0;
-  L.layers.forEach(function(ly){
-    for(var c=0;c<ly[0];c++)for(var r=0;r<ly[1];r++){
-      tiles.push({x:(ly[2]+c)*2,y:(ly[3]+r)*2,z:ly[4],t:0,gone:false});
-    }
-    W=Math.max(W,ly[2]+ly[0]);H=Math.max(H,ly[3]+ly[1]);
-  });
+  var L=LEVELS[lvl];
+  curWide=isWide();
+  tiles=layoutTiles(layersFor(L));
   L.types=typesFor(L,tiles.length);
   assign(tiles,L.types);
-  bW=W;bH=H;
+  mountTiles();
+  $('lv').textContent=lvl+1;$('lvt').textContent=LEVELS.length;setShuf(SHUF_START);comboN=0;comboAt=0;if(lvl===0)startRun();startTimer();refresh();
+}
+// Подгоняет размер плиток под доступное место; вызывается при построении и при повороте экрана
+function mountTiles(){
   tiles.forEach(function(t){
     var d=document.createElement('div');d.className='tile';
     d.style.zIndex=t.z*100+t.y;
-    d.title=ICONS[0]&&'';
     d.onclick=function(){click(t)};
     t.el=d;board.appendChild(d);
   });
   fit();
   tiles.forEach(paint);
-  $('lv').textContent=lvl+1;$('lvt').textContent=LEVELS.length;setShuf(SHUF_START);comboN=0;comboAt=0;if(lvl===0)startRun();startTimer();refresh();
 }
-// Подгоняет размер плиток под доступное место; вызывается при построении и при повороте экрана
+var curWide=null;
+// Телефон повернули посреди уровня: оставшиеся плитки раскладываются по другой раскладке и перемешиваются
+function relayout(){
+  var w=isWide();if(w===curWide||!tiles.length)return;
+  var L=LEVELS[lvl];if(!L.wide){curWide=w;return}
+  var rem=tiles.filter(function(t){return !t.gone}).length;
+  if(!rem)return; // уровень пройден — следующий построится уже в нужной раскладке
+  var nt=layoutTiles(layersFor(L)),left=nt.slice();
+  while(left.length>rem){ // «снимаем» лишние плитки парами, чтобы остаток можно было пройти
+    var fr=left.filter(function(t){return isFree(t,left)});
+    if(fr.length<2)break;
+    shuffle(fr);left.splice(left.indexOf(fr[0]),1);left.splice(left.indexOf(fr[1]),1);
+  }
+  if(left.length!==rem){layoutBox(tiles);return}
+  curWide=w;board.innerHTML='';tiles=left;sel=null;
+  layoutBox(left);assign(tiles,L.types);mountTiles();refresh();
+  toast('Раскладка повёрнута, плитки перемешаны');
+}
+function layoutBox(a){var W=0,H=0;a.forEach(function(t){W=Math.max(W,t.x/2+1);H=Math.max(H,t.y/2+1)});bW=W;bH=H}
 function fit(){
   if(!tiles.length)return;
-  var wide=window.innerWidth>700||window.matchMedia('(orientation:landscape) and (max-height:520px)').matches;
+  var short=isWide(),wide=window.innerWidth>700||short,TA=short?1:1.2; // лёжа плитки квадратные — поле заполняет экран
   var r=$('stage').getBoundingClientRect();
-  var aw=Math.min(window.innerWidth-(wide?250:24),980),ah=r.height-20;
-  tw=Math.floor(Math.max(22,Math.min(aw/bW,ah/(bH*1.2),74)));th=Math.round(tw*1.2);
+  var aw=short?Math.min(r.width-96,980):Math.min(window.innerWidth-(wide?250:24),980),ah=r.height-20;
+  tw=Math.floor(Math.max(22,Math.min(aw/bW,ah/(bH*TA),short?96:74)));th=Math.round(tw*TA);
   board.style.width=(bW*tw+16)+'px';board.style.height=(bH*th+16)+'px';
   tiles.forEach(function(t){
     var d=t.el;d.style.width=tw+'px';d.style.height=th+'px';
@@ -295,8 +334,9 @@ function fit(){
   });
 }
 var fitT=0;
-function refit(){clearTimeout(fitT);fitT=setTimeout(fit,80)}
-window.addEventListener('resize',refit);window.addEventListener('orientationchange',function(){setTimeout(fit,250)});
+try{new MutationObserver(function(){document.body.classList.toggle('hasc',!!$('codes').children.length);refit()}).observe($('codes'),{childList:true})}catch(e){}
+function refit(){clearTimeout(fitT);fitT=setTimeout(function(){relayout();fit()},80)}
+window.addEventListener('resize',refit);window.addEventListener('orientationchange',function(){setTimeout(function(){relayout();fit()},250)});
 function paint(t){
   var ic=ICONS[t.t];t.el.title=ic.n;t.el.innerHTML='';
   function emoji(){t.el.innerHTML='';var sp=document.createElement('span');sp.style.fontSize=Math.round(tw*.58)+'px';sp.textContent=ic.e;t.el.appendChild(sp)}
@@ -454,9 +494,9 @@ function renderAuth(){
   if(me){
     if(me.a&&me.a.indexOf('https://')===0){var im=document.createElement('img');im.src=me.a;im.alt='';a.appendChild(im)}
     var n=document.createElement('span');n.textContent=me.n;a.appendChild(n);
-    var b=document.createElement('button');b.className='alt';b.textContent='Профиль';b.onclick=function(){location.href='index.html#profile'};a.appendChild(b);
+    var b=document.createElement('button');b.className='alt';b.textContent='Профиль';b.title='Профиль';b.onclick=function(){location.href='index.html#profile'};a.appendChild(b);
   }else{
-    var l=document.createElement('a');l.className='btn';l.textContent='Войти для рейтинга';l.href='index.html#login';l.onclick=function(){try{sessionStorage.setItem('rm-back','mahjong.html|'+Date.now())}catch(e){}};a.appendChild(l);
+    var l=document.createElement('a');l.className='btn';l.textContent='Войти для рейтинга';l.title='Войти для рейтинга';l.href='index.html#login';l.onclick=function(){try{sessionStorage.setItem('rm-back','mahjong.html|'+Date.now())}catch(e){}};a.appendChild(l);
   }
 }
 function startRun(){
