@@ -86,7 +86,7 @@ body:has(#ov:not(.h)) #hud,body:has(#up:not(.h)) #hud{visibility:hidden}
 #ov #t2{text-shadow:0 1px 4px rgba(0,0,0,.4)}
 #evs{display:none;width:100%;max-width:560px;margin:0 auto 4px;flex-direction:column;align-items:center;gap:4px}
 #evs.on{display:flex}
-#evt{display:flex;gap:14px;overflow-x:auto;scroll-snap-type:x mandatory;width:100%;padding:12px 18px;box-sizing:border-box;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+#evt{display:flex;gap:14px;overflow-x:auto;scroll-snap-type:x mandatory;width:100%;padding:24px 24px;box-sizing:border-box;scrollbar-width:none;-webkit-overflow-scrolling:touch}
 #evt::-webkit-scrollbar{display:none}
 #ov .evc{--ec:#ff6a3d;--eg:255,106,61;position:relative;flex:0 0 auto;width:min(84vw,330px);min-height:66px;box-sizing:border-box;scroll-snap-align:center;display:flex;align-items:center;gap:10px;text-align:left;padding:8px 18px 8px 10px;border-radius:999px;border:2px solid var(--ec);background:linear-gradient(90deg,rgba(8,16,36,.82),rgba(20,40,80,.72));color:var(--tx);cursor:pointer;margin:0!important;font-size:inherit;font-weight:400;animation:evp 1.9s ease-in-out infinite}
 #ov .evc.a{--ec:#4aa8ff;--eg:74,168,255}
@@ -98,6 +98,9 @@ body:has(#ov:not(.h)) #hud,body:has(#up:not(.h)) #hud{visibility:hidden}
 #ov .evc .bz{position:absolute;top:50%;width:14px;height:34px;margin-top:-17px;fill:none;stroke:#fff7c2;stroke-width:2;stroke-linejoin:round;stroke-linecap:round;filter:drop-shadow(0 0 4px rgb(var(--eg)));opacity:0;pointer-events:none;animation:evb 3.4s steps(1,end) infinite}
 #ov .evc .bz.l{left:-9px}#ov .evc .bz.r{right:-9px;animation-delay:1.1s;transform:scaleX(-1)}
 @keyframes evb{0%,100%{opacity:0}4%{opacity:1}7%{opacity:0}10%{opacity:1}14%{opacity:0}}
+#ov>*,#evw .bx{zoom:var(--mz,1)}
+#wsel{scrollbar-color:rgba(160,200,255,.45) transparent}
+@media (min-width:900px){#evs{max-width:min(940px,100%)}}
 #evd{display:flex;gap:6px;min-height:8px}
 #evd i{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.3)}#evd i.on{background:#fff}
 #evw{position:fixed;inset:0;z-index:8;background:rgba(4,10,24,.82);display:none;align-items:center;justify-content:center;padding:14px}
@@ -112,7 +115,7 @@ body:has(#ov:not(.h)) #hud,body:has(#up:not(.h)) #hud{visibility:hidden}
 #evw .bt button.x{background:rgba(255,255,255,.12);color:var(--tx);flex:0 0 auto;padding:12px 18px}
 #evw .bt button:disabled{opacity:.5}
 #evw .ok{color:#8fd48a}#evw .no{color:#ff9a8a}
-@media (max-height:480px){#ov .evc{min-height:52px}#ov .evc .ei{flex-basis:36px;height:36px;font-size:18px}#evt{padding:6px 18px}}
+@media (max-height:480px){#ov .evc{min-height:52px}#ov .evc .ei{flex-basis:36px;height:36px;font-size:18px}#evt{padding:14px 18px}}
 @media (prefers-reduced-motion:reduce){#ov .evc,#ov .evc .bz{animation:none}#ov .evc .bz{display:none}}
 </style>
 </head>
@@ -748,6 +751,8 @@ function evOpen(id){const e=EVS.find(v=>v.id==id);if(!e)return;const w=$('#evw')
  $('#evx').onclick=()=>w.classList.remove('on');w.onclick=ev=>{if(ev.target===w)w.classList.remove('on')};
  const g=$('#evgo');if(g)g.onclick=()=>{w.classList.remove('on');const m=$('#t2');m.textContent='Бой с боссом откроется в ближайшем обновлении';m.style.color='#f2c14e'}}
 (function(){const tr=$('#evt');if(tr)tr.addEventListener('scroll',evDots,{passive:true});setInterval(()=>{if(!$('#ov').classList.contains('h')&&!$('#evw').classList.contains('on'))evRender()},60000)})();
+function mzFit(){const z=(innerWidth>=900&&innerHeight>=600)?Math.max(1,Math.min(2.2,Math.min(innerWidth/1000,innerHeight/800))):1;document.documentElement.style.setProperty('--mz',z.toFixed(2))}
+mzFit();addEventListener('resize',mzFit);
 evRender();tinit();renderAuth();ovStat();try{const m=sessionStorage.getItem('tk-msg');if(m){sessionStorage.removeItem('tk-msg');$('#t2').textContent=m;$('#t2').style.color='#f2c14e'}}catch(e){}checkSeason().then(cloudLoad,cloudLoad);
 requestAnimationFrame(loop);
 </script>
