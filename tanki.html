@@ -65,6 +65,17 @@ html,body{height:100%;margin:0;background:#1d2219;overflow:hidden;touch-action:n
  #wsel{display:flex;gap:6px;overflow-x:auto;max-width:min(92vw,520px);padding:4px;-webkit-overflow-scrolling:touch;scrollbar-width:thin}#wsel button{flex:0 0 auto;width:40px;height:40px;min-width:0;padding:0;border-radius:10px;border:2px solid #3a4030;background:#2e3528;color:var(--tx);font-size:15px;font-weight:700;position:relative}#wsel button.on{border-color:#f2c14e;background:#4a4228}#wsel button sup{position:absolute;top:-4px;right:-2px;font-size:10px}
 .amb{display:flex;flex-direction:column;gap:6px;border:2px solid #3a4030;border-radius:10px;padding:8px 10px;background:#2e3528;min-width:300px}.amb .rw{display:grid;grid-template-columns:170px 1fr 54px;gap:8px;align-items:center;text-align:left}.amb .ts{max-width:none}.amb input[type=range]{width:100%;min-width:90px}.amb .bar{height:8px;border-radius:4px;background:#1c2118;overflow:hidden}.amb .bar>div{height:100%;background:#f2c14e}.amb .bar.bad>div{background:#e85a4a}.amb .cd{margin:2px 0 0}#sb{position:fixed;right:10px;top:calc(env(safe-area-inset-top,0px) + 80px);z-index:3;display:none;flex-direction:column;gap:8px}#sb button{width:54px;height:44px;border-radius:12px;border:0;background:rgba(255,255,255,.16);color:var(--tx);font-size:13px;font-weight:700;touch-action:none}
 #rot{position:fixed;inset:0;z-index:9;background:var(--ov);display:none;flex-direction:column;align-items:center;justify-content:center;gap:14px;font-size:18px;text-align:center;padding:24px}#rot b{font-size:56px;animation:r 1.6s ease-in-out infinite}@keyframes r{50%{transform:rotate(90deg)}}#rot.s{display:flex}
+/* Гараж на узких экранах (телефон вертикально): ничего не шире экрана, слева не обрезается */
+#up{align-items:safe center}.cw,.mods{min-width:0;max-width:100%}
+@media (max-width:640px){
+#up{padding:10px 8px}.cw{gap:10px}.mods{width:100%}
+.amb{min-width:0;width:100%;box-sizing:border-box}
+.amb .rw{grid-template-columns:1fr 54px;gap:4px 8px}.amb .rw>div{grid-column:1/-1}
+.mr{flex-wrap:wrap;gap:4px;width:100%}.mr .mt{width:100%}
+#up button.mo{flex:1 1 0;width:auto;min-width:0;height:auto;min-height:100px;padding:4px 2px;font-size:12px}
+#up button.mo .tg{font-size:10px}.mr .ar{flex:0 0 auto;font-size:14px}
+.skr{justify-content:center}.sk{width:calc(50% - 6px);box-sizing:border-box}
+}
 </style>
 </head>
 <body>
