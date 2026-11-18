@@ -67,6 +67,12 @@ a.btn{display:inline-block;background:#1b2838;color:#fff;text-decoration:none;bo
 .lb .av{width:22px;height:22px;border-radius:50%;vertical-align:middle;margin-right:8px}
 .lb a{color:inherit;text-decoration:none}
 @media (max-width:700px){header{gap:6px 10px}header button,a.btn{padding:6px 10px;font-size:.9rem}h1{font-size:1.1rem}}
+@media (orientation:landscape) and (max-height:520px){ /* телефон лёжа: шапка в одну строку, поле во всю высоту */
+  header{flex-wrap:nowrap;gap:4px 8px;padding:4px 8px}header h1{display:none}.stat{font-size:.8rem;white-space:nowrap}header button{padding:5px 9px;font-size:.8rem;white-space:nowrap}
+  #stage{top:46px;bottom:6px}#authbar{left:auto;right:8px;bottom:6px;justify-content:flex-end}
+  #codes{top:50px;bottom:auto;max-height:calc(100% - 56px);flex-direction:column;width:min(210px,44vw);overflow-x:hidden;overflow-y:auto}.card{min-width:0}
+}
+
 </style>
 </head>
 <body>
@@ -214,7 +220,7 @@ function timeUp(){running=false;SFX.lose();$('onext').disabled=false;
   $('onext').textContent='Попробовать снова';$('onext').onclick=function(){hide();build()};show()}
 
 var $=function(i){return document.getElementById(i)};
-var board=$('board'),tiles=[],sel=null,lvl=0,codes=[],tw=60,th=72;
+var board=$('board'),tiles=[],sel=null,lvl=0,codes=[],tw=60,th=72,bW=1,bH=1;
 
 function shuffle(a){for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t}return a}
 
@@ -262,19 +268,35 @@ function build(){
   });
   L.types=typesFor(L,tiles.length);
   assign(tiles,L.types);
-  var aw=Math.min(window.innerWidth-(window.innerWidth>700?250:24),980),ah=window.innerHeight-96-20-(window.innerWidth>700?52:190);
-  tw=Math.floor(Math.max(30,Math.min(aw/W,ah/(H*1.2),74)));th=Math.round(tw*1.2);
-  board.style.width=(W*tw+16)+'px';board.style.height=(H*th+16)+'px';
+  bW=W;bH=H;
   tiles.forEach(function(t){
     var d=document.createElement('div');d.className='tile';
-    d.style.width=tw+'px';d.style.height=th+'px';
-    d.style.left=(t.x/2*tw+t.z*4)+'px';d.style.top=(t.y/2*th-t.z*4)+'px';d.style.zIndex=t.z*100+t.y;
+    d.style.zIndex=t.z*100+t.y;
     d.title=ICONS[0]&&'';
     d.onclick=function(){click(t)};
-    t.el=d;board.appendChild(d);paint(t);
+    t.el=d;board.appendChild(d);
   });
+  fit();
+  tiles.forEach(paint);
   $('lv').textContent=lvl+1;$('lvt').textContent=LEVELS.length;setShuf(SHUF_START);comboN=0;comboAt=0;if(lvl===0)startRun();startTimer();refresh();
 }
+// Подгоняет размер плиток под доступное место; вызывается при построении и при повороте экрана
+function fit(){
+  if(!tiles.length)return;
+  var wide=window.innerWidth>700||window.matchMedia('(orientation:landscape) and (max-height:520px)').matches;
+  var r=$('stage').getBoundingClientRect();
+  var aw=Math.min(window.innerWidth-(wide?250:24),980),ah=r.height-20;
+  tw=Math.floor(Math.max(22,Math.min(aw/bW,ah/(bH*1.2),74)));th=Math.round(tw*1.2);
+  board.style.width=(bW*tw+16)+'px';board.style.height=(bH*th+16)+'px';
+  tiles.forEach(function(t){
+    var d=t.el;d.style.width=tw+'px';d.style.height=th+'px';
+    d.style.left=(t.x/2*tw+t.z*4)+'px';d.style.top=(t.y/2*th-t.z*4)+'px';
+    var sp=d.querySelector('span');if(sp)sp.style.fontSize=Math.round(tw*.58)+'px';
+  });
+}
+var fitT=0;
+function refit(){clearTimeout(fitT);fitT=setTimeout(fit,80)}
+window.addEventListener('resize',refit);window.addEventListener('orientationchange',function(){setTimeout(fit,250)});
 function paint(t){
   var ic=ICONS[t.t];t.el.title=ic.n;t.el.innerHTML='';
   function emoji(){t.el.innerHTML='';var sp=document.createElement('span');sp.style.fontSize=Math.round(tw*.58)+'px';sp.textContent=ic.e;t.el.appendChild(sp)}
@@ -475,4 +497,4 @@ loadSession();renderAuth();loadPromos();
 probeImages(build);
 </script>
 </body>
-</html>
+  </html>
