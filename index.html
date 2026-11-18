@@ -279,14 +279,15 @@ function cardRows(p,i,body){
   var X=p.x||[0,0,0],K=p.k||[0,0,0],N=['ЛТ','СТ','ТТ'],top=['l','m','h'].indexOf(p.tc),isMe=me&&p.id===me.sid;
   function cell(t,c,tr){var d=document.createElement('td');if(c)d.className=c;d.textContent=t;tr.appendChild(d);return d}
   function row(c){var r=document.createElement('tr');r.className=c+(isMe?' me':'');body.appendChild(r);return r}
-  var A=row('ch'),rk=cell(i+1,'rk',A);rk.rowSpan=3;
+  var A=row('ch'),rk=cell(i+1,'rk',A);rk.rowSpan=4;
   var nm=document.createElement('td');
   if(p.a&&p.a.indexOf('https://')===0){var im=document.createElement('img');im.className='av';im.src=p.a;im.alt='';nm.appendChild(im)}
   var a=document.createElement('a');a.textContent=p.n;if(/^\d{17}$/.test(p.id)){a.href='https://steamcommunity.com/profiles/'+p.id;a.target='_blank';a.rel='noopener'}nm.appendChild(a);
   A.appendChild(nm);
   N.forEach(function(n,k){cell(n,'ab'+(k===top?' hi':''),A)});
   var B=row('cm');cell('Пройдено волн','lab',B);X.forEach(function(v){cell(v,'num',B)});
-  var C=row('ce');cell('Уничтожено врагов','lab',C);K.forEach(function(v){cell(v,'num',C)});
+  var C=row('cm');cell('Уничтожено врагов','lab',C);K.forEach(function(v){cell(v,'num',C)});
+  var D=row('ce');cell('Рекорд очков','lab',D);var sc=cell(p.s||0,'num',D);sc.colSpan=3;
 }
 function loadLb(id){
   lbMode=id;
