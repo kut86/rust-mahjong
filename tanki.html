@@ -76,6 +76,44 @@ html,body{height:100%;margin:0;background:#1d2219;overflow:hidden;touch-action:n
 #up button.mo .tg{font-size:10px}.mr .ar{flex:0 0 auto;font-size:14px}
 .skr{justify-content:center}.sk{width:calc(50% - 6px);box-sizing:border-box}
 }
+
+/* ===== фон меню и плашка событий ===== */
+#ov{background:radial-gradient(120% 60% at 50% 0%,rgba(120,190,255,.28),transparent 60%),linear-gradient(180deg,#0a1a3a 0%,#11366d 55%,#1c5aa3 100%)}
+body:has(#ov:not(.h)) #hud,body:has(#up:not(.h)) #hud{visibility:hidden}
+#ov #wtabs button,#ov #wsel button{background:rgba(10,22,48,.55);border-color:rgba(160,200,255,.28)}
+#ov #wtabs button.on,#ov #wsel button.on{border-color:#f2c14e}
+#ov .lk{background:rgba(10,22,48,.55)}
+#ov #t2{text-shadow:0 1px 4px rgba(0,0,0,.4)}
+#evs{display:none;width:100%;max-width:560px;margin:0 auto 4px;flex-direction:column;align-items:center;gap:4px}
+#evs.on{display:flex}
+#evt{display:flex;gap:14px;overflow-x:auto;scroll-snap-type:x mandatory;width:100%;padding:12px 18px;box-sizing:border-box;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+#evt::-webkit-scrollbar{display:none}
+#ov .evc{--ec:#ff6a3d;--eg:255,106,61;position:relative;flex:0 0 auto;width:min(84vw,330px);min-height:66px;box-sizing:border-box;scroll-snap-align:center;display:flex;align-items:center;gap:10px;text-align:left;padding:8px 18px 8px 10px;border-radius:999px;border:2px solid var(--ec);background:linear-gradient(90deg,rgba(8,16,36,.82),rgba(20,40,80,.72));color:var(--tx);cursor:pointer;margin:0!important;font-size:inherit;font-weight:400;animation:evp 1.9s ease-in-out infinite}
+#ov .evc.a{--ec:#4aa8ff;--eg:74,168,255}
+@keyframes evp{0%,100%{box-shadow:0 0 6px 0 rgba(var(--eg),.35),inset 0 0 8px rgba(var(--eg),.15)}50%{box-shadow:0 0 18px 3px rgba(var(--eg),.8),inset 0 0 14px rgba(var(--eg),.35)}}
+#ov .evc .ei{flex:0 0 46px;height:46px;border-radius:50%;background:rgba(var(--eg),.18) center/cover no-repeat;display:flex;align-items:center;justify-content:center;font-size:24px;border:1px solid rgba(var(--eg),.6)}
+#ov .evc .et{display:flex;flex-direction:column;min-width:0;line-height:1.25}
+#ov .evc b{font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#ov .evc small{font-size:12px;color:#c4d4ee;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#ov .evc .bz{position:absolute;top:50%;width:14px;height:34px;margin-top:-17px;fill:none;stroke:#fff7c2;stroke-width:2;stroke-linejoin:round;stroke-linecap:round;filter:drop-shadow(0 0 4px rgb(var(--eg)));opacity:0;pointer-events:none;animation:evb 3.4s steps(1,end) infinite}
+#ov .evc .bz.l{left:-9px}#ov .evc .bz.r{right:-9px;animation-delay:1.1s;transform:scaleX(-1)}
+@keyframes evb{0%,100%{opacity:0}4%{opacity:1}7%{opacity:0}10%{opacity:1}14%{opacity:0}}
+#evd{display:flex;gap:6px;min-height:8px}
+#evd i{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.3)}#evd i.on{background:#fff}
+#evw{position:fixed;inset:0;z-index:8;background:rgba(4,10,24,.82);display:none;align-items:center;justify-content:center;padding:14px}
+#evw.on{display:flex}
+#evw .bx{background:linear-gradient(180deg,#112a55,#0c1c3c);border:2px solid var(--ec,#ff6a3d);border-radius:22px;max-width:420px;width:100%;max-height:calc(100vh - 28px);max-height:calc(100dvh - 28px);overflow-y:auto;padding:16px;box-sizing:border-box;text-align:left;box-shadow:0 0 24px rgba(var(--eg,255,106,61),.5)}
+#evw h2{margin:0 0 4px;font-size:22px}#evw .im{width:100%;height:120px;border-radius:14px;background:center/cover no-repeat;margin-bottom:10px}
+#evw p{margin:6px 0;color:#c9d7ef;font-size:14px;line-height:1.45;max-width:none}
+#evw .rw{display:flex;justify-content:space-between;gap:10px;padding:7px 0;border-top:1px solid rgba(160,200,255,.18);font-size:14px}
+#evw .rw span{color:#a9bddd}#evw .rw b{text-align:right}
+#evw .hb{height:12px;border-radius:7px;background:rgba(0,0,0,.4);overflow:hidden;margin:4px 0 2px}#evw .hb div{height:100%;background:linear-gradient(90deg,#ff6a3d,#ffb347)}
+#evw .bt{display:flex;gap:8px;margin-top:12px}#evw .bt button{flex:1;margin:0;padding:12px 8px;font-size:16px}
+#evw .bt button.x{background:rgba(255,255,255,.12);color:var(--tx);flex:0 0 auto;padding:12px 18px}
+#evw .bt button:disabled{opacity:.5}
+#evw .ok{color:#8fd48a}#evw .no{color:#ff9a8a}
+@media (max-height:480px){#ov .evc{min-height:52px}#ov .evc .ei{flex-basis:36px;height:36px;font-size:18px}#evt{padding:6px 18px}}
+@media (prefers-reduced-motion:reduce){#ov .evc,#ov .evc .bz{animation:none}#ov .evc .bz{display:none}}
 </style>
 </head>
 <body>
@@ -88,8 +126,9 @@ html,body{height:100%;margin:0;background:#1d2219;overflow:hidden;touch-action:n
 <div id="pp"><div class="dzb"><h2 id="pph"></h2><p id="ppt"></p><div class="cd" id="ppb"></div></div></div>
 <div id="dz"><div class="dzb"><h2>Меню</h2><p>Дезертировать? Награды текущей волны будут потеряны, забег засчитается как поражение, а танк будет разбит.</p><div class="cd"><button id="dai">Указка</button><button id="dsr" style="background:#8c3a2a;color:#fff">Дезертировать</button><button id="dcn">Отмена</button></div></div></div>
 <div id="sh"><button data-k="ap"><b>ББ</b><i></i></button><button data-k="pc"><b>БП</b><i></i></button><button data-k="he"><b>ОФ</b><i></i></button></div><div id='sb'><button data-s='x'>💥 25</button><button data-s='s'>🛡 20</button><button data-s='d'>⚡ 15</button></div>
+<div id="evw"></div>
 <div id="rot"><b>📱</b>Поверните телефон горизонтально<a href="index.html" style="margin-top:6px;color:var(--tx);background:#3a4030;border-radius:14px;padding:12px 28px;font-size:16px;font-weight:700;text-decoration:none">☰ Меню игр</a></div>
-<div id="ov"><h1 id="t1">🪖 Танчики</h1><p id="t2">Левый палец — движение, правый — прицел и огонь. На компьютере: WASD, мышь, клик.</p><div class="tg" style="margin-top:2px">Стартовая волна</div><div id="wtabs"></div><div id="wsel"></div><button id="go">Играть</button><button id="fs" style="display:none;background:#3a4030;color:var(--tx);margin-top:4px;font-size:16px"></button><p id="fsh" class="tg" style="display:none;max-width:320px;line-height:1.5"></p><button id="shop" style="background:#3a4030;color:var(--tx);margin-top:4px;font-size:16px">🔧 Гараж · <span id="co">0</span> 🪙</button><a class="lk" href="index.html">☰ Меню игр</a><div id="au"></div></div>
+<div id="ov"><div id="evs"><div id="evt"></div><div id="evd"></div></div><h1 id="t1">🪖 Танчики</h1><p id="t2">Левый палец — движение, правый — прицел и огонь. На компьютере: WASD, мышь, клик.</p><div class="tg" style="margin-top:2px">Стартовая волна</div><div id="wtabs"></div><div id="wsel"></div><button id="go">Играть</button><button id="fs" style="display:none;background:#3a4030;color:var(--tx);margin-top:4px;font-size:16px"></button><p id="fsh" class="tg" style="display:none;max-width:320px;line-height:1.5"></p><button id="shop" style="background:#3a4030;color:var(--tx);margin-top:4px;font-size:16px">🔧 Гараж · <span id="co">0</span> 🪙</button><a class="lk" href="index.html">☰ Меню игр</a><div id="au"></div></div>
 <script>
 const $=s=>document.querySelector(s),cv=$('#c'),x=cv.getContext('2d'),gr=document.createElement('canvas'),g=gr.getContext('2d');
 const R=(a,b)=>b===undefined?Math.random()*a:a+Math.random()*(b-a),C=(v,a,b)=>Math.max(a,Math.min(b,v)),PI=Math.PI;
@@ -657,22 +696,4 @@ cv.addEventListener('pointermove',e=>{if(e.pointerType==='mouse'){ms.on=1;ms.x=e
 const pu=e=>{ms.down=0;for(const k of['L','R'])if(st[k]&&st[k].id===e.pointerId)st[k]=null};
 cv.addEventListener('pointerup',pu);cv.addEventListener('pointercancel',pu);
 const kn=e=>/^Key[A-Z]$/.test(e.code)?e.code[3].toLowerCase():e.key.toLowerCase(); // по физической клавише, чтобы WASD работали и в русской раскладке
-addEventListener('keydown',e=>{const k=kn(e);keys[k]=1;if(started&&!over&&!pause&&!paused&&(k=='1'||k=='2'||k=='3'))selShell(SHK[k-1]);if((k=='p'||k=='escape')&&started&&!over&&!pause)setPause(!paused)});addEventListener('keyup',e=>{keys[kn(e)]=0});
-let wasL=innerWidth>innerHeight;addEventListener('resize',()=>{resize();const l=innerWidth>innerHeight;if(l!==wasL){wasL=l;if(started&&$('#ov').classList.contains('h'))reset()}});
-/* кнопка «на весь экран»: Android/iPad/ПК — включает полный экран; iPhone (Safari и другие браузеры) не умеют — показываем, как установить игру на главный экран */
-(()=>{const standalone=matchMedia('(display-mode: fullscreen)').matches||matchMedia('(display-mode: standalone)').matches||navigator.standalone,d=document.documentElement,fsf=d.requestFullscreen||d.webkitRequestFullscreen,b=$('#fs'),h=$('#fsh');if(standalone)return;b.style.display='block';
- if(fsf){b.textContent='⛶ Во весь экран';b.onclick=()=>{try{Promise.resolve(fsf.call(d)).then(()=>screen.orientation.lock('landscape')).catch(()=>{})}catch(_){}}}
- else{b.textContent='📲 Открыть на весь экран';const ios=/iPhone|iPad|iPod/.test(navigator.userAgent);b.onclick=()=>{h.style.display=h.style.display=='block'?'none':'block';h.innerHTML=ios?'Нажмите «Поделиться» <b>⬆</b> внизу браузера → «На экран "Домой"» → «Добавить». Потом запускайте игру с иконки — она откроется без адресной строки, на весь экран.':'В меню браузера выберите «Установить приложение» или «Добавить на главный экран», потом запускайте игру с иконки.'}}})();
-function startBattle(){
- atFront=selW==MW()+1;
- try{const d=document.documentElement,fs=d.requestFullscreen||d.webkitRequestFullscreen;(fs?Promise.resolve(fs.call(d)):Promise.reject()).then(()=>screen.orientation.lock('landscape')).catch(()=>{try{screen.orientation.lock('landscape').catch(()=>{})}catch(_){}})}catch(_){}A();if(ac&&ac.state==='suspended')ac.resume();$('#ov').classList.add('h');$('#sb').style.display='flex';$('#sh').style.display='flex';$('#mn').style.display='block';$('#ps').style.display='block';reset();started=true}
-$('#go').onclick=tryGo;
-function setPause(v){paused=v?1:0;$('#pz').classList.toggle('s',!!paused);$('#ps').textContent=paused?'▶':'⏸';st.L=st.R=null;ms.down=0}
-$('#ps').onclick=()=>{if(started&&!over&&!pause)setPause(!paused)};$('#rs').onclick=()=>setPause(0);
-$('#dai').onclick=()=>{aimOn=aimOn?0:1;try{localStorage.setItem('tk-aim',aimOn)}catch(e){}aimBtn()};aimBtn();$('#mn').onpointerdown=e=>e.stopPropagation();$('#mn').onclick=dzOpen;$('#dcn').onclick=()=>{$('#dz').classList.remove('s');setPause(dzWas)};$('#dsr').onclick=desert;$('#dz').onpointerdown=e=>e.stopPropagation();
-resize();p={x:GW/2,y:GH/2,a:-PI/2,t:-PI/2,r:.55,hp:100,rc:0,fl:0,c:'#4f9d62'};en=[];bl=[];pt=[];rg=[];ob=[];queue=[];pk=[];up={sp:0,hp:0,rt:0};over=true;
-tinit();renderAuth();ovStat();try{const m=sessionStorage.getItem('tk-msg');if(m){sessionStorage.removeItem('tk-msg');$('#t2').textContent=m;$('#t2').style.color='#f2c14e'}}catch(e){}checkSeason().then(cloudLoad,cloudLoad);
-requestAnimationFrame(loop);
-</script>
-</body>
-</html>
+addEventListener('keydown',e=>{const k=kn(e);keys[k]=1;if(
