@@ -683,15 +683,15 @@ function modTxt(t,m,L){const P=MODP[m][L-1],h=v=>Math.round(t.hp*v);
  if(m=='e')return[`Скорость ${f1(t.sp*(P.sp||1))}`,`ХП ${h(P.hp||1)}`];
  return[`Корпус ${f1(Math.min(14,(5+t.sp*.8)*(P.htm||1)))}`,`Рикошет ${f1(t.rk+(P.rk||0))}%`,`Скорость ${f1(t.sp*(P.sp||1))}`]}
 function ammoHTML(t){const cap=capOf(t),e=eff(t),r=rack(t.id);if(!gdr||gdrId!=t.id){gdr={ap:r.ap,pc:r.pc,he:r.he};gdrId=t.id}
- const av=SHKT(t),rows=SHK.map(k=>{const q=SHELL[k],pr=shp(t,k);if(!av.includes(k))return `<div class='rw' style='opacity:.5'><div><b>${q.s}</b> <span class='tg'>${q.n}</span><br><span class='ts'>🔒 доступен со ступени ${k=='pc'?'II':'V'}</span></div></div>`;return `<div class='rw'><div><b>${q.s}</b> <span class='tg'>${q.n}</span><br><span class='ts'>пробитие <b>${Math.round(e.pn*q.pn)}</b> · урон <b>${f1(e.dm*q.dm)}</b><br>${pr?pr+' 🪙 за 100 · на складе <b>'+stk(t.id)[k]+'</b>':'бесплатно'}</span></div><input type='range' min='0' max='${cap}' step='${cap>=500?5:1}' data-sl='${k}'><b data-sv='${k}'></b></div>`}).join('');
- return `<div class='amb'><div class='mt' style='width:auto'>Боекомплект <span class='tg'>· у каждого танка свой${av.length>1?' · все типы вместе до '+cap:' · до '+cap}</span></div>${rows}<div class='bar' data-bar><div></div></div><div class='ts' data-tot style='max-width:none'></div><div class='cd' style='justify-content:flex-start'><button data-ab='buy'></button><button data-ab='full'>Долить до полного<span class='st'>базовыми</span></button><button data-ab='min'>До ${Math.round(MINAM*100)}%</button><button data-ab='ration' style='display:none'>Паёк штаба<span class='st'>бесплатно</span></button><button data-ab='rst'>Отмена</button></div><span class='tg'>При уменьшении ползунка монеты не возвращаются. Что купили, остаётся на складе (в инвентаре): со склада грузится бесплатно, платите только за недостающее. Ползунок упирается в свободное место, другие типы сами не уменьшаются.</span></div>`}
+ const av=SHKT(t),rows=SHK.map(k=>{const q=SHELL[k],pr=shp(t,k);if(!av.includes(k))return `<div class='rw' style='opacity:.5'><div><b>${q.s}</b> <span class='tg'>${q.n}</span><br><span class='ts'>🔒 доступен со ступени ${k=='pc'?'II':'V'}</span></div></div>`;return `<div class='rw'><div><b>${q.s}</b> <span class='tg'>${q.n}</span><br><span class='ts'>пробитие <b>${Math.round(e.pn*q.pn)}</b> · урон <b>${f1(e.dm*q.dm)}</b><br>${pr?pr+' 🪙 за 100 · на складе <b>'+stk(t.id)[k]+'</b>':'бесплатно'}</span></div><input type='range' min='0' max='${cap}' step='1' data-sl='${k}'><b data-sv='${k}'></b></div>`}).join('');
+ return `<div class='amb'><div class='mt' style='width:auto'>Боекомплект <span class='tg'>· у каждого танка свой${av.length>1?' · все типы вместе до '+cap:' · до '+cap}</span></div>${rows}<div class='bar' data-bar><div></div></div><div class='ts' data-tot style='max-width:none'></div><div class='cd' style='justify-content:flex-start'><button data-ab='buy'></button><button data-ab='ration' style='display:none'>Паёк штаба<span class='st'>бесплатно</span></button><button data-ab='rst'>Отмена</button></div><span class='tg'>При уменьшении ползунка монеты не возвращаются. Что купили, остаётся на складе (в инвентаре): со склада грузится бесплатно, платите только за недостающее. Ползунок упирается в свободное место, другие типы сами не уменьшаются.</span></div>`}
 function ammoUpd(u,t){const cap=capOf(t),r=rack(t.id),d=gdr,T=rtot(d);let cost=0;
   for(const k of SHK){const sl=u.querySelector(`[data-sl='${k}']`);if(sl){sl.value=d[k];u.querySelector(`[data-sv='${k}']`).textContent=d[k]}}cost=planAm(t,d).cost;
  const bar=u.querySelector('[data-bar]');bar.firstChild.style.width=Math.min(100,T/cap*100)+'%';bar.classList.toggle('bad',T<needAm(t));
  u.querySelector('[data-tot]').innerHTML='Заряжено <b>'+T+'</b> / '+cap+' · '+(T<needAm(t)?'<span style="color:#ff8a7a">для боя нужно минимум '+needAm(t)+'</span>':T<cap?'в бой можно, но боекомплект не полный':'полный');
  const same=SHK.every(k=>d[k]==r[k]),b=u.querySelector("[data-ab='buy']");b.disabled=same||sv.co<cost;b.innerHTML=(cost?'Заправить':'Применить')+`<span class='st ${sv.co>=cost?'ok':'no'}'>${cost} 🪙</span>`;
  const rt=u.querySelector("[data-ab='ration']"),rtn=rtot(r),need=needAm(t)-rtn;rt.style.display=need>0&&Math.ceil(need*shp(t,'ap')/100)>sv.co?'':'none';
- u.querySelector("[data-ab='full']").disabled=T>=cap;u.querySelector("[data-ab='min']").disabled=T>=needAm(t);u.querySelector("[data-ab='rst']").disabled=same}
+ u.querySelector("[data-ab='rst']").disabled=same}
 function cardHTML(t){const mine=own(t.id),e=eff(t),o=openInfo(t),on=sv.tank==t.id,xp=sv.xp[t.id]||0;let act;
  if(mine)act=on?`<button disabled>✓ в бою</button>`:`<button data-a='sel'>В бой</button>`;
  else if(o.lock)act=`<button disabled>🔒 ${o.why}</button>`;
@@ -719,7 +719,7 @@ function garage(){const u=$('#up');let h='',body='';
   body=`<p class='tg' style='padding:28px 0;font-size:15px'>Пока нет предложений</p>`}
  else if(gtk){const tt=TK(gtk);h=`<div class='cd'><button data-a='back' style='min-width:0'>← К дереву</button><button data-a='skins' style='min-width:0;border-color:${gsk?'#e8a73a':'transparent'}'>${gsk?'Модули и навыки':'Скины'}</button></div>`;body=`<p style='min-height:20px;color:#e8a73a'>${gmsg}</p>`+(gsk?skinsHTML(tt):cardHTML(tt))}
  else{const n=Math.floor(sv.fx/XFX);h=`<p>Свободный опыт: ${sv.fx} · Опыт копится на танке, на котором играете</p>`;
-  body=`<div class='cd'>${Object.entries(CL).map(([k,nm])=>`<button data-c='${k}' style='border-color:${gcl==k?'#e8a73a':'transparent'}'>${nm}</button>`).join('')}</div>${treeHTML(gcl)}<div class='cd'><button data-x='1'${n<1?' disabled':''}>Обменять свободный опыт<span class='st'>${n} 🪙 за ${n*XFX} оп.</span></button><button data-a='shop'>🛒 Магазин<span class='st'>пока нет предложений</span></button></div>`}
+  body=`<div class='cd'>${Object.entries(CL).map(([k,nm])=>`<button data-c='${k}' style='border-color:${gcl==k?'#e8a73a':'transparent'}'>${nm}</button>`).join('')}</div>${treeHTML(gcl)}<div class='cd'><button data-x='1'${n<1?' disabled':''}>Обменять свободный опыт<span class='st'>${n} 🪙 за ${n*XFX} оп.</span></button></div>`}
 ovStat();wselR();$('#t1').textContent='🪖 Танчики';
  u.innerHTML=`<h2>Гараж · ${sv.co} 🪙</h2>${h}${body}<button class='cl'>Назад</button>`;u.classList.remove('h');
  const sync=()=>{svs();TKc=eff(TK());$('#co').textContent=sv.co};
@@ -728,12 +728,12 @@ ovStat();wselR();$('#t1').textContent='🪖 Танчики';
  u.querySelectorAll('[data-c]').forEach(b=>b.onclick=()=>{gcl=b.dataset.c;garage()});
  u.querySelectorAll('[data-rp]').forEach(b=>b.onclick=()=>{const t=TK(gtk),c=repCost(t);if(sv.co>=c){sv.co-=c;delete sv.brk[t.id];sync();gmsg='Танк отремонтирован'}else gmsg='Не хватает монет на ремонт';garage()});
  if(gtk&&!gsk&&own(gtk)&&u.querySelector('[data-sl]')){const t=TK(gtk),cap=capOf(t),r=rack(t.id);ammoUpd(u,t);
-  u.querySelectorAll('[data-sl]').forEach(inp=>inp.oninput=()=>{const k=inp.dataset.sl,d=gdr,os=SHK.filter(x=>x!=k).reduce((a,x)=>a+d[x],0);d[k]=Math.max(0,Math.min(+inp.value,cap-os));ammoUpd(u,t)});
+  u.querySelectorAll('[data-sl]').forEach(inp=>inp.oninput=()=>{const k=inp.dataset.sl,d=gdr,os=SHK.filter(x=>x!=k).reduce((a,x)=>a+d[x],0);const fr=cap-os,stp=1;let v=Math.round(+inp.value);d[k]=Math.max(0,Math.min(v,fr));ammoUpd(u,t)});
   u.querySelectorAll('[data-ab]').forEach(b=>b.onclick=()=>{const a=b.dataset.ab,d=gdr;
    if(a=='buy'){const cost=planAm(t,d).cost;if(sv.co>=cost){applyAm(t,d);sync();gdr=null;gmsg=cost?'Боекомплект заправлен':'Боекомплект загружен со склада'}else gmsg='Не хватает монет';garage();return}
    if(a=='rst'){gdr=null;garage();return}
    if(a=='ration'){const need=needAm(t)-rtot(r);if(need>0){r.ap+=need;svs();gdr=null;gmsg='Паёк штаба: +'+need+' бронебойных'}garage();return}
-   if(a=='full')d.ap+=cap-rtot(d);if(a=='min'&&rtot(d)<needAm(t))d.ap+=needAm(t)-rtot(d);ammoUpd(u,t)})}
+   ammoUpd(u,t)})}
  u.querySelectorAll('.nd').forEach(b=>b.onclick=()=>{gdr=null;gtk=b.dataset.k;gmsg='';gsk=0;garage()});
  u.querySelectorAll("[data-a='back']").forEach(b=>b.onclick=()=>{gtk=null;gmsg='';gsk=0;garage()});
  u.querySelectorAll("[data-a='skins']").forEach(b=>b.onclick=()=>{gsk=gsk?0:1;gmsg='';garage()});
