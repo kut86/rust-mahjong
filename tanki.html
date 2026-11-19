@@ -134,6 +134,19 @@ body:has(#ov:not(.h)) #hud,body:has(#up:not(.h)) #hud{visibility:hidden}
 @keyframes czg{0%{opacity:0;transform:scale(.2)}35%{opacity:1;transform:scale(3.4)}100%{opacity:0;transform:scale(6)}}
 @keyframes czf{0%{opacity:0;transform:translateY(40px) scale(.4)}100%{opacity:1;transform:none}}
 @keyframes czp{0%{opacity:0;transform:translateY(40px) scale(.3)}60%{transform:translateY(-8px) scale(1.12)}100%{opacity:1;transform:none}}
+#trb{position:absolute;top:calc(12px + env(safe-area-inset-top,0px));right:14px;display:flex;gap:8px;align-items:center;z-index:2}
+#ov #trb button{margin:0;padding:8px 14px;font-size:15px;font-weight:700;border-radius:999px;background:rgba(10,26,58,.75);color:#fff;border:2px solid #4fc3ff;box-shadow:0 0 12px rgba(79,195,255,.45)}
+#ov #trb #frb{border-color:#6a7a96;box-shadow:none;color:#9fb0cc}#ov #trb #frb.rdy{border-color:#f2c14e;color:#fff;box-shadow:0 0 14px rgba(242,193,78,.7);animation:frp 1.8s ease-in-out infinite}
+@keyframes frp{50%{box-shadow:0 0 22px rgba(242,193,78,1)}}
+@media (max-width:700px){#ov{padding-top:calc(56px + env(safe-area-inset-top,0px))}}
+#evw .sh{margin:12px 0 4px;font-size:15px;color:#fff}#evw .em{font-size:12px;color:#8fa3c4;margin:2px 0}
+#evw .sr{display:flex;flex-direction:column;gap:6px}#evw .sw{display:flex;gap:10px;align-items:center;padding:6px 8px;border:1px solid rgba(160,200,255,.2);border-radius:12px;background:rgba(255,255,255,.04)}
+#evw .sw .it{flex:1;min-width:0;display:flex;flex-direction:column;font-size:13px;color:#c9d7ef}#evw .sw .it b{color:#fff;font-size:14px}#evw .sw .it b em{font-style:normal;color:#f2c14e;margin-left:6px}#evw .sw .it small{font-size:11px;color:#8fa3c4}
+#evw .sw .di{flex:0 0 40px;height:40px;padding:4px}
+#evw .sb,#evw .mini{margin:0;padding:8px 12px;font-size:13px;border-radius:10px;border:0;background:#2c3c5c;color:#dbe6ff;font-weight:700;cursor:pointer;align-self:flex-end}#evw .mini{align-self:auto;margin-left:6px}
+#evw .sl .sbx{width:min(92%,380px);padding:16px;border:2px solid #f2c14e;border-radius:18px;background:#0c1c3c;color:#c9d7ef;text-align:left}#evw .sl .sbx h3{margin:0 0 8px;text-align:left}#evw .sl .sh2{display:flex;gap:10px;align-items:center}#evw .sl .sh2 b{color:#fff}#evw .sl input[type=range]{width:100%;margin:10px 0}#evw .sl .sq{text-align:center;font-size:16px;margin-bottom:8px;color:#fff}
+#evw .sl .oa button{flex:1}#evw .sl #sqx{background:#2c3c5c;color:#dbe6ff}
+#evw .oa.sa button small{display:block;font-weight:700;font-size:12px;color:#2a1800;opacity:1}#evw .oa.sa button:disabled small{color:inherit}
 #evw .iv{display:flex;gap:10px;padding:9px 0;border-top:1px solid rgba(160,200,255,.18)}#evw .iv .ic{flex:0 0 38px;height:38px;border-radius:50%;background:rgba(255,255,255,.08);display:flex;align-items:center;justify-content:center;font-size:21px}
 #evw .iv .it{display:flex;flex-direction:column;gap:2px;min-width:0;font-size:13px;line-height:1.35;color:#c9d7ef}#evw .iv .it b{font-size:15px;color:#fff}#evw .iv .it b em{font-style:normal;color:#f2c14e;margin-left:6px}#evw .iv .it small{color:#a9bddd;font-size:12px}
 #evw .pay{margin:10px 0 2px;padding:10px;border:1px solid rgba(242,193,78,.4);border-radius:12px;font-size:13px;color:#c9d7ef}#evw .pay input{width:90px;padding:8px;border-radius:8px;border:1px solid #556;background:#0b1830;color:#fff;font-size:16px;margin:0 6px}#evw .pay .pb{display:flex;gap:8px;margin-top:8px}#evw .pay .pb button{flex:1;margin:0;padding:10px 4px;font-size:14px;background:var(--acc);color:var(--btx);border:0;border-radius:10px;font-weight:700}#evw .pay small{display:block;margin-top:6px;font-size:11px;opacity:.8}
@@ -169,7 +182,7 @@ body:has(#ov:not(.h)) #hud,body:has(#up:not(.h)) #hud{visibility:hidden}
 <div id="sh"><button data-k="ap"><b>ББ</b><i></i></button><button data-k="pc"><b>БП</b><i></i></button><button data-k="he"><b>ОФ</b><i></i></button></div><div id='sb'><button data-s='x'>💥 25</button><button data-s='s'>🛡 20</button><button data-s='d'>⚡ 15</button></div>
 <div id="evw"></div>
 <div id="rot"><b>📱</b>Поверните телефон горизонтально<a href="index.html" style="margin-top:6px;color:var(--tx);background:#3a4030;border-radius:14px;padding:12px 28px;font-size:16px;font-weight:700;text-decoration:none">☰ Меню игр</a></div>
-<div id="ov"><div id="evs"><div id="evt"></div><div id="evd"></div></div><h1 id="t1">🪖 Танчики</h1><p id="t2">Левый палец — движение, правый — прицел и огонь. На компьютере: WASD, мышь, клик.</p><div class="tg" style="margin-top:2px">Стартовая волна</div><div id="wtabs"></div><div id="wsel"></div><button id="go">Играть</button><button id="fs" style="display:none;background:#3a4030;color:var(--tx);margin-top:4px;font-size:16px"></button><p id="fsh" class="tg" style="display:none;max-width:320px;line-height:1.5"></p><button id="shop" style="background:#3a4030;color:var(--tx);margin-top:4px;font-size:16px">🔧 Гараж · <span id="co">0</span> 🪙</button><button id="invb" style="background:#3a4030;color:var(--tx);margin-top:4px;font-size:16px">🎒 Инвентарь</button><a class="lk" href="index.html">☰ Меню игр</a><div id="au"></div></div>
+<div id="ov"><div id="evs"><div id="evt"></div><div id="evd"></div></div><div id="trb" style="display:none"><button id="frb"><span>🎁 Сундук</span></button><button id="gemb">💎 <span id="gemn">0</span></button></div><h1 id="t1">🪖 Танчики</h1><p id="t2">Левый палец — движение, правый — прицел и огонь. На компьютере: WASD, мышь, клик.</p><div class="tg" style="margin-top:2px">Стартовая волна</div><div id="wtabs"></div><div id="wsel"></div><button id="go">Играть</button><button id="fs" style="display:none;background:#3a4030;color:var(--tx);margin-top:4px;font-size:16px"></button><p id="fsh" class="tg" style="display:none;max-width:320px;line-height:1.5"></p><button id="shop" style="background:#3a4030;color:var(--tx);margin-top:4px;font-size:16px">🔧 Гараж · <span id="co">0</span> 🪙</button><button id="mkt" style="background:#3a4030;color:var(--tx);margin-top:4px;font-size:16px">🛒 Магазин</button><button id="invb" style="background:#3a4030;color:var(--tx);margin-top:4px;font-size:16px">🎒 Инвентарь</button><a class="lk" href="index.html">☰ Меню игр</a><div id="au"></div></div>
 <script>
 const $=s=>document.querySelector(s),cv=$('#c'),x=cv.getContext('2d'),gr=document.createElement('canvas'),g=gr.getContext('2d');
 const R=(a,b)=>b===undefined?Math.random()*a:a+Math.random()*(b-a),C=(v,a,b)=>Math.max(a,Math.min(b,v)),PI=Math.PI;
@@ -235,9 +248,9 @@ const XFX=10;                     // сколько свободного опы�
 let NEC=0;                        // шанс союзника-некроманта (из навыка)
 const PCRIT_MUL=2,BCRIT_CH=15,BCRIT_MUL=1.5; // крит: множитель урона игрока; шанс и множитель крита босса по игроку (удар в борт/корму)
 const RAM_DMG=10,RAM_BACK=25,RAM_CAP=60;      // таран: урон врагу на полной скорости, ответный урон игроку и его потолок
-const defSv=()=>({v:3,rev:0,mw:{l:0,m:0,h:0},kl:{l:0,m:0,h:0},lt:{},am:{},brk:{},co:0,tank:'l1',tk:['l1'],xp:{},fx:0,mod:{},eq:{},sk:{},sks:{}});
+const defSv=()=>({v:3,rev:0,mw:{l:0,m:0,h:0},kl:{l:0,m:0,h:0},lt:{},am:{},st:{},brk:{},co:0,tank:'l1',tk:['l1'],xp:{},fx:0,mod:{},eq:{},sk:{},sks:{}});
 let sv=defSv();try{const o=JSON.parse(localStorage.getItem('tk')||'{}');if(o.v>=2)Object.assign(sv,o);else{sv.co=+o.co||0}}catch(e){}
-function normSv(){sv.tk=(sv.tk||[]).filter(id=>TANKS.some(t=>t.id==id));if(!sv.tk.includes('l1'))sv.tk.unshift('l1');if(!sv.tk.includes(sv.tank))sv.tank='l1';sv.xp=sv.xp||{};sv.fx=+sv.fx||0;sv.mod=sv.mod||{};sv.eq=sv.eq||{};sv.sk=sv.sk||{};sv.sks=sv.sks||{};if(typeof sv.am=='number'&&Number.isFinite(sv.am))sv.lg=sv.am;if(!sv.am||typeof sv.am!='object')sv.am={};sv.brk=sv.brk&&typeof sv.brk=='object'?sv.brk:{};if(typeof sv.mw!='object'||!sv.mw){const old=Math.max(0,Math.floor(+sv.mw||0)),c0=(TANKS.find(t=>t.id==sv.tank)||{c:'l'}).c;sv.mw={l:0,m:0,h:0};sv.mw[c0]=old} // старый общий рекорд переходит классу выбранного танка
+function normSv(){sv.st=sv.st&&typeof sv.st=='object'?sv.st:{};sv.tk=(sv.tk||[]).filter(id=>TANKS.some(t=>t.id==id));if(!sv.tk.includes('l1'))sv.tk.unshift('l1');if(!sv.tk.includes(sv.tank))sv.tank='l1';sv.xp=sv.xp||{};sv.fx=+sv.fx||0;sv.mod=sv.mod||{};sv.eq=sv.eq||{};sv.sk=sv.sk||{};sv.sks=sv.sks||{};if(typeof sv.am=='number'&&Number.isFinite(sv.am))sv.lg=sv.am;if(!sv.am||typeof sv.am!='object')sv.am={};sv.brk=sv.brk&&typeof sv.brk=='object'?sv.brk:{};if(typeof sv.mw!='object'||!sv.mw){const old=Math.max(0,Math.floor(+sv.mw||0)),c0=(TANKS.find(t=>t.id==sv.tank)||{c:'l'}).c;sv.mw={l:0,m:0,h:0};sv.mw[c0]=old} // старый общий рекорд переходит классу выбранного танка
 sv.kl=sv.kl&&typeof sv.kl=='object'?sv.kl:{};sv.lt=sv.lt&&typeof sv.lt=='object'?sv.lt:{};for(const c of['l','m','h']){sv.mw[c]=Math.max(0,Math.floor(+sv.mw[c]||0));sv.kl[c]=Math.max(0,Math.floor(+sv.kl[c]||0))}}normSv();
 /* Монеты ведутся как журнал: любое изменение sv.co копится в qPend (сумма ещё не отправленных операций), а сервер складывает их сам.
    Так устаревшая вкладка или повторная отправка не могут перезаписать баланс. coSilent — выставить баланс без записи операции (после ответа сервера). */
@@ -275,6 +288,11 @@ function rack(id){id=id||sv.tank;const t=TK(id),cap=capOf(t);let r=sv.am[id];
  for(const k of SHK)r[k]=Math.max(0,Math.floor(+r[k]||0));
  {const av=SHKT(t);for(const k of SHK)if(!av.includes(k)&&r[k]>0){r.ap+=r[k];r[k]=0}}
  if(rtot(r)>cap){const x=cap/rtot(r);for(const k of SHK)r[k]=Math.floor(r[k]*x)}return r}
+/* Склад: купленные снаряды (только платные типы), лежат у конкретного танка, не больше вместимости на каждый тип */
+function stk(id){sv.st=sv.st&&typeof sv.st=='object'?sv.st:{};const t=TK(id),cap=capOf(t),av=SHKT(t);let r=sv.st[id];if(!r)r=sv.st[id]={ap:0,pc:0,he:0};for(const k of SHK){r[k]=av.includes(k)&&shp(t,k)>0?Math.min(cap,Math.max(0,Math.floor(+r[k]||0))):0}return r}
+// что произойдёт при заправке до d: сначала берём со склада, остальное докупаем; лишнее из боекомплекта уходит на склад
+function planAm(t,d){const r=rack(t.id),S=stk(t.id),o={},cap=capOf(t);let cost=0;for(const k of SHK){const need=d[k]-r[k],pd=shp(t,k)>0;if(need>0){const use=pd?Math.min(S[k],need):0,buy=need-use;o[k]={use,buy,ret:0};cost+=Math.ceil(buy*shp(t,k)/100)}else o[k]={use:0,buy:0,ret:pd?-need:0}}return{cost,o}}
+function applyAm(t,d){const pl=planAm(t,d),S=stk(t.id),cap=capOf(t);sv.co-=pl.cost;for(const k of SHK){S[k]=Math.max(0,S[k]-pl.o[k].use+pl.o[k].ret);if(shp(t,k)>0)S[k]=Math.min(S[k],cap-d[k])}sv.am[t.id]={ap:d.ap,pc:d.pc,he:d.he};return pl.cost}
 const needAm=t=>Math.ceil(capOf(t)*MINAM);
 const repCost=t=>REPAIR_COST*t.t;
 function wtabR(){const t=$('#wtabs');if(!t)return;t.innerHTML='';for(const c of['l','m','h']){const mine=sv.tk.map(id=>TK(id)).filter(x=>x.c==c).sort((a,b)=>b.t-a.t),b=document.createElement('button');b.textContent=CN[c]+' · '+sv.mw[c];b.disabled=!mine.length;if(c==TK().c)b.className='on';
@@ -334,7 +352,7 @@ function report(w,sc,fin){if(tok&&runTok){const t=TK();api('/api/tank',{run:runT
 
 /* ===== Облачное сохранение (Cloudflare D1): работает после входа через Steam; без входа прогресс только в этом браузере =====
    Разделы независимы (у каждого своя версия на сервере): tanks, xp, mods, skills, ammo, waves; монеты — журнал операций. */
-const PARTS={tanks:['tk','tank','lt'],xp:['xp','fx'],mods:['mod','eq'],skills:['sk','sks'],ammo:['am','brk','lg'],waves:['mw','kl']};
+const PARTS={tanks:['tk','tank','lt'],xp:['xp','fx'],mods:['mod','eq'],skills:['sk','sks'],ammo:['am','brk','lg','st'],waves:['mw','kl']};
 const partOf=k=>{const o={};for(const f of PARTS[k])if(sv[f]!==undefined)o[f]=sv[f];return o};
 const uid=()=>crypto.randomUUID?crypto.randomUUID():Math.random().toString(36).slice(2)+Date.now().toString(36);
 const persistQ=()=>{try{localStorage.setItem('tk-q',JSON.stringify({pend:qPend,inflight:qIn}))}catch(e){}};
@@ -488,11 +506,11 @@ function vec(s){const dx=s.x-s.ox,dy=s.y-s.oy,h=Math.hypot(dx,dy)||1,m=Math.min(
 function hitP(v,quiet){p.hp-=v;p.fl=.08;hurt=.3;shake=Math.max(shake,5);vib(30);if(!quiet)dnum(p,v,'#ff6a5a','-');if(p.hp<=0)die()}
 function ovStat(){const t=TK(),e=$('#t2'),br=!!sv.brk[sv.tank];e.textContent='Танк «'+t.n+'» '+(br?'разбит — почините его в гараже':'к бою готов');e.style.color=br?'#ff8a7a':'#8fd48a'}
 function ppShow(h,t,btns){$('#pph').textContent=h;$('#ppt').textContent=t;const b=$('#ppb');b.innerHTML='';for(const[l,fn,c]of btns){const x=document.createElement('button');x.textContent=l;if(c)x.style.cssText=c;x.onclick=()=>{$('#pp').classList.remove('s');if(fn)fn()};b.appendChild(x)}$('#pp').classList.add('s')}
-function quickFill(t){const r=rack(),cap=capOf(t),pr=shp(t,'ap'),need=cap-rtot(r);if(need>0){const n=pr>0?Math.min(need,Math.floor(sv.co*100/pr)):need;sv.co-=pr>0?Math.ceil(n*pr/100):0;r.ap+=n}if(rtot(r)<needAm(t))r.ap+=needAm(t)-rtot(r);svs();$('#co').textContent=sv.co}
+function quickFill(t){const r=rack(),cap=capOf(t),pr=shp(t,'ap'),S=stk(t.id);let need=cap-rtot(r);if(need>0){const u=pr>0?Math.min(S.ap,need):0;S.ap-=u;r.ap+=u;need-=u}if(need>0){const n=pr>0?Math.min(need,Math.floor(sv.co*100/pr)):need;sv.co-=pr>0?Math.ceil(n*pr/100):0;r.ap+=n}if(rtot(r)<needAm(t))r.ap+=needAm(t)-rtot(r);svs();$('#co').textContent=sv.co}
 function tryGo(){if(cloudBusy){$('#t2').textContent='Загрузка прогресса…';$('#t2').style.color='#f2c14e';return}const t=TK(),r=rack(),T=rtot(r),cap=capOf(t),pr=shp(t,'ap');
  if(sv.brk[sv.tank]){ppShow('Танк разбит','Танк «'+t.n+'» нужно починить в гараже (карточка танка → «Ремонт»).',[['В гараж',()=>$('#shop').click()],['Отмена']]);return}
  if(T>=cap){startBattle();return}
- const full=Math.ceil((cap-T)*pr/100),afford=pr==0||sv.co>=full,any=pr==0||sv.co*100>=pr,lbl=T<needAm(t)&&!any?'Паёк штаба · бесплатно':'Пополнить · '+(pr==0?'бесплатно':afford?full+' 🪙':'на '+sv.co+' 🪙');
+ const full=Math.ceil(Math.max(0,cap-T-(pr>0?stk(t.id).ap:0))*pr/100),afford=pr==0||sv.co>=full,any=pr==0||sv.co*100>=pr,lbl=T<needAm(t)&&!any?'Паёк штаба · бесплатно':'Пополнить · '+(pr==0?'бесплатно':afford?full+' 🪙':'на '+sv.co+' 🪙');
  const btns=[];if(T>=needAm(t))btns.push(['В бой',startBattle]);btns.push([lbl,()=>{quickFill(t);tryGo()}]);btns.push(['Отмена']);
  ppShow('Ваш боекомплект не полный',(T<needAm(t)?'Заряжено '+T+' из '+cap+'. Для боя нужно минимум '+needAm(t)+'.':'Заряжено '+T+' из '+cap+'. Выйти в бой с неполным боекомплектом?'),btns)}
 function endScr(t1,t2){over=true;bossT=-1;if(atFront)selW=MW()+1;wselR();svs();cloudApplyQ();cloudFlush();setPause(0);$('#t1').textContent=t1;ovStat();$('#go').textContent='Играть снова';$('#co').textContent=sv.co;$('#ov').classList.remove('h')}
@@ -665,10 +683,10 @@ function modTxt(t,m,L){const P=MODP[m][L-1],h=v=>Math.round(t.hp*v);
  if(m=='e')return[`Скорость ${f1(t.sp*(P.sp||1))}`,`ХП ${h(P.hp||1)}`];
  return[`Корпус ${f1(Math.min(14,(5+t.sp*.8)*(P.htm||1)))}`,`Рикошет ${f1(t.rk+(P.rk||0))}%`,`Скорость ${f1(t.sp*(P.sp||1))}`]}
 function ammoHTML(t){const cap=capOf(t),e=eff(t),r=rack(t.id);if(!gdr||gdrId!=t.id){gdr={ap:r.ap,pc:r.pc,he:r.he};gdrId=t.id}
- const av=SHKT(t),rows=SHK.map(k=>{const q=SHELL[k],pr=shp(t,k);if(!av.includes(k))return `<div class='rw' style='opacity:.5'><div><b>${q.s}</b> <span class='tg'>${q.n}</span><br><span class='ts'>🔒 доступен со ступени ${k=='pc'?'II':'V'}</span></div></div>`;return `<div class='rw'><div><b>${q.s}</b> <span class='tg'>${q.n}</span><br><span class='ts'>пробитие <b>${Math.round(e.pn*q.pn)}</b> · урон <b>${f1(e.dm*q.dm)}</b><br>${pr?pr+' 🪙 за 100':'бесплатно'}</span></div><input type='range' min='0' max='${cap}' step='${cap>=500?5:1}' data-sl='${k}'><b data-sv='${k}'></b></div>`}).join('');
- return `<div class='amb'><div class='mt' style='width:auto'>Боекомплект <span class='tg'>· у каждого танка свой${av.length>1?' · все типы вместе до '+cap:' · до '+cap}</span></div>${rows}<div class='bar' data-bar><div></div></div><div class='ts' data-tot style='max-width:none'></div><div class='cd' style='justify-content:flex-start'><button data-ab='buy'></button><button data-ab='full'>Долить до полного<span class='st'>базовыми</span></button><button data-ab='min'>До ${Math.round(MINAM*100)}%</button><button data-ab='ration' style='display:none'>Паёк штаба<span class='st'>бесплатно</span></button><button data-ab='rst'>Отмена</button></div><span class='tg'>При уменьшении ползунка монеты не возвращаются. Ползунок упирается в свободное место: другие типы снарядов не уменьшаются сами.</span></div>`}
+ const av=SHKT(t),rows=SHK.map(k=>{const q=SHELL[k],pr=shp(t,k);if(!av.includes(k))return `<div class='rw' style='opacity:.5'><div><b>${q.s}</b> <span class='tg'>${q.n}</span><br><span class='ts'>🔒 доступен со ступени ${k=='pc'?'II':'V'}</span></div></div>`;return `<div class='rw'><div><b>${q.s}</b> <span class='tg'>${q.n}</span><br><span class='ts'>пробитие <b>${Math.round(e.pn*q.pn)}</b> · урон <b>${f1(e.dm*q.dm)}</b><br>${pr?pr+' 🪙 за 100 · на складе <b>'+stk(t.id)[k]+'</b>':'бесплатно'}</span></div><input type='range' min='0' max='${cap}' step='${cap>=500?5:1}' data-sl='${k}'><b data-sv='${k}'></b></div>`}).join('');
+ return `<div class='amb'><div class='mt' style='width:auto'>Боекомплект <span class='tg'>· у каждого танка свой${av.length>1?' · все типы вместе до '+cap:' · до '+cap}</span></div>${rows}<div class='bar' data-bar><div></div></div><div class='ts' data-tot style='max-width:none'></div><div class='cd' style='justify-content:flex-start'><button data-ab='buy'></button><button data-ab='full'>Долить до полного<span class='st'>базовыми</span></button><button data-ab='min'>До ${Math.round(MINAM*100)}%</button><button data-ab='ration' style='display:none'>Паёк штаба<span class='st'>бесплатно</span></button><button data-ab='rst'>Отмена</button></div><span class='tg'>При уменьшении ползунка монеты не возвращаются. Что купили, остаётся на складе (в инвентаре): со склада грузится бесплатно, платите только за недостающее. Ползунок упирается в свободное место, другие типы сами не уменьшаются.</span></div>`}
 function ammoUpd(u,t){const cap=capOf(t),r=rack(t.id),d=gdr,T=rtot(d);let cost=0;
-  for(const k of SHK){const sl=u.querySelector(`[data-sl='${k}']`);if(sl){sl.value=d[k];u.querySelector(`[data-sv='${k}']`).textContent=d[k]}cost+=Math.ceil(Math.max(0,d[k]-r[k])*shp(t,k)/100)}
+  for(const k of SHK){const sl=u.querySelector(`[data-sl='${k}']`);if(sl){sl.value=d[k];u.querySelector(`[data-sv='${k}']`).textContent=d[k]}}cost=planAm(t,d).cost;
  const bar=u.querySelector('[data-bar]');bar.firstChild.style.width=Math.min(100,T/cap*100)+'%';bar.classList.toggle('bad',T<needAm(t));
  u.querySelector('[data-tot]').innerHTML='Заряжено <b>'+T+'</b> / '+cap+' · '+(T<needAm(t)?'<span style="color:#ff8a7a">для боя нужно минимум '+needAm(t)+'</span>':T<cap?'в бой можно, но боекомплект не полный':'полный');
  const same=SHK.every(k=>d[k]==r[k]),b=u.querySelector("[data-ab='buy']");b.disabled=same||sv.co<cost;b.innerHTML=(cost?'Заправить':'Применить')+`<span class='st ${sv.co>=cost?'ok':'no'}'>${cost} 🪙</span>`;
@@ -712,7 +730,7 @@ ovStat();wselR();$('#t1').textContent='🪖 Танчики';
  if(gtk&&!gsk&&own(gtk)&&u.querySelector('[data-sl]')){const t=TK(gtk),cap=capOf(t),r=rack(t.id);ammoUpd(u,t);
   u.querySelectorAll('[data-sl]').forEach(inp=>inp.oninput=()=>{const k=inp.dataset.sl,d=gdr,os=SHK.filter(x=>x!=k).reduce((a,x)=>a+d[x],0);d[k]=Math.max(0,Math.min(+inp.value,cap-os));ammoUpd(u,t)});
   u.querySelectorAll('[data-ab]').forEach(b=>b.onclick=()=>{const a=b.dataset.ab,d=gdr;
-   if(a=='buy'){let cost=0;for(const k of SHK)cost+=Math.ceil(Math.max(0,d[k]-r[k])*shp(t,k)/100);if(sv.co>=cost){sv.co-=cost;sv.am[t.id]={ap:d.ap,pc:d.pc,he:d.he};sync();gdr=null;gmsg='Боекомплект заправлен'}else gmsg='Не хватает монет';garage();return}
+   if(a=='buy'){const cost=planAm(t,d).cost;if(sv.co>=cost){applyAm(t,d);sync();gdr=null;gmsg=cost?'Боекомплект заправлен':'Боекомплект загружен со склада'}else gmsg='Не хватает монет';garage();return}
    if(a=='rst'){gdr=null;garage();return}
    if(a=='ration'){const need=needAm(t)-rtot(r);if(need>0){r.ap+=need;svs();gdr=null;gmsg='Паёк штаба: +'+need+' бронебойных'}garage();return}
    if(a=='full')d.ap+=cap-rtot(d);if(a=='min'&&rtot(d)<needAm(t))d.ap+=needAm(t)-rtot(d);ammoUpd(u,t)})}
@@ -747,7 +765,7 @@ function startBattle(){
  if(wbPend&&!wb){wbBegin();return}
  atFront=selW==MW()+1;
  try{const d=document.documentElement,fs=d.requestFullscreen||d.webkitRequestFullscreen;(fs?Promise.resolve(fs.call(d)):Promise.reject()).then(()=>screen.orientation.lock('landscape')).catch(()=>{try{screen.orientation.lock('landscape').catch(()=>{})}catch(_){}})}catch(_){}A();if(ac&&ac.state==='suspended')ac.resume();$('#ov').classList.add('h');$('#sb').style.display='flex';$('#sh').style.display='flex';$('#mn').style.display='block';$('#ps').style.display='block';reset();started=true}
-$('#go').onclick=()=>{wbPend=null;tryGo()};$('#invb').onclick=()=>{invOpen();invLoad().then(()=>{if($('#evw').classList.contains('on')&&$('#evw').querySelector('.ab'))invOpen()})};
+$('#go').onclick=()=>{wbPend=null;tryGo()};$('#invb').onclick=()=>{invOpen();invLoad().then(()=>{if($('#evw').classList.contains('on')&&$('#evw').querySelector('.ig')&&!$('#evw .cz'))invOpen()})};
 function setPause(v){paused=v?1:0;$('#pz').classList.toggle('s',!!paused);$('#ps').textContent=paused?'▶':'⏸';st.L=st.R=null;ms.down=0}
 $('#ps').onclick=()=>{if(started&&!over&&!pause)setPause(!paused)};$('#rs').onclick=()=>setPause(0);
 $('#dai').onclick=()=>{aimOn=aimOn?0:1;try{localStorage.setItem('tk-aim',aimOn)}catch(e){}aimBtn()};aimBtn();$('#mn').onpointerdown=e=>e.stopPropagation();$('#mn').onclick=dzOpen;$('#dcn').onclick=()=>{$('#dz').classList.remove('s');setPause(dzWas)};$('#dsr').onclick=desert;$('#dz').onpointerdown=e=>e.stopPropagation();
@@ -866,7 +884,7 @@ const BTN={x:'salvo',s:'shield',d:'dbl'},ITEMS=[
  {k:'chest',ico:'📦',n:'Сундук',d:'Внутри золото 10–200, редко щит, залп или двойная стрельба.',h:'Нужен ключ. Ежедневный бесплатный сундук ключа не требует.',w:'Только в инвентаре.'},
  {k:'gem',ico:'💎',n:'Кристаллы',d:'Особая валюта: за них покупают сундуки.',h:'Тратятся в инвентаре, кнопка «Купить сундук».',w:'Только в инвентаре. Падают с мирового босса.'}];
 let INV=null,invDaily=null,invPrice=30,invPay=null;
-function updSb(){document.querySelectorAll('#sb button').forEach(b=>{const k=b.dataset.s,it=BTN[k],n=INV?INV[it]||0:0,ic=b.textContent.split(' ')[0];b.textContent=ic+' '+n;b.style.opacity=(!n||(wb&&wb.used[k]))?'.35':''});const ib=$('#invb');if(ib)ib.textContent='🎒 Инвентарь'+(INV&&invDaily===false?' · 🎁':'')}
+function updSb(){document.querySelectorAll('#sb button').forEach(b=>{const k=b.dataset.s,it=BTN[k],n=INV?INV[it]||0:0,ic=b.textContent.split(' ')[0];b.textContent=ic+' '+n;b.style.opacity=(!n||(wb&&wb.used[k]))?'.35':''});$('#trb').style.display=tok?'flex':'none';$('#gemn').textContent=INV?INV.gem||0:0;const fb=$('#frb');fb.disabled=invDaily!==false;fb.classList.toggle('rdy',invDaily===false);fb.firstChild.textContent=invDaily===false?'🎁 Сундук':'🎁 завтра'}
 function invSet(j){if(!j)return;if(j.items)INV=j.items;if(j.chestPrice)invPrice=j.chestPrice;if(j.daily)invDaily=j.daily.claimed;if(j.pay)invPay=j.pay;updSb()}
 document.addEventListener('visibilitychange',()=>{if(!document.hidden&&tok&&$('#evw').classList.contains('on')&&$('#evw').querySelector('.pay'))invLoad().then(()=>invOpen())});
 function invLoad(){if(!tok){INV=null;updSb();return Promise.resolve()}return api('/api/inv').then(j=>{invSet(j);return j}).catch(()=>{})}
@@ -892,11 +910,24 @@ const SVG={
  gem:'<defs><linearGradient id="iG" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#b5f0ff"/><stop offset=".5" stop-color="#3fb0ff"/><stop offset="1" stop-color="#1d56c9"/></linearGradient></defs><path d="M20 8 H44 L58 24 L32 58 L6 24 Z" fill="url(#iG)" stroke="#0b3b6b" stroke-width="3" stroke-linejoin="round"/><path d="M6 24 H58 M20 8 L26 24 L32 58 L38 24 L44 8 M26 24 H38" stroke="#fff" stroke-opacity=".6" stroke-width="1.8" fill="none"/>',
  gold:'<defs><radialGradient id="iC" cx=".4" cy=".35" r=".8"><stop offset="0" stop-color="#fff0a0"/><stop offset="1" stop-color="#d79a1c"/></radialGradient></defs><circle cx="32" cy="32" r="26" fill="url(#iC)" stroke="#7a5200" stroke-width="3"/><circle cx="32" cy="32" r="18" fill="none" stroke="#a8730d" stroke-width="3"/><path d="M26 24 H38 M26 32 H38 M26 40 H38" stroke="#a8730d" stroke-width="3" stroke-linecap="round"/>'};
 SVG.salvo=SVG.salvo.replace('BURST','M32.0 2.0 L35.9 17.5 L47.0 6.0 L42.6 21.4 L58.0 17.0 L46.5 28.1 L62.0 32.0 L46.5 35.9 L58.0 47.0 L42.6 42.6 L47.0 58.0 L35.9 46.5 L32.0 62.0 L28.1 46.5 L17.0 58.0 L21.4 42.6 L6.0 47.0 L17.5 35.9 L2.0 32.0 L17.5 28.1 L6.0 17.0 L21.4 21.4 L17.0 6.0 L28.1 17.5Z');
+SVG.ap='<defs><linearGradient id="sA" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#8a6a2a"/><stop offset=".5" stop-color="#f0d27a"/><stop offset="1" stop-color="#8a6a2a"/></linearGradient></defs><path d="M32 4 C40 12 42 22 42 30 V54 H22 V30 C22 22 24 12 32 4Z" fill="url(#sA)" stroke="#4a3510" stroke-width="3" stroke-linejoin="round"/><rect x="20" y="50" width="24" height="9" rx="2" fill="#b08a3a" stroke="#4a3510" stroke-width="3"/>';
+SVG.pc='<defs><linearGradient id="sP" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#6d7a8c"/><stop offset=".5" stop-color="#e6eef9"/><stop offset="1" stop-color="#6d7a8c"/></linearGradient></defs><path d="M32 3 C36 14 37 24 37 32 V54 H27 V32 C27 24 28 14 32 3Z" fill="url(#sP)" stroke="#2b3544" stroke-width="3" stroke-linejoin="round"/><rect x="20" y="50" width="24" height="9" rx="2" fill="#8a96a8" stroke="#2b3544" stroke-width="3"/>';
+SVG.he='<defs><linearGradient id="sE" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#8a3a1a"/><stop offset=".5" stop-color="#ff9a5a"/><stop offset="1" stop-color="#8a3a1a"/></linearGradient></defs><path d="M32 6 C41 12 44 22 44 30 V54 H20 V30 C20 22 23 12 32 6Z" fill="url(#sE)" stroke="#4a1a0a" stroke-width="3" stroke-linejoin="round"/><rect x="20" y="22" width="24" height="5" fill="#ffe08a"/><rect x="18" y="50" width="28" height="9" rx="2" fill="#b0653a" stroke="#4a1a0a" stroke-width="3"/>';
+RC.ap=RC.pc=RC.he='#c9b27a';
 const icon=(k,c)=>ITEM_IMG[k]?'<img class="'+(c||'')+'" src="'+ITEM_IMG[k]+'" alt="">':'<svg class="'+(c||'')+'" viewBox="0 0 64 64">'+SVG[k]+'</svg>';
 let invSel='chest',invPin='chest';
 function invDet(k,prev){const i=ITEMS.find(x=>x.k==k),I=INV||{},n=I[k]||0;let act='';
  if(!prev&&k=='chest'){const can=Math.min(I.chest||0,I.key||0);act='<div class="oa">'+[1,5,10].map(q=>'<button data-o="'+q+'"'+(can>=q?'':' disabled')+'>Открыть ×'+q+'</button>').join('')+'</div>'+(can<1?'<small>'+(!I.chest?'Нет сундуков':'Нет ключей')+'</small>':'')}
  return '<div class="dh"><span class="di" style="--rc:'+RC[k]+'">'+icon(k)+'</span><div><b>'+i.n+'<em>× '+n+'</em></b><span>'+i.d+'</span></div></div><small>Как использовать: '+i.h+'</small><small>Где работает: '+i.w+'</small>'+act+'<span class="ns">не продаётся</span>'}
+
+const SHN={ap:'ББ',pc:'БП',he:'ОФ'};
+function shellRows(){const rows=[];for(const t of TANKS){if(!sv.st||!sv.st[t.id])continue;const S=stk(t.id);for(const k of SHK)if(S[k]>0)rows.push({t,k,n:S[k]})}rows.sort((a,b)=>b.t.t-a.t.t||(a.t.n<b.t.n?-1:1));return rows}
+function sellOpen(id,k){const t=TK(id),S=stk(id),w=$('#evw'),pr=shp(t,k),max=S[k];if(!max||!pr){invOpen();return}
+ const z=document.createElement('div');z.className='cz sl';
+ z.innerHTML='<div class="sbx"><h3>Продать снаряды</h3><div class="sh2"><span class="di" style="--rc:'+RC[k]+'">'+icon(k)+'</span><div><b>'+SHELL[k].n+'</b><br><small>'+t.n+' · ступень '+RM[t.t-1]+'</small></div></div><p>Цена продажи — 50% от закупочной ('+f1(pr/2)+' 🪙 за 100 шт.)</p><input type="range" min="1" max="'+max+'" value="'+max+'" step="1"><div class="sq"><b id="sqn"></b> шт. → <b id="sqc"></b> 🪙</div><div class="oa"><button id="sqok">Продать</button><button id="sqx">Отмена</button></div></div>';
+ w.appendChild(z);const r=z.querySelector('input'),upd=()=>{const q=+r.value;$('#sqn').textContent=q;$('#sqc').textContent=Math.floor(q*pr/200)};r.oninput=upd;upd();
+ $('#sqx').onclick=()=>z.remove();
+ $('#sqok').onclick=()=>{const q=Math.min(+r.value,stk(id)[k]);if(q<1)return;const got=Math.floor(q*pr/200);stk(id)[k]-=q;sv.co+=got;svs();$('#co').textContent=sv.co;if(typeof cloudFlush=='function')cloudFlush();z.remove();invOpen();ppShow('Продано',q+' шт. · '+SHN[k]+' · '+t.n+'\n+'+got+' 🪙',[['Ок']])}}
 function lootSum(L){const g=L.reduce((a,l)=>a+(l.gold||0),0),it={};L.forEach(l=>{if(l.item)it[l.item]=(it[l.item]||0)+1});return{g,it}}
 function chestAnim(L,done){const w=$('#evw'),z=document.createElement('div'),T=[];let end=false;z.className='cz';
  z.innerHTML='<div class="cst"><div class="ch"><svg viewBox="0 0 64 64">'+SVG.chest+'</svg><i class="gl"></i></div><div class="cl"></div><div class="cr"></div></div><button class="cx">Пропустить</button>';w.appendChild(z);
@@ -910,23 +941,31 @@ function chestAnim(L,done){const w=$('#evw'),z=document.createElement('div'),T=[
  T.push(setTimeout(()=>{ch.className='ch open'},L.length>1?650:1000));
  if(L.length==1){T.push(setTimeout(()=>{cr.innerHTML=card(L[0]);cr.className='cr pop'},1450));T.push(setTimeout(fin,1500))}
  else{let t=950;L.forEach(l=>{T.push(setTimeout(()=>{const d=document.createElement('div');d.innerHTML=card(l);d.firstChild.classList.add('fly');cl.appendChild(d.firstChild)},t));t+=260});T.push(setTimeout(fin,t+700))}}
-function invOpen(){const w=$('#evw');w.style.setProperty('--ec','#f2c14e');w.style.setProperty('--eg','242,193,78');
- if(!tok){w.innerHTML='<div class="bx"><h2>🎒 Инвентарь</h2><p>Предметы хранятся в облаке. Войдите в аккаунт (Steam, Google или Discord), чтобы получать и использовать их.</p><div class="bt"><button class="x" id="evx">Закрыть</button></div></div>';w.classList.add('on');$('#evx').onclick=()=>w.classList.remove('on');return}
+const evErr={no_key:'Нет ключа.',no_chest:'Нет сундука.',already_claimed:'Сегодня уже получали.',no_gems:'Не хватает кристаллов.',unauthorized:'Войдите в аккаунт.'};
+function shellHTML(){const rows=shellRows();if(!rows.length)return '<h3 class="sh">Снаряды</h3><p class="em">Здесь появятся снаряды, которые вы купили в гараже и не взяли в бой.</p>';
+ return '<h3 class="sh">Снаряды</h3><div class="sr">'+rows.map(r=>'<div class="sw"><span class="di" style="--rc:'+RC[r.k]+'">'+icon(r.k)+'</span><div class="it"><b>'+SHELL[r.k].n+'<em>× '+r.n+'</em></b><small>'+r.t.n+' · ступень '+RM[r.t.t-1]+'</small></div><button class="sb" data-id="'+r.t.id+'" data-k="'+r.k+'">Продать</button></div>').join('')+'</div>'}
+function invWin(html){const w=$('#evw');w.style.setProperty('--ec','#f2c14e');w.style.setProperty('--eg','242,193,78');w.innerHTML='<div class="bx">'+html+'<div class="bt"><button class="x" id="evx">Закрыть</button></div></div>';w.classList.add('on');$('#evx').onclick=()=>w.classList.remove('on');w.onclick=ev=>{if(ev.target===w)w.classList.remove('on')};return w}
+function needLogin(t){invWin('<h2>'+t+'</h2><p>Предметы и кристаллы хранятся в облаке. Войдите в аккаунт (Steam, Google или Discord).</p>')}
+function invOpen(){if(!tok)return needLogin('🎒 Инвентарь');
  const I=INV||{},tiles=ITEMS.map(i=>'<button class="it2'+(I[i.k]?'':' z')+(i.k==invPin?' sel':'')+'" data-k="'+i.k+'" style="--rc:'+RC[i.k]+'">'+icon(i.k)+'<span class="cn">'+(I[i.k]||0)+'</span></button>').join('');
- w.innerHTML='<div class="bx"><h2>🎒 Инвентарь</h2><div class="ig">'+tiles+'</div><div id="ivdet" class="dt"></div><div class="ab">'
- +'<button id="ivd"'+(invDaily?' disabled':'')+'>🎁 Ежедневный сундук'+(invDaily?'<small>уже получен сегодня</small>':'<small>бесплатно, ключ не нужен</small>')+'</button>'
- +'<button id="ivb"'+((I.gem||0)>=invPrice?'':' disabled')+'>🛒 Купить сундук · '+invPrice+' 💎<small>у вас '+(I.gem||0)+' 💎</small></button></div>'+payBox()+'<div class="bt"><button class="x" id="evx">Закрыть</button></div></div>';
- w.classList.add('on');$('#evx').onclick=()=>w.classList.remove('on');w.onclick=ev=>{if(ev.target===w)w.classList.remove('on')};
+ const w=invWin('<h2>🎒 Инвентарь</h2><div class="ig">'+tiles+'</div><div id="ivdet" class="dt"></div>'+shellHTML());
  const det=$('#ivdet'),show=(k,prev)=>{det.innerHTML=invDet(k,prev);if(!prev)det.querySelectorAll('[data-o]').forEach(b=>b.onclick=()=>openN(+b.dataset.o))};
- const openN=n=>{det.querySelectorAll('button').forEach(b=>b.disabled=true);api('/api/inv/open',{n}).then(j=>{invSet(j);if(j.coins!==undefined)coFrom({bal:j.coins});chestAnim(j.loots||[j.loot],invOpen)}).catch(e=>{invLoad().then(invOpen);ppShow('Не получилось',({no_key:'Нет ключа.',no_chest:'Нет сундука.'})[e&&e.error]||'Нет связи с сервером.',[['Ок',invOpen]])})};
+ const openN=n=>{det.querySelectorAll('button').forEach(b=>b.disabled=true);api('/api/inv/open',{n}).then(j=>{invSet(j);if(j.coins!==undefined)coFrom({bal:j.coins});chestAnim(j.loots||[j.loot],invOpen)}).catch(e=>{invLoad().then(invOpen);ppShow('Не получилось',evErr[e&&e.error]||'Нет связи с сервером.',[['Ок',invOpen]])})};
  show(invPin);
  const hov=matchMedia('(hover:hover)').matches;
  w.querySelectorAll('.it2').forEach(b=>{b.onclick=()=>{invPin=b.dataset.k;w.querySelectorAll('.it2').forEach(x=>x.classList.toggle('sel',x==b));show(invPin)};if(hov)b.onmouseenter=()=>show(b.dataset.k,b.dataset.k!=invPin)});
  if(hov)w.querySelector('.ig').onmouseleave=()=>show(invPin);
- payBind();
- const act=(id,url,body,ok)=>{const b=$(id);if(b)b.onclick=()=>{b.disabled=true;api(url,body).then(j=>{invSet(j);if(j.coins!==undefined)coFrom({bal:j.coins});ok(j)}).catch(e=>{b.disabled=false;ppShow('Не получилось',({already_claimed:'Сегодня уже получали.',no_gems:'Не хватает кристаллов.',unauthorized:'Войдите в аккаунт.'})[e&&e.error]||'Нет связи с сервером.',[['Ок',invOpen]])})}};
- act('#ivd','/api/inv/daily',{},j=>{invOpen();chestAnim([j.loot],invOpen)});
- act('#ivb','/api/inv/buy',{item:'chest',n:1},j=>{invPin='chest';invOpen();ppShow('Куплено','📦 Сундук ×1 за '+invPrice+' 💎',[['Ок',invOpen]])})}
+ w.querySelectorAll('.sb').forEach(b=>b.onclick=()=>sellOpen(b.dataset.id,b.dataset.k))}
+function payOpen(){if(!tok)return needLogin('💎 Кристаллы');
+ invLoad().then(()=>{const on=invPay&&invPay.on;invWin('<h2>💎 Кристаллы</h2><p>У вас <b>'+((INV&&INV.gem)||0)+'</b> 💎. Кристаллы нужны для покупки сундуков в магазине.</p>'+(on?payBox():'<p>Пополнение сейчас недоступно.</p>'));payBind()})}
+function shopOpen(){if(!tok)return needLogin('🛒 Магазин');
+ invLoad().then(()=>{const g=(INV&&INV.gem)||0,P=invPrice,btn=n=>'<button data-b="'+n+'"'+(g>=P*n?'':' disabled')+'>×'+n+'<small>'+P*n+' 💎</small></button>';
+  const w=invWin('<h2>🛒 Магазин</h2><p>У вас <b>'+g+'</b> 💎 <button class="mini" id="shp">Пополнить</button></p><div class="dt"><div class="dh"><span class="di" style="--rc:'+RC.chest+'">'+icon('chest')+'</span><div><b>Сундук</b><span>Золото 10–200, редко щит, залп или двойная стрельба. Открывается ключом.</span></div></div><div class="oa sa">'+btn(1)+btn(5)+btn(10)+'</div></div>');
+  $('#shp').onclick=payOpen;
+  w.querySelectorAll('[data-b]').forEach(b=>b.onclick=()=>{const n=+b.dataset.b;w.querySelectorAll('[data-b]').forEach(x=>x.disabled=true);api('/api/inv/buy',{item:'chest',n}).then(j=>{invSet(j);shopOpen();ppShow('Куплено','📦 Сундуков: '+n+' за '+P*n+' 💎\nОткрывайте их в инвентаре (нужны ключи).',[['Ок']])}).catch(e=>{shopOpen();ppShow('Не получилось',evErr[e&&e.error]||'Нет связи с сервером.',[['Ок']])})})})}
+function dailyGo(){if(!tok)return needLogin('🎁 Бесплатный сундук');const b=$('#frb');if(b)b.disabled=true;
+ api('/api/inv/daily',{}).then(j=>{invSet(j);if(j.coins!==undefined)coFrom({bal:j.coins});const w=$('#evw');w.innerHTML='';w.classList.add('on');chestAnim([j.loot],()=>w.classList.remove('on'))}).catch(e=>{invLoad();ppShow('Не получилось',evErr[e&&e.error]||'Нет связи с сервером.',[['Ок']])})}
+$('#gemb').onclick=payOpen;$('#frb').onclick=dailyGo;$('#mkt').onclick=shopOpen;
 (function(){const tr=$('#evt');if(tr)tr.addEventListener('scroll',evDots,{passive:true});setInterval(()=>{if(!$('#ov').classList.contains('h')&&!$('#evw').classList.contains('on'))evLoad()},60000)})();
 function mzFit(){const z=(innerWidth>=900&&innerHeight>=600)?Math.max(1,Math.min(2.2,Math.min(innerWidth/1000,innerHeight/800))):1;document.documentElement.style.setProperty('--mz',z.toFixed(2))}
 mzFit();addEventListener('resize',mzFit);
