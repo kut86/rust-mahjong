@@ -715,45 +715,40 @@ $('#dai').onclick=()=>{aimOn=aimOn?0:1;try{localStorage.setItem('tk-aim',aimOn)}
 resize();p={x:GW/2,y:GH/2,a:-PI/2,t:-PI/2,r:.55,hp:100,rc:0,fl:0,c:'#4f9d62'};en=[];bl=[];pt=[];rg=[];ob=[];queue=[];pk=[];up={sp:0,hp:0,rt:0};over=true;
 
 /* ===== События (плашка в меню). Пока список зашит здесь; позже придёт с сервера ===== */
-const DAY=864e5,EVS=[
- {id:'boss1',type:'boss',ico:'👹',title:'Мировой босс',sub:'Нанеси урон — получи золото',img:'',
-  text:'Общий враг для всего сервера. Каждый удар по боссу снимает часть его здоровья, а за нанесённый урон вы получаете золото. Бейтесь втроём в день и добейте босса вместе!',
-  hp:100000,hpNow:100000,att:3,rst:3,from:Date.parse('2026-11-18T00:00:00+05:00'),to:Date.parse('2026-11-25T00:00:00+05:00'),min:8,max:10},
- {id:'soon1',type:'news',ico:'📣',title:'Скоро: новые события',sub:'Листайте — здесь будут объявления',img:'',
-  text:'Здесь будут появляться новые боссы, бои и объявления. Следите за плашкой на главном экране.'}
-];
+const DAY=864e5;let EVS=[],evOff=0;
 const esc=v=>String(v).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-const evSt=e=>!e.from?'on':Date.now()<e.from?'soon':Date.now()>e.to?'end':'on';
+const evNow=()=>Date.now()+evOff,evSt=e=>e.dead?'dead':!e.from?'on':evNow()<e.from?'soon':evNow()>e.to?'end':'on';
 const evDate=t=>new Date(t).toLocaleString('ru-RU',{day:'numeric',month:'long',hour:'2-digit',minute:'2-digit'});
 function evLeft(ms){const d=Math.floor(ms/DAY),h=Math.floor(ms%DAY/36e5),m=Math.floor(ms%36e5/6e4);return d?d+' д '+h+' ч':h?h+' ч '+m+' мин':m+' мин'}
 const BZ='<svg class="bz %s" viewBox="0 0 14 34"><path d="M9 1 3 15h6L4 33"/></svg>';
 function evRender(){const box=$('#evs'),tr=$('#evt'),dt=$('#evd');if(!box)return;tr.innerHTML='';dt.innerHTML='';const L=EVS.filter(e=>evSt(e)!='end');box.classList.toggle('on',!!L.length);
  L.forEach((e,i)=>{const c=document.createElement('button');c.className='evc'+(e.type=='boss'?'':' a');const st=evSt(e);
-  const sub=e.type=='boss'?(st=='on'?'Идёт · ещё '+evLeft(e.to-Date.now()):'Старт: '+evDate(e.from)):esc(e.sub||'');
-  c.innerHTML=BZ.replace('%s','l')+BZ.replace('%s','r')+'<span class="ei"'+(e.img?' style="background-image:url('+esc(e.img)+')"':'')+'>'+(e.img?'':e.ico||'⚔')+'</span><span class="et"><b>'+esc(e.title)+'</b><small>'+sub+'</small></span>';
+  const sub=e.type=='boss'?(st=='dead'?'Побеждён! Награды выданы':st=='on'?'Идёт · ещё '+evLeft(e.to-evNow()):'Старт: '+evDate(e.from)):esc(e.sub||'');
+  c.innerHTML=BZ.replace('%s','l')+BZ.replace('%s','r')+'<span class="ei"'+(e.img?' style="background-image:url('+esc(e.img)+')"':'')+'>'+(e.img?'':e.ico||(e.type=='boss'?'👹':'📣'))+'</span><span class="et"><b>'+esc(e.title)+'</b><small>'+sub+'</small></span>';
   c.onclick=()=>evOpen(e.id);tr.appendChild(c);const d=document.createElement('i');dt.appendChild(d)});
  dt.style.display=L.length>1?'flex':'none';evDots();}
 function evDots(){const tr=$('#evt'),ds=$('#evd').children;if(!ds.length)return;const w=tr.firstElementChild?tr.firstElementChild.offsetWidth+14:1,k=Math.round(tr.scrollLeft/w);[...ds].forEach((d,i)=>d.className=i==k?'on':'')}
+function evLoad(){return api('/api/boss').then(j=>{EVS=Array.isArray(j.events)?j.events:[];if(j.now)evOff=j.now-Date.now();evRender()}).catch(()=>{})}
 function evOpen(id){const e=EVS.find(v=>v.id==id);if(!e)return;const w=$('#evw'),st=evSt(e),b=e.type=='boss',t=TK();
  w.style.setProperty('--ec',b?'#ff6a3d':'#4aa8ff');w.style.setProperty('--eg',b?'255,106,61':'74,168,255');
- let h=(e.img?'<div class="im" style="background-image:url('+esc(e.img)+')"></div>':'')+'<h2>'+(e.ico||'')+' '+esc(e.title)+'</h2><p>'+esc(e.text||'')+'</p>',ok=true,btn='';
- if(b){const pc=Math.max(0,Math.round(e.hpNow/e.hp*100));ok=t.t>=e.min&&t.t<=e.max;
+ let h=(e.img?'<div class="im" style="background-image:url('+esc(e.img)+')"></div>':'')+'<h2>'+(e.ico||(b?'👹':'📣'))+' '+esc(e.title)+'</h2><p>'+esc(e.text||'')+'</p>',ok=true,btn='';
+ if(b){const pc=Math.max(0,Math.round(e.hpNow/e.hp*100)),top=(e.top||[]).slice(0,5);ok=t.t>=e.min&&t.t<=e.max;
   const mine=sv.tk.map(i=>TK(i)).filter(x=>x.t>=e.min&&x.t<=e.max).map(x=>x.n);
   h+='<div class="rw" style="flex-direction:column;gap:2px;border:0"><span>Здоровье босса</span><div class="hb"><div style="width:'+pc+'%"></div></div><b style="text-align:left">'+e.hpNow.toLocaleString('ru-RU')+' / '+e.hp.toLocaleString('ru-RU')+' HP</b></div>'
-  +'<div class="rw"><span>Лимит</span><b>'+e.att+' попытки в день · '+e.rst+' платных сброса</b></div>'
-  +'<div class="rw"><span>Начало</span><b>'+evDate(e.from)+'</b></div><div class="rw"><span>Окончание</span><b>'+evDate(e.to)+(st=='on'?'<br><small style="color:#a9bddd">осталось '+evLeft(e.to-Date.now())+'</small>':'')+'</b></div>'
+  +'<div class="rw"><span>Попытки</span><b>'+(e.me?'сегодня осталось '+e.me.left+' из '+e.att+(e.me.price!==null?'<br><small style="color:#a9bddd">сброс: '+e.me.price+' 🪙 (ещё '+(e.rst-e.me.resets)+')</small>':e.me.resets?'<br><small style="color:#a9bddd">сбросы на сегодня закончились</small>':''):e.att+' в день · до '+e.rst+' платных сбросов')+'</b></div>'+(e.me&&e.me.dmg?'<div class="rw"><span>Ваш урон</span><b>'+e.me.dmg.toLocaleString('ru-RU')+(e.me.rank?' · место '+e.me.rank:'')+'</b></div>':'')
+  +'<div class="rw"><span>Начало</span><b>'+evDate(e.from)+'</b></div><div class="rw"><span>Окончание</span><b>'+evDate(e.to)+(st=='on'?'<br><small style="color:#a9bddd">осталось '+evLeft(e.to-evNow())+'</small>':'')+'</b></div>'
   +'<div class="rw"><span>Техника</span><b>'+e.min+'–'+e.max+' уровень</b></div>'
   +'<div class="rw"><span>Ваш танк</span><b class="'+(ok?'ok':'no')+'">«'+esc(t.n)+'» · '+t.t+' ур. '+(ok?'— допущен':'— не подходит')+'</b></div>'
   +(!ok&&mine.length?'<div class="rw"><span>Подойдут</span><b>'+esc(mine.join(', '))+'</b></div>':'')
-  +'<div class="rw"><span>Награда</span><b>🪙 золото = нанесённый урон<br><small style="color:#a9bddd">1 урон = 1 монета</small></b></div>';
-  btn=st=='soon'?'<button disabled>Начнётся '+evDate(e.from)+'</button>':!ok?'<button disabled>Нужен танк '+e.min+'–'+e.max+' ур.</button>':'<button id="evgo">⚔ В бой</button>';}
+  +(top.length?'<div class="rw" style="flex-direction:column;gap:3px"><span>Лучшие по урону</span>'+top.map((r,i)=>'<b style="text-align:left;font-weight:600">'+(i+1)+'. '+esc(r.n||'Игрок')+' — '+r.dmg.toLocaleString('ru-RU')+'</b>').join('')+'</div>':'')+'<div class="rw"><span>Награда</span><b>🪙 золото = нанесённый урон<br><small style="color:#a9bddd">1 урон = 1 монета</small></b></div>';
+  btn=st=='dead'?'<button disabled>Босс побеждён</button>':st=='soon'?'<button disabled>Начнётся '+evDate(e.from)+'</button>':!ok?'<button disabled>Нужен танк '+e.min+'–'+e.max+' ур.</button>':'<button id="evgo">⚔ В бой</button>';}
  w.innerHTML='<div class="bx">'+h+'<div class="bt">'+btn+'<button class="x" id="evx">Закрыть</button></div></div>';w.classList.add('on');
  $('#evx').onclick=()=>w.classList.remove('on');w.onclick=ev=>{if(ev.target===w)w.classList.remove('on')};
  const g=$('#evgo');if(g)g.onclick=()=>{w.classList.remove('on');const m=$('#t2');m.textContent='Бой с боссом откроется в ближайшем обновлении';m.style.color='#f2c14e'}}
-(function(){const tr=$('#evt');if(tr)tr.addEventListener('scroll',evDots,{passive:true});setInterval(()=>{if(!$('#ov').classList.contains('h')&&!$('#evw').classList.contains('on'))evRender()},60000)})();
+(function(){const tr=$('#evt');if(tr)tr.addEventListener('scroll',evDots,{passive:true});setInterval(()=>{if(!$('#ov').classList.contains('h')&&!$('#evw').classList.contains('on'))evLoad()},60000)})();
 function mzFit(){const z=(innerWidth>=900&&innerHeight>=600)?Math.max(1,Math.min(2.2,Math.min(innerWidth/1000,innerHeight/800))):1;document.documentElement.style.setProperty('--mz',z.toFixed(2))}
 mzFit();addEventListener('resize',mzFit);
-evRender();tinit();renderAuth();ovStat();try{const m=sessionStorage.getItem('tk-msg');if(m){sessionStorage.removeItem('tk-msg');$('#t2').textContent=m;$('#t2').style.color='#f2c14e'}}catch(e){}checkSeason().then(cloudLoad,cloudLoad);
+evLoad();tinit();renderAuth();ovStat();try{const m=sessionStorage.getItem('tk-msg');if(m){sessionStorage.removeItem('tk-msg');$('#t2').textContent=m;$('#t2').style.color='#f2c14e'}}catch(e){}checkSeason().then(cloudLoad,cloudLoad);
 requestAnimationFrame(loop);
 </script>
 </body>
