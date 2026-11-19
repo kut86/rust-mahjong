@@ -112,6 +112,7 @@ body:has(#ov:not(.h)) #hud,body:has(#up:not(.h)) #hud{visibility:hidden}
 @media (max-height:480px){#wbh{top:calc(env(safe-area-inset-top,0px) + 44px);width:min(50vw,380px)}#wbh .b{height:12px}#wbh .b span{line-height:12px;font-size:10px}#wbh .r1{font-size:12px}}
 #evw .iv{display:flex;gap:10px;padding:9px 0;border-top:1px solid rgba(160,200,255,.18)}#evw .iv .ic{flex:0 0 38px;height:38px;border-radius:50%;background:rgba(255,255,255,.08);display:flex;align-items:center;justify-content:center;font-size:21px}
 #evw .iv .it{display:flex;flex-direction:column;gap:2px;min-width:0;font-size:13px;line-height:1.35;color:#c9d7ef}#evw .iv .it b{font-size:15px;color:#fff}#evw .iv .it b em{font-style:normal;color:#f2c14e;margin-left:6px}#evw .iv .it small{color:#a9bddd;font-size:12px}
+#evw .pay{margin:10px 0 2px;padding:10px;border:1px solid rgba(242,193,78,.4);border-radius:12px;font-size:13px;color:#c9d7ef}#evw .pay input{width:90px;padding:8px;border-radius:8px;border:1px solid #556;background:#0b1830;color:#fff;font-size:16px;margin:0 6px}#evw .pay .pb{display:flex;gap:8px;margin-top:8px}#evw .pay .pb button{flex:1;margin:0;padding:10px 4px;font-size:14px;background:var(--acc);color:var(--btx);border:0;border-radius:10px;font-weight:700}#evw .pay small{display:block;margin-top:6px;font-size:11px;opacity:.8}
 #evw .ab{display:flex;flex-direction:column;gap:8px;margin:10px 0 2px}#evw .ab button{margin:0;padding:11px 8px;font-size:15px;background:var(--acc);color:var(--btx);border:0;border-radius:12px;font-weight:700}#evw .ab button:disabled{opacity:.45}#evw .ab small{display:block;font-weight:400;font-size:11px;opacity:.85}
 #evd{display:flex;gap:6px;min-height:8px}
 #evd i{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.3)}#evd i.on{background:#fff}
@@ -840,13 +841,20 @@ const BTN={x:'salvo',s:'shield',d:'dbl'},ITEMS=[
  {k:'key',ico:'🔑',n:'Ключ',d:'Открывает сундук.',h:'В инвентаре нажмите «Открыть сундук».',w:'Только в инвентаре. Падает с мирового босса.'},
  {k:'chest',ico:'📦',n:'Сундук',d:'Внутри золото 10–200, редко щит, залп или двойная стрельба.',h:'Нужен ключ. Ежедневный бесплатный сундук ключа не требует.',w:'Только в инвентаре.'},
  {k:'gem',ico:'💎',n:'Кристаллы',d:'Особая валюта: за них покупают сундуки.',h:'Тратятся в инвентаре, кнопка «Купить сундук».',w:'Только в инвентаре. Падают с мирового босса.'}];
-let INV=null,invDaily=null,invPrice=30;
+let INV=null,invDaily=null,invPrice=30,invPay=null;
 function updSb(){document.querySelectorAll('#sb button').forEach(b=>{const k=b.dataset.s,it=BTN[k],n=INV?INV[it]||0:0,ic=b.textContent.split(' ')[0];b.textContent=ic+' '+n;b.style.opacity=(!n||(wb&&wb.used[k]))?'.35':''});const ib=$('#invb');if(ib)ib.textContent='🎒 Инвентарь'+(INV&&invDaily===false?' · 🎁':'')}
-function invSet(j){if(!j)return;if(j.items)INV=j.items;if(j.chestPrice)invPrice=j.chestPrice;if(j.daily)invDaily=j.daily.claimed;updSb()}
+function invSet(j){if(!j)return;if(j.items)INV=j.items;if(j.chestPrice)invPrice=j.chestPrice;if(j.daily)invDaily=j.daily.claimed;if(j.pay)invPay=j.pay;updSb()}
+document.addEventListener('visibilitychange',()=>{if(!document.hidden&&tok&&$('#evw').classList.contains('on')&&$('#evw').querySelector('.pay'))invLoad().then(()=>invOpen())});
 function invLoad(){if(!tok){INV=null;updSb();return Promise.resolve()}return api('/api/inv').then(j=>{invSet(j);return j}).catch(()=>{})}
 function invUse(it,op,n){op=op||('u'+Math.random().toString(36).slice(2,10)+Date.now().toString(36));api('/api/inv/use',{op,item:it}).then(j=>invSet(j)).catch(e=>{if(e&&e.error){invLoad();return}if((n||0)<4)setTimeout(()=>invUse(it,op,(n||0)+1),3000)})}
 const itName=k=>(ITEMS.find(i=>i.k==k)||{}).n||k;
 const lootTxt=l=>l.gold?'+'+l.gold+' 🪙 золота':'🎁 '+itName(l.item)+' ×1';
+function payBox(){if(!invPay||!invPay.on)return '';const r=invPay.rate;return '<div class="pay"><b>💎 Пополнить кристаллы</b><br>Поддержать проект и получить кристаллы: 1 ₽ = '+r+' 💎<br>Сумма: <input id="pysum" type="number" min="10" max="10000" value="100"> ₽ = <b id="pyg">'+Math.floor(100*r)+'</b> 💎<div class="pb"><button data-t="AC">💳 Картой</button><button data-t="PC">ЮMoney</button></div><small>Оплата откроется в новой вкладке. Кристаллы приходят в течение минуты после оплаты, потом вернитесь в игру. Это добровольная поддержка проекта; кристаллы не возвращаются и не обмениваются на деньги.</small></div>'}
+function payBind(){const sm=$('#pysum');if(!sm)return;sm.oninput=()=>{$('#pyg').textContent=Math.max(0,Math.floor((+sm.value||0)*invPay.rate))};
+ document.querySelectorAll('#evw .pay .pb button').forEach(b=>b.onclick=()=>{const v=Math.floor(+sm.value);if(!(v>=10&&v<=10000)){sm.focus();return}
+  const f=document.createElement('form');f.method='POST';f.action='https://yoomoney.ru/quickpay/confirm';f.target='_blank';
+  const o={receiver:invPay.wallet,'quickpay-form':'button',paymentType:b.dataset.t,sum:v,label:invPay.label,targets:'Кристаллы в игре Танчики',successURL:location.href.split('#')[0]};
+  for(const k in o){const i=document.createElement('input');i.type='hidden';i.name=k;i.value=o[k];f.appendChild(i)}document.body.appendChild(f);f.submit();f.remove()})}
 function invOpen(){const w=$('#evw');w.style.setProperty('--ec','#f2c14e');w.style.setProperty('--eg','242,193,78');
  if(!tok){w.innerHTML='<div class="bx"><h2>🎒 Инвентарь</h2><p>Предметы хранятся в облаке. Войдите в аккаунт (Steam, Google или Discord), чтобы получать и использовать их.</p><div class="bt"><button class="x" id="evx">Закрыть</button></div></div>';w.classList.add('on');$('#evx').onclick=()=>w.classList.remove('on');return}
  const I=INV||{},rows=ITEMS.map(i=>'<div class="iv"><span class="ic">'+i.ico+'</span><div class="it"><b>'+i.n+'<em>× '+(I[i.k]||0)+'</em></b><span>'+i.d+'</span><small>Как использовать: '+i.h+'</small><small>Где работает: '+i.w+'</small><small>Продаётся: нет</small></div></div>').join('');
@@ -854,9 +862,10 @@ function invOpen(){const w=$('#evw');w.style.setProperty('--ec','#f2c14e');w.sty
  w.innerHTML='<div class="bx"><h2>🎒 Инвентарь</h2><p>Всё, что вы получили в игре. В бой автоматически берётся всё имеющееся количество.</p><div class="ab">'
  +'<button id="ivd"'+(invDaily?' disabled':'')+'>🎁 Ежедневный сундук'+(invDaily?'<small>уже получен сегодня</small>':'<small>бесплатно, ключ не нужен</small>')+'</button>'
  +'<button id="ivo"'+(can?'':' disabled')+'>📦 Открыть сундук<small>'+(can?'потратит 1 сундук и 1 ключ':!I.chest?'нет сундуков':'нет ключей')+'</small></button>'
- +'<button id="ivb"'+((I.gem||0)>=invPrice?'':' disabled')+'>🛒 Купить сундук · '+invPrice+' 💎<small>у вас '+(I.gem||0)+' 💎</small></button></div>'+rows+'<div class="bt"><button class="x" id="evx">Закрыть</button></div></div>';
+ +'<button id="ivb"'+((I.gem||0)>=invPrice?'':' disabled')+'>🛒 Купить сундук · '+invPrice+' 💎<small>у вас '+(I.gem||0)+' 💎</small></button></div>'+payBox()+rows+'<div class="bt"><button class="x" id="evx">Закрыть</button></div></div>';
  w.classList.add('on');$('#evx').onclick=()=>w.classList.remove('on');w.onclick=ev=>{if(ev.target===w)w.classList.remove('on')};
  const act=(id,url,body,ok)=>{const b=$(id);if(b)b.onclick=()=>{b.disabled=true;api(url,body).then(j=>{invSet(j);if(j.coins!==undefined)coFrom({bal:j.coins});w.classList.remove('on');ok(j)}).catch(e=>{b.disabled=false;ppShow('Не получилось',({already_claimed:'Сегодня уже получали.',no_key:'Нет ключа.',no_chest:'Нет сундука.',no_gems:'Не хватает кристаллов.',unauthorized:'Войдите в аккаунт.'})[e&&e.error]||'Нет связи с сервером.',[['Ок',invOpen]])})}};
+ payBind();
  act('#ivd','/api/inv/daily',{},j=>ppShow('Ежедневный сундук',lootTxt(j.loot),[['Ок',invOpen]]));
  act('#ivo','/api/inv/open',{},j=>ppShow('Сундук открыт',lootTxt(j.loot),[['Ок',invOpen]]));
  act('#ivb','/api/inv/buy',{item:'chest',n:1},j=>ppShow('Куплено','📦 Сундук ×1 за '+invPrice+' 💎',[['Ок',invOpen]]))}
