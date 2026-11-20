@@ -50,6 +50,13 @@ a.btn{display:inline-block;background:#1b2838;color:#fff;text-decoration:none;bo
 .lb td,.lb th{padding:7px 6px;border-bottom:1px solid var(--line);font-size:.95rem}
 .lb th{color:var(--muted);font-weight:400}
 .lb tr.me td{color:var(--rustHi);font-weight:700}
+.lb .pfx{margin:0 12px 0 6px}
+.cmpv{height:112px;display:flex;align-items:center;justify-content:center;margin:2px 0 6px}.cmpv .pfx{margin:0}
+.cmh{margin:10px 0 4px;color:var(--muted);font-size:.8rem;letter-spacing:.06em;text-transform:uppercase;text-align:left}
+.cmg{display:flex;flex-wrap:wrap;gap:6px}.cmg button{padding:6px 12px;font-size:.85rem;border-radius:999px;background:var(--panel);border:1px solid var(--line);color:var(--text)}.cmg button.on{border-color:#f2c14e;box-shadow:0 0 8px rgba(242,193,78,.5);color:#fff}
+.cmt{margin:6px 0 0;color:var(--muted);font-size:.8rem;line-height:1.4;text-align:left}
+.cmnk{display:flex;gap:8px}.cmnk input{flex:1;min-width:0;background:var(--bg);border:1px solid var(--line);color:var(--text);border-radius:8px;padding:9px 10px;font-size:1rem}
+#pfav,#pfn{cursor:pointer}
 .lb .av{width:22px;height:22px;border-radius:50%;vertical-align:middle;margin-right:8px}
 .lb a{color:inherit;text-decoration:none}
 .box.wide{max-width:640px}
@@ -108,7 +115,21 @@ a.btn{display:inline-block;background:#1b2838;color:#fff;text-decoration:none;bo
   <div class="lnk"><div><b>Discord</b><small id="pfd"></small></div><span id="pfdb"></span></div>
   <div id="pfrole" style="display:none;margin:6px 0 0;padding:8px 10px;border:1px solid var(--line,#33373b);border-radius:8px;font-size:.85rem;color:var(--muted)"></div>
   <p id="pfmsg"></p>
+  <div class="row2"><button id="pfcm">✨ Украшения и ник</button></div>
   <div class="row2"><button class="alt" id="pflo">Выйти</button><button id="pfcl">Закрыть</button></div>
+</div></div>
+<div class="ov" id="cmov"><div class="box pf">
+  <h2>Украшения и ник</h2>
+  <div id="cmpv" class="cmpv"></div>
+  <h3 id="cmn" style="margin:0 0 8px"></h3>
+  <div class="cmh">Рамка</div><div class="cmg" id="cmfr"></div>
+  <div class="cmh">Украшение</div><div class="cmg" id="cmdc"></div>
+  <p class="cmt" id="cmempty"></p>
+  <div class="cmh">Никнейм</div>
+  <div class="cmnk"><input id="cmin" maxlength="16" placeholder="Новый ник (3–16 символов)" autocomplete="off"><button id="cmok">Сменить</button></div>
+  <p class="cmt" id="cmpr"></p>
+  <p id="cmmsg" style="min-height:1.3em;color:var(--rustHi);font-size:.9rem;margin:6px 0"></p>
+  <div class="row2"><button id="cmcl">Закрыть</button></div>
 </div></div>
 <div class="ov" id="lbov"><div class="box" id="lbbox">
   <h2>Рейтинг</h2>
@@ -123,6 +144,7 @@ a.btn{display:inline-block;background:#1b2838;color:#fff;text-decoration:none;bo
   <button id="lbclose">Закрыть</button>
 </div></div>
 
+<script src="frames.js"></script>
 <script>
 // Адрес вашего сервера (Cloudflare Worker)
 var API='https://rust-mahjong-api.rust-pve.workers.dev';
@@ -217,6 +239,33 @@ function openProfile(msg){
   $('pfn').textContent=me.n;pfMsg(msg||'');$('pfs').textContent='…';$('pfg').textContent='…';$('pfd').textContent='…';$('pfsb').innerHTML='';$('pfgb').innerHTML='';$('pfdb').innerHTML='';
   $('pfov').classList.add('show');pfLoad();
 }
+
+// ====== Украшения и ник ======
+var CM=null;
+function cmErr(e){var m={nick_len:'Ник: от 3 до 16 символов.',nick_chars:'Только буквы, цифры, пробел, _ . -',nick_bad:'Такой ник использовать нельзя.',nick_reserved:'Это имя зарезервировано.',taken:'Этот ник уже занят.',same:'Это уже ваш ник.',busy:'Повторите через секунду.',no_gems:'Не хватает кристаллов'+(e&&e.need?' (нужно '+e.need+' 💎)':'')+'.',not_owned:'Эта рамка вам недоступна.'};return (e&&m[e.error])||'Нет связи с сервером.'}
+function cmRender(){
+  var j=CM;if(!j)return;
+  $('cmpv').innerHTML='';$('cmpv').appendChild(PFX.el(j.a||'',j.n,[j.fr,j.dc],64));$('cmn').textContent=j.n;$('pfn').textContent=j.n;
+  function fill(host,pre,cur,slot){
+    host.innerHTML='';
+    var items=[''].concat(j.owned.filter(function(x){return x.indexOf(pre)===0}));
+    items.forEach(function(id){var b=document.createElement('button');b.textContent=id?PFX.name(id):'Нет';if(id===cur)b.className='on';
+      b.onclick=function(){var fr=slot==='fr'?id:j.fr,dc=slot==='dc'?id:j.dc;api('/api/cos/equip',{fr:fr,dc:dc}).then(function(r){CM=r;$('cmmsg').textContent='';cmRender()}).catch(function(e){$('cmmsg').textContent=cmErr(e)})};host.appendChild(b)});
+  }
+  fill($('cmfr'),'fr:',j.fr,'fr');fill($('cmdc'),'dc:',j.dc,'dc');
+  $('cmempty').textContent=j.owned.length?'Рамки и украшения выдаются за победу над мировым боссом в «Танчиках».':'Пока ничего нет. Рамку и украшение получают все, кто нанёс урон мировому боссу, когда его победят.';
+  $('cmpr').textContent=j.nickFree?'Первая смена ника бесплатна.':'Смена ника: '+j.nickPrice+' 💎 (у вас '+j.gems+' 💎). Кристаллы — в «Танчиках».';
+}
+function openCosmetics(){
+  if(!tok)return;$('cmmsg').textContent='';$('cmin').value='';$('cmov').classList.add('show');
+  api('/api/profile').then(function(j){CM=j;cmRender()}).catch(function(e){$('cmmsg').textContent=cmErr(e)});
+}
+$('pfcm').onclick=openCosmetics;$('pfav').onclick=openCosmetics;$('pfn').onclick=openCosmetics;$('cmcl').onclick=function(){$('cmov').classList.remove('show')};
+$('cmok').onclick=function(){
+  var v=$('cmin').value.trim();if(!v)return;var b=$('cmok');b.disabled=true;
+  if(CM&&!CM.nickFree&&!confirm('Сменить ник на «'+v+'» за '+CM.nickPrice+' 💎?')){b.disabled=false;return}
+  api('/api/nick',{nick:v,op:'n'+Math.random().toString(36).slice(2,10)+Date.now().toString(36)}).then(function(r){CM=r;$('cmin').value='';$('cmmsg').textContent='Ник изменён ✓';cmRender()}).catch(function(e){$('cmmsg').textContent=cmErr(e)}).then(function(){b.disabled=false});
+};
 // Какие способы входа привязаны к аккаунту, под которым играли на этом устройстве (хранится только в браузере)
 function rememberMethods(j){try{localStorage.setItem('rm-methods',JSON.stringify({steam:!!j.steam,google:!!j.google,discord:!!j.discord}))}catch(e){}}
 function knownMethods(){try{var m=JSON.parse(localStorage.getItem('rm-methods')||'null');return m&&(m.steam||m.google||m.discord)?m:null}catch(e){return null}}
@@ -275,13 +324,14 @@ function showGame(g){
 }
 GAMES.forEach(function(G){var b=document.createElement('button');b.innerHTML='<span class="gi">'+G.icon+'</span><span>'+G.name+'</span><small>'+G.sub+'</small>';b.onclick=function(){showGame(G.id)};$('lbpick').appendChild(b)});
 $('lbpick').className='gpick';$('lbback').onclick=showPick;
+function avAppend(host,p){if(window.PFX&&PFX.has(p.f)){host.appendChild(PFX.el(p.a,p.n,p.f,24));return}if(p.a&&p.a.indexOf('https://')===0){var im=document.createElement('img');im.className='av';im.src=p.a;im.alt='';host.appendChild(im)}}
 function cardRows(p,i,body){
   var X=p.x||[0,0,0],K=p.k||[0,0,0],N=['ЛТ','СТ','ТТ'],top=['l','m','h'].indexOf(p.tc),isMe=me&&p.id===me.sid;
   function cell(t,c,tr){var d=document.createElement('td');if(c)d.className=c;d.textContent=t;tr.appendChild(d);return d}
   function row(c){var r=document.createElement('tr');r.className=c+(isMe?' me':'');body.appendChild(r);return r}
   var A=row('ch'),rk=cell(i+1,'rk',A);rk.rowSpan=4;
   var nm=document.createElement('td');
-  if(p.a&&p.a.indexOf('https://')===0){var im=document.createElement('img');im.className='av';im.src=p.a;im.alt='';nm.appendChild(im)}
+  avAppend(nm,p);
   var a=document.createElement('a');a.textContent=p.n;if(/^\d{17}$/.test(p.id)){a.href='https://steamcommunity.com/profiles/'+p.id;a.target='_blank';a.rel='noopener'}nm.appendChild(a);
   A.appendChild(nm);
   N.forEach(function(n,k){cell(n,'ab'+(k===top?' hi':''),A)});
@@ -302,7 +352,7 @@ function loadLb(id){
       var tr=document.createElement('tr');if(me&&p.id===me.sid)tr.className='me';
       var c1=document.createElement('td');c1.textContent=i+1;
       var c2=document.createElement('td');
-      if(p.a&&p.a.indexOf('https://')===0){var im=document.createElement('img');im.className='av';im.src=p.a;im.alt='';c2.appendChild(im)}
+      avAppend(c2,p);
       var a=document.createElement('a');a.textContent=p.n;if(/^\d{17}$/.test(p.id)){a.href='https://steamcommunity.com/profiles/'+p.id;a.target='_blank';a.rel='noopener'}c2.appendChild(a);
       var c3=document.createElement('td');c3.textContent=M.v(p);
       tr.appendChild(c1);tr.appendChild(c2);tr.appendChild(c3);body.appendChild(tr);
