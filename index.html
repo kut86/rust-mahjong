@@ -51,7 +51,7 @@ a.btn{display:inline-block;background:#1b2838;color:#fff;text-decoration:none;bo
 .lb th{color:var(--muted);font-weight:400}
 .lb tr.me td{color:var(--rustHi);font-weight:700}
 .lb .pfx{margin:0 12px 0 6px}
-.cmpv{border-radius:14px;height:112px;display:flex;align-items:center;justify-content:center;margin:2px 0 6px}.cmpv .pfx{margin:0}
+.cmpv{height:112px;display:flex;align-items:center;justify-content:center;margin:2px 0 6px}.cmpv .pfx{margin:0}
 .cmh{margin:10px 0 4px;color:var(--muted);font-size:.8rem;letter-spacing:.06em;text-transform:uppercase;text-align:left}
 .cmg{display:flex;flex-wrap:wrap;gap:6px}.cmg button{padding:6px 12px;font-size:.85rem;border-radius:999px;background:var(--panel);border:1px solid var(--line);color:var(--text)}.cmg button.on{border-color:#f2c14e;box-shadow:0 0 8px rgba(242,193,78,.5);color:#fff}
 .cmt{margin:6px 0 0;color:var(--muted);font-size:.8rem;line-height:1.4;text-align:left}
@@ -246,7 +246,7 @@ var CM=null;
 function cmErr(e){var m={nick_len:'Ник: от 3 до 16 символов.',nick_chars:'Только буквы, цифры, пробел, _ . -',nick_bad:'Такой ник использовать нельзя.',nick_reserved:'Это имя зарезервировано.',taken:'Этот ник уже занят.',same:'Это уже ваш ник.',busy:'Повторите через секунду.',no_gems:'Не хватает кристаллов'+(e&&e.need?' (нужно '+e.need+' 💎)':'')+'.',not_owned:'Эта рамка вам недоступна.'};return (e&&m[e.error])||'Нет связи с сервером.'}
 function cmRender(){
   var j=CM;if(!j)return;
-  $('cmpv').innerHTML='';$('cmpv').appendChild(PFX.el(j.a||'',j.n,[j.fr,j.dc],64));var cp=$('cmpv');cp.className='cmpv';cp.style.cssText='';PFX.row(cp,[j.fr,j.dc,j.bg||''],1);$('cmn').textContent=j.n;$('pfn').textContent=j.n;
+  var cp=$('cmpv');cp.innerHTML='';var ct=document.createElement('table'),cr=document.createElement('tr'),cd=document.createElement('td');ct.style.cssText='width:100%;height:100%;border-collapse:collapse';cd.style.cssText='text-align:center;padding:0;border:0';cd.appendChild(PFX.el(j.a||'',j.n,[j.fr,j.dc],64));cr.appendChild(cd);ct.appendChild(cr);cp.appendChild(ct);PFX.row(cr,[j.fr,j.dc,j.bg||''],1);$('cmn').textContent=j.n;$('pfn').textContent=j.n;
   function fill(host,pre,cur,slot){
     host.innerHTML='';
     var items=[''].concat(j.owned.filter(function(x){return x.indexOf(pre)===0}));
