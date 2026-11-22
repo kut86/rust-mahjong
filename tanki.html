@@ -100,7 +100,7 @@ body:has(#ov:not(.h)) #hud,body:has(#up:not(.h)) #hud{visibility:hidden}
 @keyframes evb{0%,100%{opacity:0}4%{opacity:1}7%{opacity:0}10%{opacity:1}14%{opacity:0}}
 #ov>*,#evw .bx{zoom:var(--mz,1)}
 #wsel{scrollbar-color:rgba(160,200,255,.45) transparent}
-@media (min-width:900px){#evs{max-width:min(940px,100%)}}
+@media (min-width:900px){#evs{max-width:min(1120px,100%)}#evt{justify-content:safe center}#ov .evc{flex:0 1 330px;width:auto;min-width:250px}}
 #wbh{position:fixed;left:50%;transform:translateX(-50%);top:calc(env(safe-area-inset-top,0px) + 54px);width:min(64vw,440px);display:none;pointer-events:none;z-index:3;font-weight:700;text-shadow:0 1px 3px #000}
 #wbh.on{display:block}#wbh .r1{display:flex;justify-content:space-between;font-size:13px;margin-bottom:3px}
 #wbh .b{position:relative;height:14px;border-radius:8px;background:rgba(0,0,0,.55);overflow:hidden;margin-bottom:4px;border:1px solid rgba(255,255,255,.18)}
@@ -784,7 +784,7 @@ function evRender(){const box=$('#evs'),tr=$('#evt'),dt=$('#evd');if(!box)return
   c.innerHTML=BZ.replace('%s','l')+BZ.replace('%s','r')+'<span class="ei"'+(e.img?' style="background-image:url('+esc(e.img)+')"':'')+'>'+(e.img?'':e.ico||(e.type=='boss'?'👹':'📣'))+'</span><span class="et"><b>'+esc(e.title)+'</b><small>'+sub+'</small></span>';
   c.onclick=()=>evOpen(e.id);tr.appendChild(c);const d=document.createElement('i');dt.appendChild(d)});
  dt.style.display=L.length>1?'flex':'none';evDots();}
-function evDots(){const tr=$('#evt'),ds=$('#evd').children;if(!ds.length)return;const w=tr.firstElementChild?tr.firstElementChild.offsetWidth+14:1,k=Math.round(tr.scrollLeft/w);[...ds].forEach((d,i)=>d.className=i==k?'on':'')}
+function evDots(){const tr=$('#evt'),ds=$('#evd').children;if(!ds.length)return;$('#evd').style.visibility=tr.scrollWidth>tr.clientWidth+2?'':'hidden';const w=tr.firstElementChild?tr.firstElementChild.offsetWidth+14:1,k=Math.round(tr.scrollLeft/w);[...ds].forEach((d,i)=>d.className=i==k?'on':'')}
 function evLoad(){return api('/api/boss').then(j=>{EVS=Array.isArray(j.events)?j.events:[];if(j.now)evOff=j.now-Date.now();evRender()}).catch(()=>{})}
 function evOpen(id){const e=EVS.find(v=>v.id==id);if(!e)return;const w=$('#evw'),st=evSt(e),b=e.type=='boss',t=TK();
  w.style.setProperty('--ec',b?'#ff6a3d':'#4aa8ff');w.style.setProperty('--eg',b?'255,106,61':'74,168,255');
