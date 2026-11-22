@@ -922,7 +922,7 @@ const icon=(k,c)=>ITEM_IMG[k]?'<img class="'+(c||'')+'" src="'+ITEM_IMG[k]+'" al
 let invSel='chest',invPin='chest';
 function invDet(k,prev){const i=ITEMS.find(x=>x.k==k),I=INV||{},n=I[k]||0;let act='';
  if(!prev&&k=='chest'){const can=Math.min(I.chest||0,I.key||0);act='<div class="oa">'+[1,5,10].map(q=>'<button data-o="'+q+'"'+(can>=q?'':' disabled')+'>Открыть ×'+q+'</button>').join('')+'</div>'+(can<1?'<small>'+(!I.chest?'Нет сундуков':'Нет ключей')+'</small>':'')}
- return '<div class="dh"><span class="di" style="--rc:'+RC[k]+'">'+icon(k)+'</span><div><b>'+i.n+'<em>× '+n+'</em></b><span>'+i.d+'</span></div></div><small>Как использовать: '+i.h+'</small><small>Где работает: '+i.w+'</small>'+act+(k=='key'||k=='chest'||k=='gem'?'<button class="mini buy" data-sh="'+(k=='gem'?'pay':'shop')+'" style="position:absolute;right:10px;bottom:8px">'+(k=='gem'?'Пополнить':'Купить')+'</button>':'<span class="ns">не продаётся</span>')}
+ return '<div class="dh"><span class="di" style="--rc:'+RC[k]+'">'+icon(k)+'</span><div><b>'+i.n+'<em>× '+n+'</em></b><span>'+i.d+'</span></div></div><small>Как использовать: '+i.h+'</small><small>Где работает: '+i.w+'</small>'+act+(k=='key'||k=='chest'||k=='gem'?'<button class="mini buy" data-sh="'+(k=='gem'?'pay':'shop')+'" style="display:block;margin:10px 0 0 auto;align-self:auto">'+(k=='gem'?'Пополнить':'Купить')+'</button>':'<span class="ns">не продаётся</span>')}
 
 const SHN={ap:'ББ',pc:'БП',he:'ОФ'};
 function shellRows(){const rows=[];for(const t of TANKS){if(!sv.st||!sv.st[t.id])continue;const S=stk(t.id);for(const k of SHK)if(S[k]>0)rows.push({t,k,n:S[k]})}rows.sort((a,b)=>b.t.t-a.t.t||(a.t.n<b.t.n?-1:1));return rows}
