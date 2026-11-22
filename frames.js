@@ -3,7 +3,7 @@
  * КАК ДОБАВИТЬ НОВУЮ РАМКУ ИЛИ УКРАШЕНИЕ
  *  1. В worker.js, в каталоге COS, добавьте строку, например:  'fr:t1': 'Рамка чемпиона'  (рамка — 'fr:…', украшение — 'dc:…').
  *  2. Здесь добавьте запись с тем же именем без префикса: FRAMES.t1 (для 'fr:t1') или DECOS.t1 (для 'dc:t1').
- *     Подложка строки рейтинга — 'bg:…' в COS и PLATES.имя здесь (colors — цвета градиента, glow — свечение, speed — секунд на один блик).
+ *     Подложка строки рейтинга — 'bg:…' в COS и PLATES.имя здесь (colors — цвета градиента, glow — свечение, speed — секунд на один блик, edge: true — бегущий ободок и молнии по краю).
  *  3. Если нужно выдавать её за босса — добавьте правило в BOSS_AWARDS в worker.js (например, за 1 место).
  *  Внешний вид задают параметры, рисовать ничего не нужно:
  *    n      — название, которое видит игрок
@@ -25,7 +25,7 @@
   };
 
   var PLATES = {
-    bp: { n: 'Грозовая подложка', colors: ['#4fc3ff', '#b07cff', '#ff5fd2', '#ffd24a'], glow: '#b07cff', speed: 4.5 }
+    bp: { n: 'Грозовая подложка', colors: ['#4fc3ff', '#b07cff', '#ff5fd2', '#ffd24a'], glow: '#b07cff', speed: 4.5, edge: true }
   };
 
   var NS = 'http://www.w3.org/2000/svg', CSS_DONE = false;
@@ -43,7 +43,18 @@
       '.pfx-b{fill:none;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:1;animation:pfx-shoot var(--sp,3s) linear infinite}' +
       '.pfx-a{fill:none;stroke-linecap:round;stroke-linejoin:round;animation:pfx-flick calc(var(--sp,3s)*.7) steps(1,end) infinite}' +
       '.pfx-pl{background-image:linear-gradient(100deg,transparent 38%,rgba(255,255,255,.16) 50%,transparent 62%),var(--pg);background-size:260% 100%,100% 100%;background-repeat:no-repeat;animation:pfx-sheen var(--sp,4.5s) linear infinite}' +
+      '@property --bc{syntax:"<color>";inherits:true;initial-value:#b07cff}' +
+      '.pfx-pl td.rk{background-color:var(--p0,transparent)}' +
       '.pfx-pl td.rk,.pfx-pl.pfx-s td:first-child{box-shadow:inset 3px 0 0 var(--pa,#b07cff)}' +
+      '.pfx-pl.pfx-e td{--bt:inset 0 0 0 0 transparent;--bb:inset 0 0 0 0 transparent;--br:inset 0 0 0 0 transparent;--bl:inset 0 0 0 0 transparent;--it:none;--ib:none;--il:none;--ir:none;' +
+      'box-shadow:var(--bt),var(--bb),var(--br),var(--bl);background-image:var(--it),var(--ib),var(--il),var(--ir);background-repeat:repeat-x,repeat-x,repeat-y,repeat-y;' +
+      'background-position:0 0,0 100%,0 0,100% 0;background-size:auto 8px,auto 8px,8px auto,8px auto;animation:pfx-edge var(--sp,4.5s) linear infinite,pfx-run calc(var(--sp,4.5s)*.4) linear infinite}' +
+      '.pfx-pl.pfx-t td{--bt:inset 0 2px 0 var(--bc);--it:var(--zh)}.pfx-pl.pfx-b td{--bb:inset 0 -2px 0 var(--bc);--ib:var(--zh)}' +
+      '.pfx-pl.pfx-e td.rk{--bb:inset 0 -2px 0 var(--bc);--ib:var(--zh)}' +
+      '.pfx-pl.pfx-e td:last-child{--br:inset -2px 0 0 var(--bc);--ir:var(--zv)}' +
+      '.pfx-pl.pfx-e td.rk,.pfx-pl.pfx-e.pfx-s td:first-child{--bl:inset 3px 0 0 var(--bc);--il:var(--zv)}' +
+      '@keyframes pfx-edge{0%{--bc:var(--c0)}25%{--bc:var(--c1)}50%{--bc:var(--c2)}75%{--bc:var(--c3)}100%{--bc:var(--c0)}}' +
+      '@keyframes pfx-run{to{background-position:32px 0,-32px 100%,0 32px,100% -32px}}' +
       '@keyframes pfx-sheen{0%{background-position:160% 0,0 0}100%{background-position:-60% 0,0 0}}' +
       '@keyframes pfx-spin{to{transform:rotate(360deg)}}' +
       '@keyframes pfx-shoot{0%{stroke-dashoffset:1;opacity:1}16%{stroke-dashoffset:0;opacity:1}30%{opacity:.9}48%{opacity:0;stroke-dashoffset:0}100%{opacity:0;stroke-dashoffset:0}}' +
@@ -115,16 +126,36 @@
     }
     return w;
   }
-  /* PFX.row(tr, f, single) — подложка всей строки (single — строка из одной линии, без объединённой ячейки с местом) игрока в рейтинге (f[2] = 'bg:bp'). */
-  function row(tr, f, single) {
+  /* PFX.row(tr, f, mode) — подложка всей строки игрока в рейтинге (f[2] = 'bg:bp'). */
+  // Бегущая молния по краю: плитка-зигзаг с градиентом цветов подложки (горизонтальная и вертикальная)
+  function zig(c, vert) {
+    var id = 'g', st = c.concat(c[0]).map(function (x, i, a) { return '<stop offset="' + Math.round(i / (a.length - 1) * 100) + '%" stop-color="' + x + '"/>'; }).join('');
+    var pts = vert ? '4,0 1,4 6,9 2,14 6,19 1,25 4,32' : '0,4 4,1 9,6 14,2 19,6 25,1 32,4';
+    var svg = '<svg xmlns="http://www.w3.org/2000/svg" width="' + (vert ? 8 : 32) + '" height="' + (vert ? 32 : 8) + '"><defs><linearGradient id="' + id + '" x1="0" y1="0" x2="' + (vert ? 0 : 1) + '" y2="' + (vert ? 1 : 0) + '">' + st + '</linearGradient></defs>' +
+      '<polyline points="' + pts + '" fill="none" stroke="url(#' + id + ')" stroke-opacity=".3" stroke-width="3.5" stroke-linejoin="round"/><polyline points="' + pts + '" fill="none" stroke="url(#' + id + ')" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+    return 'url("data:image/svg+xml,' + encodeURIComponent(svg) + '")';
+  }
+  /* PFX.row(tr, f, mode) — подложка строки игрока в рейтинге (f[2] = 'bg:bp').
+   *   mode: 1 — строка из одной линии; 't', 'm', 'b' — верхняя, средняя, нижняя строка карточки из нескольких строк. */
+  function row(tr, f, mode) {
     var p = PLATES[ident(f && f[2], 'bg:')];
     if (!p || !tr) return;
     css();
     var c = p.colors, g = c.map(function (x, i) { return x + (i % 2 ? '24' : '38') + ' ' + Math.round(i / (c.length - 1) * 100) + '%'; });
-    tr.classList.add('pfx-pl'); if (single) tr.classList.add('pfx-s');
+    tr.classList.add('pfx-pl');
+    var single = mode === 1 || mode === true;
+    if (single) tr.classList.add('pfx-s');
     tr.style.setProperty('--pg', 'linear-gradient(90deg,' + g.join(',') + ')');
     tr.style.setProperty('--pa', p.glow || c[0]);
+    tr.style.setProperty('--p0', 'color-mix(in srgb,' + c[0] + ' 22%,var(--panel,#23272a))');
     tr.style.setProperty('--sp', (p.speed || 4.5) + 's');
+    if (p.edge) {
+      tr.classList.add('pfx-e');
+      if (single || mode === 't') tr.classList.add('pfx-t');
+      if (single || mode === 'b') tr.classList.add('pfx-b');
+      for (var i = 0; i < 4; i++) tr.style.setProperty('--c' + i, c[i % c.length]);
+      tr.style.setProperty('--zh', zig(c, false)); tr.style.setProperty('--zv', zig(c, true));
+    }
   }
   window.PFX = { FRAMES: FRAMES, DECOS: DECOS, PLATES: PLATES, el: el, row: row, has: function (f) { return !!(f && (f[0] || f[1])); },
     name: function (id) { var t = id && id.slice(0, 3), k = id && id.slice(3); return t === 'fr:' ? (FRAMES[k] || {}).n || id : t === 'dc:' ? (DECOS[k] || {}).n || id : t === 'bg:' ? (PLATES[k] || {}).n || id : id; } };
