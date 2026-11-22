@@ -246,7 +246,7 @@ var CM=null;
 function cmErr(e){var m={nick_len:'Ник: от 3 до 16 символов.',nick_chars:'Только буквы, цифры, пробел, _ . -',nick_bad:'Такой ник использовать нельзя.',nick_reserved:'Это имя зарезервировано.',taken:'Этот ник уже занят.',same:'Это уже ваш ник.',busy:'Повторите через секунду.',no_gems:'Не хватает кристаллов'+(e&&e.need?' (нужно '+e.need+' 💎)':'')+'.',not_owned:'Эта рамка вам недоступна.'};return (e&&m[e.error])||'Нет связи с сервером.'}
 function cmRender(){
   var j=CM;if(!j)return;
-  $('cmpv').innerHTML='';$('cmpv').appendChild(PFX.el(j.a||'',j.n,[j.fr,j.dc],64));var cp=$('cmpv');cp.classList.remove('pfx-pl');cp.style.cssText='';PFX.row(cp,[j.fr,j.dc,j.bg||''],1);$('cmn').textContent=j.n;$('pfn').textContent=j.n;
+  $('cmpv').innerHTML='';$('cmpv').appendChild(PFX.el(j.a||'',j.n,[j.fr,j.dc],64));var cp=$('cmpv');cp.className='cmpv';cp.style.cssText='';PFX.row(cp,[j.fr,j.dc,j.bg||''],1);$('cmn').textContent=j.n;$('pfn').textContent=j.n;
   function fill(host,pre,cur,slot){
     host.innerHTML='';
     var items=[''].concat(j.owned.filter(function(x){return x.indexOf(pre)===0}));
@@ -339,7 +339,7 @@ function cardRows(p,i,body){
   var B=row('cm');cell('Пройдено волн','lab',B);X.forEach(function(v){cell(v,'num',B)});
   var C=row('cm');cell('Уничтожено врагов','lab',C);K.forEach(function(v){cell(v,'num',C)});
   var D=row('ce');cell('Рекорд очков','lab',D);var sc=cell(p.s||0,'num',D);sc.colSpan=3;
-  if(window.PFX&&p.f&&p.f[2])[A,B,C,D].forEach(function(r){PFX.row(r,p.f)});
+  if(window.PFX&&p.f&&p.f[2])[[A,'t'],[B,'m'],[C,'m'],[D,'b']].forEach(function(r){PFX.row(r[0],p.f,r[1])});
 }
 function loadLb(id){
   lbMode=id;
