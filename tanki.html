@@ -182,7 +182,7 @@ body:has(#ov:not(.h)) #hud,body:has(#up:not(.h)) #hud{visibility:hidden}
 <div id="sh"><button data-k="ap"><b>ББ</b><i></i></button><button data-k="pc"><b>БП</b><i></i></button><button data-k="he"><b>ОФ</b><i></i></button></div><div id='sb'><button data-s='x'>💥 25</button><button data-s='s'>🛡 20</button><button data-s='d'>⚡ 15</button></div>
 <div id="evw"></div>
 <div id="rot"><b>📱</b>Поверните телефон горизонтально<a href="index.html" style="margin-top:6px;color:var(--tx);background:#3a4030;border-radius:14px;padding:12px 28px;font-size:16px;font-weight:700;text-decoration:none">☰ Меню игр</a></div>
-<div id="ov"><div id="evs"><div id="evt"></div><div id="evd"></div></div><div id="trb" style="display:none"><button id="frb"><span>🎁 Сундук</span></button><button id="gemb">💎 <span id="gemn">0</span></button></div><h1 id="t1">🪖 Танчики</h1><p id="t2">Левый палец — движение, правый — прицел и огонь. На компьютере: WASD, мышь, клик.</p><div class="tg" style="margin-top:2px">Стартовая волна</div><div id="wtabs"></div><div id="wsel"></div><button id="go">Играть</button><button id="fs" style="display:none;background:#3a4030;color:var(--tx);margin-top:4px;font-size:16px"></button><p id="fsh" class="tg" style="display:none;max-width:320px;line-height:1.5"></p><button id="shop" style="background:#3a4030;color:var(--tx);margin-top:4px;font-size:16px">🔧 Гараж · <span id="co">0</span> 🪙</button><button id="mkt" style="background:#3a4030;color:var(--tx);margin-top:4px;font-size:16px">🛒 Магазин</button><button id="invb" style="background:#3a4030;color:var(--tx);margin-top:4px;font-size:16px">🎒 Инвентарь</button><a class="lk" href="index.html">☰ Меню игр</a><div id="au"></div></div>
+<div id="ov"><div id="evs"><div id="evt"></div><div id="evd"></div></div><div id="trb" style="display:none"><button id="frb"><span>🎁 Сундук</span></button><button id="gemb">💎 <span id="gemn">0</span></button></div><h1 id="t1">🪖 Танчики</h1><p id="t2">Левый палец — движение, правый — прицел и огонь. На компьютере: WASD, мышь, клик.</p><div class="tg" style="margin-top:2px">Стартовая волна</div><div id="wtabs"></div><div id="wsel"></div><button id="go">Играть</button><button id="fs" style="display:none;background:#3a4030;color:var(--tx);margin-top:4px;font-size:16px"></button><p id="fsh" class="tg" style="display:none;max-width:320px;line-height:1.5"></p><button id="shop" style="background:#3a4030;color:var(--tx);margin-top:4px;font-size:16px">🔧 Гараж · <span id="co">0</span> 🪙</button><button id="mkt" style="background:#3a4030;color:var(--tx);margin-top:4px;font-size:16px">🛒 Магазин</button><button id="dqb" style="background:#3a4030;color:var(--tx);margin-top:4px;font-size:16px">📋 Задания</button><button id="invb" style="background:#3a4030;color:var(--tx);margin-top:4px;font-size:16px">🎒 Инвентарь</button><a class="lk" href="index.html">☰ Меню игр</a><div id="au"></div></div>
 <script>
 const $=s=>document.querySelector(s),cv=$('#c'),x=cv.getContext('2d'),gr=document.createElement('canvas'),g=gr.getContext('2d');
 const R=(a,b)=>b===undefined?Math.random()*a:a+Math.random()*(b-a),C=(v,a,b)=>Math.max(a,Math.min(b,v)),PI=Math.PI;
@@ -504,7 +504,7 @@ function kill(e){if(!e.sm){sv.kl[TK().c]++;runKills++}const rs=e.type!='B'&&al.l
 function vec(s){const dx=s.x-s.ox,dy=s.y-s.oy,h=Math.hypot(dx,dy)||1,m=Math.min(1,h/(S*2.2));return{x:dx/h*m,y:dy/h*m,m}}
 
 function hitP(v,quiet){p.hp-=v;p.fl=.08;hurt=.3;shake=Math.max(shake,5);vib(30);if(!quiet)dnum(p,v,'#ff6a5a','-');if(p.hp<=0)die()}
-function ovStat(){const t=TK(),e=$('#t2'),br=!!sv.brk[sv.tank];e.textContent='Танк «'+t.n+'» '+(br?'разбит — почините его в гараже':'к бою готов');e.style.color=br?'#ff8a7a':'#8fd48a'}
+function ovStat(){if(typeof dqLoad=='function'&&Date.now()-dqT>20000)dqLoad();const t=TK(),e=$('#t2'),br=!!sv.brk[sv.tank];e.textContent='Танк «'+t.n+'» '+(br?'разбит — почините его в гараже':'к бою готов');e.style.color=br?'#ff8a7a':'#8fd48a'}
 function ppShow(h,t,btns){$('#pph').textContent=h;$('#ppt').textContent=t;const b=$('#ppb');b.innerHTML='';for(const[l,fn,c]of btns){const x=document.createElement('button');x.textContent=l;if(c)x.style.cssText=c;x.onclick=()=>{$('#pp').classList.remove('s');if(fn)fn()};b.appendChild(x)}$('#pp').classList.add('s')}
 function quickFill(t){const r=rack(),cap=capOf(t),pr=shp(t,'ap'),S=stk(t.id);let need=cap-rtot(r);if(need>0){const u=pr>0?Math.min(S.ap,need):0;S.ap-=u;r.ap+=u;need-=u}if(need>0){const n=pr>0?Math.min(need,Math.floor(sv.co*100/pr)):need;sv.co-=pr>0?Math.ceil(n*pr/100):0;r.ap+=n}if(rtot(r)<needAm(t))r.ap+=needAm(t)-rtot(r);svs();$('#co').textContent=sv.co}
 function tryGo(){if(cloudBusy){$('#t2').textContent='Загрузка прогресса…';$('#t2').style.color='#f2c14e';return}const t=TK(),r=rack(),T=rtot(r),cap=capOf(t),pr=shp(t,'ap');
@@ -971,10 +971,25 @@ function shopOpen(){if(!tok)return needLogin('🛒 Магазин');
 function dailyGo(){if(!tok)return needLogin('🎁 Бесплатный сундук');const b=$('#frb');if(b)b.disabled=true;
  api('/api/inv/daily',{}).then(j=>{invSet(j);if(j.coins!==undefined)coFrom({bal:j.coins});const w=$('#evw');w.innerHTML='';w.classList.add('on');chestAnim([j.loot],()=>w.classList.remove('on'))}).catch(e=>{invLoad();ppShow('Не получилось',evErr[e&&e.error]||'Нет связи с сервером.',[['Ок']])})}
 $('#gemb').onclick=payOpen;$('#frb').onclick=dailyGo;$('#mkt').onclick=shopOpen;
+/* ===== Ежедневные задания ===== */
+let DQ=null,dqT=0;
+function dqLabel(){const b=$('#dqb');if(!b)return;const r=DQ?DQ.tasks.filter(x=>!x.claimed&&x.have>=x.n).length+((DQ.tasks.every(x=>x.claimed)&&!DQ.bonus.claimed)?1:0):0;b.textContent='📋 Задания'+(r?' · 🎁 '+r:'');b.style.borderColor=r?'#f2c14e':''}
+function dqLoad(){if(!tok)return Promise.resolve();dqT=Date.now();return api('/api/dq',{}).then(j=>{DQ=j;dqLabel();return j}).catch(()=>{})}
+function dqLeft(ms){const h=Math.floor(ms/3600000),m=Math.floor(ms%3600000/60000);return h+' ч '+m+' мин'}
+function dqOpen(){if(!tok)return needLogin('📋 Задания');
+ dqLoad().then(()=>{if(!DQ){ppShow('Не получилось','Нет связи с сервером.',[['Ок']]);return}
+  const all=DQ.tasks.every(x=>x.claimed),rows=DQ.tasks.map(x=>{const ok=x.have>=x.n,pc=Math.round(x.have/x.n*100);
+   return '<div class="dt"><div class="dh"><div><b>'+x.name+'</b><span>'+x.have+' / '+x.n+' · награда '+x.g+' 🪙</span></div></div><div style="height:8px;border-radius:5px;background:#17233b;margin:8px 0"><div style="height:100%;width:'+pc+'%;border-radius:5px;background:'+(ok?'#f2c14e':'#4f78c4')+'"></div></div>'+(x.claimed?'<small>✅ Получено</small>':'<div class="oa"><button data-q="'+x.i+'"'+(ok?'':' disabled')+'>Забрать '+x.g+' 🪙</button></div>')+'</div>'}).join('');
+  const bonus='<div class="dt"><div class="dh"><span class="di" style="--rc:'+RC.key+'">'+icon('key')+'</span><div><b>Все три задания</b><span>Шанс получить ключ: '+Math.round(DQ.bonus.chance*100)+'%</span></div></div>'+(DQ.bonus.claimed?'<small>✅ Получено</small>':'<div class="oa"><button data-q="b"'+(all?'':' disabled')+'>Забрать бонус</button></div>')+'</div>';
+  const w=invWin('<h2>📋 Задания дня</h2><p>Обновятся через '+dqLeft(DQ.left)+'. Считаются бои в обычных волнах.</p>'+rows+bonus);
+  w.querySelectorAll('[data-q]').forEach(b=>b.onclick=()=>{w.querySelectorAll('[data-q]').forEach(x=>x.disabled=true);const q=b.dataset.q;
+   api('/api/dq/claim',{i:q=='b'?'b':+q}).then(j=>{DQ=j.dq;if(j.items)INV=j.items;if(j.coins!==undefined)coFrom({bal:j.coins});updSb();dqLabel();dqOpen();ppShow('Награда получена',j.gold?'+'+j.gold+' 🪙':(j.key?'🔑 Вам выпал ключ!':'В этот раз ключ не выпал.'),[['Ок']])}).catch(e=>{dqOpen();ppShow('Не получилось',e&&e.error=='not_done'?'Задание ещё не выполнено.':'Нет связи с сервером.',[['Ок']])})})})}
+$('#dqb').onclick=dqOpen;
+
 (function(){const tr=$('#evt');if(tr)tr.addEventListener('scroll',evDots,{passive:true});setInterval(()=>{if(!$('#ov').classList.contains('h')&&!$('#evw').classList.contains('on'))evLoad()},60000)})();
 function mzFit(){const z=(innerWidth>=900&&innerHeight>=600)?Math.max(1,Math.min(2.2,Math.min(innerWidth/1000,innerHeight/800))):1;document.documentElement.style.setProperty('--mz',z.toFixed(2))}
 mzFit();addEventListener('resize',mzFit);
-evLoad();invLoad();tinit();renderAuth();ovStat();try{const m=sessionStorage.getItem('tk-msg');if(m){sessionStorage.removeItem('tk-msg');$('#t2').textContent=m;$('#t2').style.color='#f2c14e'}}catch(e){}checkSeason().then(cloudLoad,cloudLoad);
+evLoad();invLoad();dqLoad();tinit();renderAuth();ovStat();try{const m=sessionStorage.getItem('tk-msg');if(m){sessionStorage.removeItem('tk-msg');$('#t2').textContent=m;$('#t2').style.color='#f2c14e'}}catch(e){}checkSeason().then(cloudLoad,cloudLoad);
 requestAnimationFrame(loop);
 </script>
 </body>
