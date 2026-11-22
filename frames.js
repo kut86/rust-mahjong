@@ -3,6 +3,7 @@
  * КАК ДОБАВИТЬ НОВУЮ РАМКУ ИЛИ УКРАШЕНИЕ
  *  1. В worker.js, в каталоге COS, добавьте строку, например:  'fr:t1': 'Рамка чемпиона'  (рамка — 'fr:…', украшение — 'dc:…').
  *  2. Здесь добавьте запись с тем же именем без префикса: FRAMES.t1 (для 'fr:t1') или DECOS.t1 (для 'dc:t1').
+ *     Подложка строки рейтинга — 'bg:…' в COS и PLATES.имя здесь (colors — цвета градиента, glow — свечение, speed — секунд на один блик).
  *  3. Если нужно выдавать её за босса — добавьте правило в BOSS_AWARDS в worker.js (например, за 1 место).
  *  Внешний вид задают параметры, рисовать ничего не нужно:
  *    n      — название, которое видит игрок
@@ -17,10 +18,14 @@
  */
 (function () {
   var FRAMES = {
-    bp: { n: 'Участник боя с боссом', colors: ['#4fc3ff', '#b07cff', '#ff5fd2', '#ffd24a', '#5cff9d'], bolts: 14, len: 0.5, width: 3, speed: 2.6, glow: '#8ab4ff', ring: 3 }
+    bp: { n: 'Участник боя с боссом', colors: ['#4fc3ff', '#b07cff', '#ff5fd2', '#ffd24a', '#5cff9d'], bolts: 12, len: 0.32, width: 2.4, speed: 3.2, glow: '#8ab4ff', ring: 3 }
   };
   var DECOS = {
-    bp: { n: 'Грозовое украшение', colors: ['#fff27a', '#7af0ff', '#ff7ae6', '#9a7aff'], bolts: 6, arcs: 6, len: 0.55, width: 2.6, speed: 2.2, glow: '#b07cff' }
+    bp: { n: 'Грозовое украшение', colors: ['#fff27a', '#7af0ff', '#ff7ae6', '#9a7aff'], bolts: 5, arcs: 5, len: 0.5, width: 2, speed: 2.4, glow: '#b07cff' }
+  };
+
+  var PLATES = {
+    bp: { n: 'Грозовая подложка', colors: ['#4fc3ff', '#b07cff', '#ff5fd2', '#ffd24a'], glow: '#b07cff', speed: 4.5 }
   };
 
   var NS = 'http://www.w3.org/2000/svg', CSS_DONE = false;
@@ -37,10 +42,13 @@
       '.pfx-l.d{z-index:3;animation:pfx-spin calc(var(--sp,3s)*5) linear infinite reverse}.pfx-l.f{animation:pfx-spin calc(var(--sp,3s)*9) linear infinite}' +
       '.pfx-b{fill:none;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:1;animation:pfx-shoot var(--sp,3s) linear infinite}' +
       '.pfx-a{fill:none;stroke-linecap:round;stroke-linejoin:round;animation:pfx-flick calc(var(--sp,3s)*.7) steps(1,end) infinite}' +
+      '.pfx-pl{background-image:linear-gradient(100deg,transparent 38%,rgba(255,255,255,.16) 50%,transparent 62%),var(--pg);background-size:260% 100%,100% 100%;background-repeat:no-repeat;animation:pfx-sheen var(--sp,4.5s) linear infinite}' +
+      '.pfx-pl td.rk,.pfx-pl.pfx-s td:first-child{box-shadow:inset 3px 0 0 var(--pa,#b07cff)}' +
+      '@keyframes pfx-sheen{0%{background-position:160% 0,0 0}100%{background-position:-60% 0,0 0}}' +
       '@keyframes pfx-spin{to{transform:rotate(360deg)}}' +
       '@keyframes pfx-shoot{0%{stroke-dashoffset:1;opacity:1}16%{stroke-dashoffset:0;opacity:1}30%{opacity:.9}48%{opacity:0;stroke-dashoffset:0}100%{opacity:0;stroke-dashoffset:0}}' +
       '@keyframes pfx-flick{0%{opacity:1}12%{opacity:.15}24%{opacity:1}38%{opacity:.35}52%{opacity:1}70%{opacity:0}85%{opacity:.8}100%{opacity:1}}' +
-      '@media (prefers-reduced-motion:reduce){.pfx *{animation:none!important}.pfx-b{opacity:.85;stroke-dashoffset:0}}';
+      '@media (prefers-reduced-motion:reduce){.pfx *,.pfx-pl{animation:none!important}.pfx-b{opacity:.85;stroke-dashoffset:0}}';
     document.head.appendChild(s);
   }
   // Детерминированный «случайный» ряд: у одной и той же рамки всегда одинаковый узор
@@ -83,7 +91,7 @@
 
   /* PFX.el(src, name, f, size) — аватар с рамкой.
    *   src  — адрес картинки (https://…) или пустая строка (тогда рисуется кружок с первой буквой)
-   *   f    — ['fr:bp','dc:bp'] (рамка, украшение) или пустое значение
+   *   f    — ['fr:bp','dc:bp','bg:bp'] (рамка, украшение, подложка) или пустое значение
    *   size — размер аватара в пикселях */
   function el(src, name, f, size) {
     css();
@@ -107,6 +115,17 @@
     }
     return w;
   }
-  window.PFX = { FRAMES: FRAMES, DECOS: DECOS, el: el, has: function (f) { return !!(f && (f[0] || f[1])); },
-    name: function (id) { var t = id && id.slice(0, 3), k = id && id.slice(3); return t === 'fr:' ? (FRAMES[k] || {}).n || id : t === 'dc:' ? (DECOS[k] || {}).n || id : id; } };
+  /* PFX.row(tr, f, single) — подложка всей строки (single — строка из одной линии, без объединённой ячейки с местом) игрока в рейтинге (f[2] = 'bg:bp'). */
+  function row(tr, f, single) {
+    var p = PLATES[ident(f && f[2], 'bg:')];
+    if (!p || !tr) return;
+    css();
+    var c = p.colors, g = c.map(function (x, i) { return x + (i % 2 ? '24' : '38') + ' ' + Math.round(i / (c.length - 1) * 100) + '%'; });
+    tr.classList.add('pfx-pl'); if (single) tr.classList.add('pfx-s');
+    tr.style.setProperty('--pg', 'linear-gradient(90deg,' + g.join(',') + ')');
+    tr.style.setProperty('--pa', p.glow || c[0]);
+    tr.style.setProperty('--sp', (p.speed || 4.5) + 's');
+  }
+  window.PFX = { FRAMES: FRAMES, DECOS: DECOS, PLATES: PLATES, el: el, row: row, has: function (f) { return !!(f && (f[0] || f[1])); },
+    name: function (id) { var t = id && id.slice(0, 3), k = id && id.slice(3); return t === 'fr:' ? (FRAMES[k] || {}).n || id : t === 'dc:' ? (DECOS[k] || {}).n || id : t === 'bg:' ? (PLATES[k] || {}).n || id : id; } };
 })();
