@@ -45,6 +45,7 @@
       '.pfx-pl{background-image:linear-gradient(100deg,transparent 38%,rgba(255,255,255,.16) 50%,transparent 62%),var(--pg);background-size:260% 100%,100% 100%;background-repeat:no-repeat;animation:pfx-sheen var(--sp,4.5s) linear infinite}' +
       '@property --bc{syntax:"<color>";inherits:true;initial-value:#b07cff}' +
       '.pfx-pl td.rk{background-color:var(--p0,transparent)}' +
+      '.pfx-pi td{color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.95),0 0 2px rgba(0,0,0,.9)}.pfx-pi td.lab,.pfx-pi td.ab{color:rgba(255,255,255,.82)}.pfx-pi td.ab.hi{color:#ffb070}' +
       '.pfx-pl td.rk,.pfx-pl.pfx-s td:first-child{box-shadow:inset 3px 0 0 var(--pa,#b07cff)}' +
       '.pfx-pl.pfx-e td{--bt:inset 0 0 0 0 transparent;--bb:inset 0 0 0 0 transparent;--br:inset 0 0 0 0 transparent;--bl:inset 0 0 0 0 transparent;--it:none;--ib:none;--il:none;--ir:none;' +
       'box-shadow:var(--bt),var(--bb),var(--br),var(--bl);background-image:var(--it),var(--ib),var(--il),var(--ir);background-repeat:repeat-x,repeat-x,repeat-y,repeat-y;' +
@@ -183,13 +184,23 @@
       for (var i = 0; i < 4; i++) tr.style.setProperty('--c' + i, c[i % c.length]);
       if (p.bolts !== false) { tr.style.setProperty('--zh', zig(c, false)); tr.style.setProperty('--zv', zig(c, true)); }
     }
-    if (p.sheen === false || p.img) { // свой набор слоёв: [блик] + градиент + [затемнение + картинка]
+    // карточка из нескольких строк: картинка рисуется один раз на всю группу строк (tbody), а не на каждую строку отдельно
+    var tb = (!single && p.img && tr.parentNode && tr.parentNode.tagName === 'TBODY') ? tr.parentNode : null, useImg = p.img && !tb;
+    if (p.img) {
+      tr.classList.add('pfx-pi');
+      if (tb) {
+        var dm0 = p.imgDim === undefined ? 0.55 : p.imgDim;
+        tb.style.backgroundImage = 'linear-gradient(rgba(35,39,42,' + dm0 + '),rgba(35,39,42,' + dm0 + ')),url("' + p.img + '")';
+        tb.style.backgroundSize = '100% 100%,cover'; tb.style.backgroundPosition = '0 0,50% 50%'; tb.style.backgroundRepeat = 'no-repeat';
+      }
+    }
+    if (p.sheen === false || useImg) { // свой набор слоёв: [блик] + градиент + [затемнение + картинка]
       var L = [], Z = [], sh = p.sheen !== false;
       if (sh) { L.push('linear-gradient(100deg,transparent 38%,rgba(255,255,255,.16) 50%,transparent 62%)'); Z.push('260% 100%'); }
       L.push('var(--pg)'); Z.push('100% 100%');
-      if (p.img) { var dm = p.imgDim === undefined ? 0.55 : p.imgDim; L.push('linear-gradient(rgba(35,39,42,' + dm + '),rgba(35,39,42,' + dm + '))'); Z.push('100% 100%'); L.push('url("' + p.img + '")'); Z.push('cover'); }
-      tr.style.backgroundImage = L.join(','); tr.style.backgroundSize = Z.join(','); tr.style.backgroundRepeat = 'no-repeat'; tr.style.backgroundPosition = p.img ? (sh ? '160% 0,0 0,0 0,50% 50%' : '0 0,0 0,50% 50%') : '0 0';
-      tr.style.animationName = sh ? (p.img ? 'pfx-sheen4' : 'pfx-sheen') : 'none';
+      if (useImg) { var dm = p.imgDim === undefined ? 0.55 : p.imgDim; L.push('linear-gradient(rgba(35,39,42,' + dm + '),rgba(35,39,42,' + dm + '))'); Z.push('100% 100%'); L.push('url("' + p.img + '")'); Z.push('cover'); }
+      tr.style.backgroundImage = L.join(','); tr.style.backgroundSize = Z.join(','); tr.style.backgroundRepeat = 'no-repeat'; tr.style.backgroundPosition = useImg ? (sh ? '160% 0,0 0,0 0,50% 50%' : '0 0,0 0,50% 50%') : '0 0';
+      tr.style.animationName = sh ? (useImg ? 'pfx-sheen4' : 'pfx-sheen') : 'none';
       if (!sh) tr.style.animation = 'none';
     }
   }

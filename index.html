@@ -406,13 +406,13 @@ function cardRows(p,i,body){
 function loadLb(id){
   lbMode=id;
   var M=MODES.filter(function(x){return x.id===id})[0],body=$('lbb'),msg=$('lbmsg');
-  body.innerHTML='';msg.textContent='Загрузка…';$('lbh').textContent=M.h;$('lbdesc').textContent=M.d;$('lbhead').style.display=M.cards?'none':'';$('lbbox').className=M.g==='tk'?'box wide':'box';
+  body.innerHTML='';Array.prototype.slice.call(body.parentNode.querySelectorAll('tbody.lbcard')).forEach(function(t){t.remove()});msg.textContent='Загрузка…';$('lbh').textContent=M.h;$('lbdesc').textContent=M.d;$('lbhead').style.display=M.cards?'none':'';$('lbbox').className=M.g==='tk'?'box wide':'box';
   Array.prototype.forEach.call($('tabs').children,function(b){b.className=b.getAttribute('data-id')===id?'':'alt'});
   api(M.url).then(function(j){
     if(lbMode!==id)return;
     msg.textContent=j.players.length?'':'Пока нет результатов.';
     j.players.forEach(function(p,i){
-      if(M.cards){cardRows(p,i,body);return}
+      if(M.cards){var tb=document.createElement('tbody');tb.className='lbcard';body.parentNode.appendChild(tb);cardRows(p,i,tb);return}
       var tr=document.createElement('tr');if(me&&p.id===me.sid)tr.className='me';
       var c1=document.createElement('td');c1.textContent=i+1;
       var c2=document.createElement('td');
