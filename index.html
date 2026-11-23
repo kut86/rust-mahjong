@@ -65,6 +65,14 @@ a.btn{display:inline-block;background:#1b2838;color:#fff;text-decoration:none;bo
 .pf .av2{width:72px;height:72px;border-radius:50%;border:2px solid var(--rust);margin:2px auto 6px;display:block}
 .pf h3{margin:0 0 12px}.pf .lnk{display:flex;align-items:center;justify-content:space-between;gap:10px;border-top:1px solid var(--line);padding:10px 2px;text-align:left}
 .pf .lnk b{display:block}.pf .lnk small{color:var(--muted)}.pf .okk{color:#6fe08a;white-space:nowrap}
+.plst{margin:4px 0 0;text-align:left;font-size:.9rem}
+.plst div{display:flex;justify-content:space-between;gap:10px;border-top:1px solid var(--line);padding:6px 2px}
+.plst b{font-weight:600}.plst span{color:var(--muted)}
+.btnl{display:inline-block;padding:9px 16px;border-radius:8px;border:1px solid var(--line);color:inherit;text-decoration:none;font-size:.9rem}
+#plov{z-index:1100}
+.pfid{display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap;margin:0 0 12px;font-size:.85rem;color:var(--muted)}
+.pfid code{background:rgba(255,255,255,.07);border:1px solid var(--line);border-radius:6px;padding:3px 8px;color:var(--fg,#e8e6df);font-size:.85rem;user-select:all;-webkit-user-select:all;word-break:break-all}
+.pfid button{padding:4px 10px;font-size:.8rem;min-height:0}
 .pf #pfmsg{min-height:1.3em;color:var(--rustHi);font-size:.9rem;margin:8px 0}.pf .row2{display:flex;gap:10px;justify-content:center;margin-top:8px}
 #gbtn,#gbtn2{display:inline-block;vertical-align:middle}
 .gw{position:relative;display:inline-block;vertical-align:middle;overflow:hidden;border-radius:8px}
@@ -108,7 +116,8 @@ a.btn{display:inline-block;background:#1b2838;color:#fff;text-decoration:none;bo
 </div></div>
 <div class="ov" id="pfov"><div class="box pf">
   <img class="av2" id="pfav" alt="" style="display:none">
-  <h3 id="pfn"></h3>
+  <h3 id="pfn" style="margin-bottom:6px"></h3>
+  <div class="pfid"><span>ID игрока</span><code id="pfid"></code><button id="pfidc" type="button">Копировать</button></div>
   <p style="margin:0 0 4px;color:var(--muted);font-size:.85rem">Способы входа в аккаунт. Привяжите другие, чтобы входить любым из них, прогресс у них общий.</p>
   <div class="lnk"><div><b>Steam</b><small id="pfs"></small></div><span id="pfsb"></span></div>
   <div class="lnk"><div><b>Google</b><small id="pfg"></small></div><span id="pfgb"></span></div>
@@ -144,6 +153,15 @@ a.btn{display:inline-block;background:#1b2838;color:#fff;text-decoration:none;bo
   <p id="lbmsg"></p>
   </div>
   <button id="lbclose">Закрыть</button>
+</div></div>
+
+<div class="ov" id="plov"><div class="box pf">
+  <div id="plpv" class="cmpv"></div>
+  <h3 id="pln" style="margin:0 0 6px"></h3>
+  <div class="pfid" id="plidw" style="display:none"><span>ID игрока</span><code id="plid"></code><button id="plidc" type="button">Копировать</button></div>
+  <div id="plst" class="plst"></div>
+  <p id="plmsg" style="min-height:1.2em;color:var(--rustHi);font-size:.9rem;margin:6px 0"></p>
+  <div class="row2"><a id="plsteam" class="btnl" target="_blank" rel="noopener" style="display:none">Страница в Steam</a><button id="plcl">Закрыть</button></div>
 </div></div>
 
 <script src="frames.js"></script>
@@ -239,7 +257,7 @@ function pfLoad(){
 function openProfile(msg){
   if(!me)return;
   var im=$('pfav');if(me.a&&me.a.indexOf('https://')===0){im.src=me.a;im.style.display='block'}else im.style.display='none';
-  $('pfn').textContent=me.n;pfMsg(msg||'');$('pfs').textContent='…';$('pfg').textContent='…';$('pfd').textContent='…';$('pfsb').innerHTML='';$('pfgb').innerHTML='';$('pfdb').innerHTML='';
+  $('pfn').textContent=me.n;$('pfid').textContent=me.sid;$('pfidc').textContent='Копировать';pfMsg(msg||'');$('pfs').textContent='…';$('pfg').textContent='…';$('pfd').textContent='…';$('pfsb').innerHTML='';$('pfgb').innerHTML='';$('pfdb').innerHTML='';
   $('pfov').classList.add('show');pfLoad();
 }
 
@@ -264,6 +282,12 @@ function openCosmetics(){
   if(!tok)return;$('cmmsg').textContent='';$('cmin').value='';$('cmov').classList.add('show');
   api('/api/profile').then(function(j){CM=j;cmRender()}).catch(function(e){$('cmmsg').textContent=cmErr(e)});
 }
+$('pfidc').onclick=function(){
+  var t=String(me&&me.sid||''),b=$('pfidc');if(!t)return;
+  function ok(){b.textContent='Скопировано ✓'}
+  function old(){var a=document.createElement('textarea');a.value=t;a.style.cssText='position:fixed;opacity:0';document.body.appendChild(a);a.select();try{document.execCommand('copy');ok()}catch(e){var c=$('pfid');var r=document.createRange();r.selectNodeContents(c);var g=getSelection();g.removeAllRanges();g.addRange(r);b.textContent='Выделено, скопируйте'}document.body.removeChild(a)}
+  if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(t).then(ok,old);else old();
+};
 $('pfcm').onclick=openCosmetics;$('pfav').onclick=openCosmetics;$('pfn').onclick=openCosmetics;$('cmcl').onclick=function(){$('cmov').classList.remove('show')};
 $('cmok').onclick=function(){
   var v=$('cmin').value.trim();if(!v)return;var b=$('cmok');b.disabled=true;
@@ -328,6 +352,40 @@ function showGame(g){
 }
 GAMES.forEach(function(G){var b=document.createElement('button');b.innerHTML='<span class="gi">'+G.icon+'</span><span>'+G.name+'</span><small>'+G.sub+'</small>';b.onclick=function(){showGame(G.id)};$('lbpick').appendChild(b)});
 $('lbpick').className='gpick';$('lbback').onclick=showPick;
+
+// ====== Карточка игрока ======
+function openPlayer(p){
+  var id=typeof p==='string'?p:p.id;if(!id)return;
+  $('plov').classList.add('show');$('plpv').innerHTML='';$('pln').textContent=(p&&p.n)||'…';$('plst').innerHTML='';$('plmsg').textContent='Загрузка…';$('plidw').style.display='none';$('plsteam').style.display='none';
+  api('/api/player?id='+encodeURIComponent(id)).then(function(j){
+    $('plmsg').textContent='';$('pln').textContent=j.n;
+    var cp=$('plpv'),ct=document.createElement('table'),cr=document.createElement('tr'),cd=document.createElement('td');ct.style.cssText='width:100%;height:100%;border-collapse:collapse';cd.style.cssText='text-align:center;padding:0;border:0';
+    cd.appendChild(PFX.el(j.a||'',j.n,[j.f[0],j.f[1]],64));cr.appendChild(cd);ct.appendChild(cr);cp.appendChild(ct);PFX.row(cr,j.f,1);
+    var L=[],N=['ЛТ','СТ','ТТ'];
+    function add(k,v){L.push('<div><span>'+k+'</span><b>'+v+'</b></div>')}
+    if(j.tk){
+      var best=Math.max.apply(null,j.tk.x),bi=j.tk.x.indexOf(best);
+      add('Танчики: рекорд волн',best+(j.tk.tn[bi]?' ('+N[bi]+', '+j.tk.tn[bi]+')':''));
+      add('Волны по классам',j.tk.x.map(function(v,i){return N[i]+' '+v}).join(' · '));
+      add('Убито врагов',j.tk.k.reduce(function(a,b){return a+b},0));
+      add('Рекорд очков',j.tk.s||0);
+      if(j.tk.b)add('Побеждено боссов в забегах',j.tk.b);
+    }
+    if(j.boss&&j.boss.e){add('Боёв с мировым боссом',j.boss.e);add('Урон по боссам',j.boss.d)}
+    if(j.mj)add('Маджонг: пройдено уровней',j.mj.c);
+    if(j.sp)add('Маджонг: лучшее время',fmtMs(j.sp.ms));
+    if(j.cos)add('Украшений',j.cos);
+    $('plst').innerHTML=L.join('')||'<p class="cmt">Пока нет результатов.</p>';
+    if(j.id){$('plidw').style.display='';$('plid').textContent=j.id;$('plidc').textContent='Копировать';$('plidc').onclick=function(){copyText(j.id,$('plidc'))}}
+    if(j.steam){var a=$('plsteam');a.href='https://steamcommunity.com/profiles/'+id;a.style.display=''}
+  }).catch(function(e){$('plmsg').textContent=(e&&e.error==='not_found')?'Игрок не найден.':'Не удалось загрузить профиль.'});
+}
+$('plcl').onclick=function(){$('plov').classList.remove('show')};
+function copyText(t,b){
+  function ok(){b.textContent='Скопировано ✓'}
+  function old(){var a=document.createElement('textarea');a.value=t;a.style.cssText='position:fixed;opacity:0';document.body.appendChild(a);a.select();try{document.execCommand('copy');ok()}catch(e){b.textContent='Выделите и скопируйте'}document.body.removeChild(a)}
+  if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(t).then(ok,old);else old();
+}
 function avAppend(host,p){if(window.PFX&&PFX.has(p.f)){host.appendChild(PFX.el(p.a,p.n,p.f,24));return}if(p.a&&p.a.indexOf('https://')===0){var im=document.createElement('img');im.className='av';im.src=p.a;im.alt='';host.appendChild(im)}}
 function cardRows(p,i,body){
   var X=p.x||[0,0,0],K=p.k||[0,0,0],N=['ЛТ','СТ','ТТ'],top=['l','m','h'].indexOf(p.tc),isMe=me&&p.id===me.sid;
@@ -336,12 +394,13 @@ function cardRows(p,i,body){
   var A=row('ch'),rk=cell(i+1,'rk',A);rk.rowSpan=4;var rowsAll=[A];
   var nm=document.createElement('td');
   avAppend(nm,p);
-  var a=document.createElement('a');a.textContent=p.n;if(/^\d{17}$/.test(p.id)){a.href='https://steamcommunity.com/profiles/'+p.id;a.target='_blank';a.rel='noopener'}nm.appendChild(a);
+  var a=document.createElement('a');a.textContent=p.n;a.style.cursor='pointer';a.onclick=function(e){e.stopPropagation();openPlayer(p)};nm.appendChild(a);
   A.appendChild(nm);
   N.forEach(function(n,k){cell(n,'ab'+(k===top?' hi':''),A)});
   var B=row('cm');cell('Пройдено волн','lab',B);X.forEach(function(v){cell(v,'num',B)});
   var C=row('cm');cell('Уничтожено врагов','lab',C);K.forEach(function(v){cell(v,'num',C)});
   var D=row('ce');cell('Рекорд очков','lab',D);var sc=cell(p.s||0,'num',D);sc.colSpan=3;
+  rowsAll=[A,B,C,D];rowsAll.forEach(function(r){r.style.cursor='pointer';r.onclick=function(){openPlayer(p)}});
   if(window.PFX&&p.f&&p.f[2])[[A,'t'],[B,'m'],[C,'m'],[D,'b']].forEach(function(r){PFX.row(r[0],p.f,r[1])});
 }
 function loadLb(id){
@@ -358,9 +417,10 @@ function loadLb(id){
       var c1=document.createElement('td');c1.textContent=i+1;
       var c2=document.createElement('td');
       avAppend(c2,p);
-      var a=document.createElement('a');a.textContent=p.n;if(/^\d{17}$/.test(p.id)){a.href='https://steamcommunity.com/profiles/'+p.id;a.target='_blank';a.rel='noopener'}c2.appendChild(a);
+      var a=document.createElement('a');a.textContent=p.n;a.style.cursor='pointer';a.onclick=function(e){e.stopPropagation();openPlayer(p)};c2.appendChild(a);
       var c3=document.createElement('td');c3.textContent=M.v(p);
       tr.appendChild(c1);tr.appendChild(c2);tr.appendChild(c3);body.appendChild(tr);if(window.PFX&&p.f&&p.f[2])PFX.row(tr,p.f,1);
+      if(!M.more){tr.style.cursor='pointer';tr.onclick=function(){openPlayer(p)}}
       if(M.more){tr.style.cursor='pointer';var mr=null;tr.onclick=function(e){if(e.target.tagName==='A')return;if(mr){mr.remove();mr=null;return}mr=document.createElement('tr');var d=document.createElement('td');d.colSpan=3;d.style.cssText='white-space:pre-line;font-size:.85rem;opacity:.85;text-align:left';d.textContent=M.more(p);mr.appendChild(d);tr.after(mr)}}
     });
   }).catch(function(){if(lbMode===id)msg.textContent='Не удалось загрузить рейтинг. Проверьте адрес сервера в начале скрипта.'});
