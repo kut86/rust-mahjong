@@ -100,7 +100,7 @@ body:has(#ov:not(.h)) #hud,body:has(#up:not(.h)) #hud{visibility:hidden}
 @keyframes evb{0%,100%{opacity:0}4%{opacity:1}7%{opacity:0}10%{opacity:1}14%{opacity:0}}
 #ov>*,#evw .bx{zoom:var(--mz,1)}
 #wsel{scrollbar-color:rgba(160,200,255,.45) transparent}
-@media (min-width:900px){#evs{max-width:min(1120px,100%)}#evt{justify-content:safe center}#ov .evc{flex:0 1 330px;width:auto;min-width:250px}}
+@media (min-width:900px){#evs{max-width:min(940px,100%)}}
 #wbh{position:fixed;left:50%;transform:translateX(-50%);top:calc(env(safe-area-inset-top,0px) + 54px);width:min(64vw,440px);display:none;pointer-events:none;z-index:3;font-weight:700;text-shadow:0 1px 3px #000}
 #wbh.on{display:block}#wbh .r1{display:flex;justify-content:space-between;font-size:13px;margin-bottom:3px}
 #wbh .b{position:relative;height:14px;border-radius:8px;background:rgba(0,0,0,.55);overflow:hidden;margin-bottom:4px;border:1px solid rgba(255,255,255,.18)}
@@ -110,52 +110,14 @@ body:has(#ov:not(.h)) #hud,body:has(#up:not(.h)) #hud{visibility:hidden}
 @keyframes wbp{from{box-shadow:0 0 4px #ff5a3c}to{box-shadow:0 0 14px 3px #ff5a3c}}
 #ppt{white-space:pre-line}
 @media (max-height:480px){#wbh{top:calc(env(safe-area-inset-top,0px) + 44px);width:min(50vw,380px)}#wbh .b{height:12px}#wbh .b span{line-height:12px;font-size:10px}#wbh .r1{font-size:12px}}
-#evw .ig{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:10px 0}
-#evw .it2{position:relative;aspect-ratio:1;margin:0;padding:8px;background:radial-gradient(circle at 50% 30%,rgba(255,255,255,.12),rgba(255,255,255,.03));border:2px solid color-mix(in srgb,var(--rc) 55%,transparent);border-radius:14px;cursor:pointer;box-shadow:inset 0 0 14px color-mix(in srgb,var(--rc) 22%,transparent)}
-#evw .it2 svg,#evw .it2 img{width:100%;height:100%;object-fit:contain;display:block;filter:drop-shadow(0 2px 3px rgba(0,0,0,.5))}
-#evw .it2.z svg,#evw .it2.z img{opacity:.35;filter:grayscale(.7)}#evw .it2.sel{border-color:var(--rc);box-shadow:0 0 12px color-mix(in srgb,var(--rc) 70%,transparent)}
-#evw .it2 .cn{position:absolute;right:5px;bottom:3px;font:700 14px/1 sans-serif;color:#fff;text-shadow:0 1px 3px #000,0 0 4px #000}
-#evw .dt{position:relative;padding:10px 10px 22px;border:1px solid rgba(160,200,255,.22);border-radius:12px;background:rgba(255,255,255,.04);min-height:150px;display:flex;flex-direction:column;gap:4px;font-size:13px;line-height:1.35;color:#c9d7ef}
-#evw .dt small{font-size:12px;color:#a9bddd}#evw .dh{display:flex;gap:10px;align-items:center;margin-bottom:4px}#evw .dh b{display:block;font-size:16px;color:#fff}#evw .dh b em{font-style:normal;color:#f2c14e;margin-left:6px}
-#evw .di{flex:0 0 52px;height:52px;border-radius:12px;padding:5px;background:rgba(255,255,255,.07);border:2px solid var(--rc)}#evw .di svg,#evw .di img{width:100%;height:100%;object-fit:contain}
-#evw .ns{position:absolute;right:10px;bottom:5px;font-size:11px;color:#7d8aa3}
-#evw .oa{display:flex;gap:6px;margin-top:6px}#evw .oa button{flex:1;margin:0;padding:9px 2px;font-size:13px;background:var(--acc);color:var(--btx);border:0;border-radius:10px;font-weight:700}#evw .oa button:disabled{opacity:.4}
-#evw .ab{margin-top:10px}
-#evw .cz{position:absolute;inset:0;z-index:3;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;background:radial-gradient(circle at 50% 40%,#16336a,#050b1a 75%);overflow:hidden}
-.cz .cst{display:flex;flex-direction:column;align-items:center;gap:12px;max-width:94vw;padding-top:6vmin}
-.cz .ch{position:relative;width:clamp(120px,34vmin,260px)}.cz .ch svg{width:100%;display:block;overflow:visible;filter:drop-shadow(0 6px 10px rgba(0,0,0,.6))}.cz .ch .lid{transform-origin:7px 30px;transition:transform .45s cubic-bezier(.3,1.6,.5,1)}
-.cz .ch.shake svg{animation:czs .9s ease-in-out}.cz .ch.open .lid{transform:rotate(-62deg) translate(-3px,-4px)}
-.cz .gl{position:absolute;left:50%;top:38%;width:30%;aspect-ratio:1;margin:-15% 0 0 -15%;border-radius:50%;background:radial-gradient(circle,#fff8d0,rgba(255,200,60,.6) 40%,transparent 70%);opacity:0;transform:scale(.2)}.cz .ch.open .gl{animation:czg 1.1s ease-out forwards}
-.cz .lc{display:flex;flex-direction:column;align-items:center;gap:4px;padding:10px 14px;min-width:92px;border-radius:14px;border:2px solid var(--rc);background:rgba(255,255,255,.07);box-shadow:0 0 18px color-mix(in srgb,var(--rc) 55%,transparent);color:#fff;font-size:14px;text-align:center}.cz .lc svg,.cz .lc img{width:clamp(48px,12vmin,84px);height:clamp(48px,12vmin,84px);object-fit:contain}
-.cz .cl{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;max-width:92vw}.cz .cl .lc{padding:6px 10px;min-width:70px;font-size:12px}.cz .cl .lc svg{width:36px;height:36px}.cz .fly{animation:czf .45s cubic-bezier(.2,1.4,.4,1)}
-.cz .cr.pop .lc{animation:czp .6s cubic-bezier(.2,1.6,.4,1)}.cz .sm{display:flex;flex-wrap:wrap;gap:10px;justify-content:center}.cz h3{margin:0 0 8px;color:#fff;font-size:16px;text-align:center}
-.cz .cx{margin:0;padding:11px 26px;font-size:15px;border-radius:12px;border:0;background:rgba(255,255,255,.14);color:#dbe6ff;cursor:pointer}#evw .cz .cx.ok{background:#e8a73a!important;color:#2a1800!important;font-weight:700}#evw .cz .cx{color:#dbe6ff}
-@keyframes czs{0%,100%{transform:rotate(0)}12%{transform:rotate(-5deg) translateX(-3px)}25%{transform:rotate(5deg) translateX(3px)}38%{transform:rotate(-6deg)}52%{transform:rotate(6deg)}68%{transform:rotate(-3deg)}85%{transform:rotate(3deg)}}
-@keyframes czg{0%{opacity:0;transform:scale(.2)}35%{opacity:1;transform:scale(3.4)}100%{opacity:0;transform:scale(6)}}
-@keyframes czf{0%{opacity:0;transform:translateY(40px) scale(.4)}100%{opacity:1;transform:none}}
-@keyframes czp{0%{opacity:0;transform:translateY(40px) scale(.3)}60%{transform:translateY(-8px) scale(1.12)}100%{opacity:1;transform:none}}
-#trb{position:absolute;top:calc(12px + env(safe-area-inset-top,0px));right:14px;display:flex;gap:8px;align-items:center;z-index:2}
-#ov #trb button{margin:0;padding:8px 14px;font-size:15px;font-weight:700;border-radius:999px;background:rgba(10,26,58,.75);color:#fff;border:2px solid #4fc3ff;box-shadow:0 0 12px rgba(79,195,255,.45)}
-#ov #trb #frb{border-color:#6a7a96;box-shadow:none;color:#9fb0cc}#ov #trb #frb.rdy{border-color:#f2c14e;color:#fff;box-shadow:0 0 14px rgba(242,193,78,.7);animation:frp 1.8s ease-in-out infinite}
-@keyframes frp{50%{box-shadow:0 0 22px rgba(242,193,78,1)}}
-@media (max-width:700px){#ov{padding-top:calc(56px + env(safe-area-inset-top,0px))}}
-#evw .sh{margin:12px 0 4px;font-size:15px;color:#fff}#evw .em{font-size:12px;color:#8fa3c4;margin:2px 0}
-#evw .sr{display:flex;flex-direction:column;gap:6px}#evw .sw{display:flex;gap:10px;align-items:center;padding:6px 8px;border:1px solid rgba(160,200,255,.2);border-radius:12px;background:rgba(255,255,255,.04)}
-#evw .sw .it{flex:1;min-width:0;display:flex;flex-direction:column;font-size:13px;color:#c9d7ef}#evw .sw .it b{color:#fff;font-size:14px}#evw .sw .it b em{font-style:normal;color:#f2c14e;margin-left:6px}#evw .sw .it small{font-size:11px;color:#8fa3c4}
-#evw .sw .di{flex:0 0 40px;height:40px;padding:4px}
-#evw .sb,#evw .mini{margin:0;padding:8px 12px;font-size:13px;border-radius:10px;border:0;background:#2c3c5c;color:#dbe6ff;font-weight:700;cursor:pointer;align-self:flex-end}#evw .mini{align-self:auto;margin-left:6px}
-#evw .sl .sbx{width:min(92%,380px);padding:16px;border:2px solid #f2c14e;border-radius:18px;background:#0c1c3c;color:#c9d7ef;text-align:left}#evw .sl .sbx h3{margin:0 0 8px;text-align:left}#evw .sl .sh2{display:flex;gap:10px;align-items:center}#evw .sl .sh2 b{color:#fff}#evw .sl input[type=range]{width:100%;margin:10px 0}#evw .sl .sq{text-align:center;font-size:16px;margin-bottom:8px;color:#fff}
-#evw .sl .oa button{flex:1}#evw .sl #sqx{background:#2c3c5c;color:#dbe6ff}
-#evw .oa.sa button small{display:block;font-weight:700;font-size:12px;color:#2a1800;opacity:1}#evw .oa.sa button:disabled small{color:inherit}
 #evw .iv{display:flex;gap:10px;padding:9px 0;border-top:1px solid rgba(160,200,255,.18)}#evw .iv .ic{flex:0 0 38px;height:38px;border-radius:50%;background:rgba(255,255,255,.08);display:flex;align-items:center;justify-content:center;font-size:21px}
 #evw .iv .it{display:flex;flex-direction:column;gap:2px;min-width:0;font-size:13px;line-height:1.35;color:#c9d7ef}#evw .iv .it b{font-size:15px;color:#fff}#evw .iv .it b em{font-style:normal;color:#f2c14e;margin-left:6px}#evw .iv .it small{color:#a9bddd;font-size:12px}
-#evw .pay{margin:10px 0 2px;padding:10px;border:1px solid rgba(242,193,78,.4);border-radius:12px;font-size:13px;color:#c9d7ef}#evw .pay input{width:90px;padding:8px;border-radius:8px;border:1px solid #556;background:#0b1830;color:#fff;font-size:16px;margin:0 6px}#evw .pay .pb{display:flex;gap:8px;margin-top:8px}#evw .pay .pb button{flex:1;margin:0;padding:10px 4px;font-size:14px;background:var(--acc);color:var(--btx);border:0;border-radius:10px;font-weight:700}#evw .pay small{display:block;margin-top:6px;font-size:11px;opacity:.8}
 #evw .ab{display:flex;flex-direction:column;gap:8px;margin:10px 0 2px}#evw .ab button{margin:0;padding:11px 8px;font-size:15px;background:var(--acc);color:var(--btx);border:0;border-radius:12px;font-weight:700}#evw .ab button:disabled{opacity:.45}#evw .ab small{display:block;font-weight:400;font-size:11px;opacity:.85}
 #evd{display:flex;gap:6px;min-height:8px}
 #evd i{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.3)}#evd i.on{background:#fff}
 #evw{position:fixed;inset:0;z-index:8;background:rgba(4,10,24,.82);display:none;align-items:center;justify-content:center;padding:14px}
 #evw.on{display:flex}
-#evw .bx{background:linear-gradient(180deg,#112a55,#0c1c3c);border:2px solid var(--ec,#ff6a3d);border-radius:22px;max-width:420px;width:100%;max-height:calc((100vh - 28px)/var(--mz,1));max-height:calc((100dvh - 28px)/var(--mz,1));overflow-y:auto;overscroll-behavior:contain;padding:16px;box-sizing:border-box;text-align:left;box-shadow:0 0 24px rgba(var(--eg,255,106,61),.5)}
+#evw .bx{background:linear-gradient(180deg,#112a55,#0c1c3c);border:2px solid var(--ec,#ff6a3d);border-radius:22px;max-width:420px;width:100%;max-height:calc(100vh - 28px);max-height:calc(100dvh - 28px);overflow-y:auto;padding:16px;box-sizing:border-box;text-align:left;box-shadow:0 0 24px rgba(var(--eg,255,106,61),.5)}
 #evw h2{margin:0 0 4px;font-size:22px}#evw .im{width:100%;height:120px;border-radius:14px;background:center/cover no-repeat;margin-bottom:10px}
 #evw p{margin:6px 0;color:#c9d7ef;font-size:14px;line-height:1.45;max-width:none}
 #evw .rw{display:flex;justify-content:space-between;gap:10px;padding:7px 0;border-top:1px solid rgba(160,200,255,.18);font-size:14px}
@@ -182,7 +144,7 @@ body:has(#ov:not(.h)) #hud,body:has(#up:not(.h)) #hud{visibility:hidden}
 <div id="sh"><button data-k="ap"><b>ББ</b><i></i></button><button data-k="pc"><b>БП</b><i></i></button><button data-k="he"><b>ОФ</b><i></i></button></div><div id='sb'><button data-s='x'>💥 25</button><button data-s='s'>🛡 20</button><button data-s='d'>⚡ 15</button></div>
 <div id="evw"></div>
 <div id="rot"><b>📱</b>Поверните телефон горизонтально<a href="index.html" style="margin-top:6px;color:var(--tx);background:#3a4030;border-radius:14px;padding:12px 28px;font-size:16px;font-weight:700;text-decoration:none">☰ Меню игр</a></div>
-<div id="ov"><div id="evs"><div id="evt"></div><div id="evd"></div></div><div id="trb" style="display:none"><button id="frb"><span>🎁 Сундук</span></button><button id="gemb">💎 <span id="gemn">0</span></button></div><h1 id="t1">🪖 Танчики</h1><p id="t2">Левый палец — движение, правый — прицел и огонь. На компьютере: WASD, мышь, клик.</p><div class="tg" style="margin-top:2px">Стартовая волна</div><div id="wtabs"></div><div id="wsel"></div><button id="go">Играть</button><button id="fs" style="display:none;background:#3a4030;color:var(--tx);margin-top:4px;font-size:16px"></button><p id="fsh" class="tg" style="display:none;max-width:320px;line-height:1.5"></p><button id="shop" style="background:#3a4030;color:var(--tx);margin-top:4px;font-size:16px">🔧 Гараж · <span id="co">0</span> 🪙</button><button id="mkt" style="background:#3a4030;color:var(--tx);margin-top:4px;font-size:16px">🛒 Магазин</button><button id="dqb" style="background:#3a4030;color:var(--tx);margin-top:4px;font-size:16px">📋 Задания</button><button id="invb" style="background:#3a4030;color:var(--tx);margin-top:4px;font-size:16px">🎒 Инвентарь</button><button id="adb" style="display:none;background:#40303a;color:var(--tx);margin-top:4px;font-size:16px">⚙ Админ</button><a class="lk" href="index.html">☰ Меню игр</a><div id="au"></div></div>
+<div id="ov"><div id="evs"><div id="evt"></div><div id="evd"></div></div><h1 id="t1">🪖 Танчики</h1><p id="t2">Левый палец — движение, правый — прицел и огонь. На компьютере: WASD, мышь, клик.</p><div class="tg" style="margin-top:2px">Стартовая волна</div><div id="wtabs"></div><div id="wsel"></div><button id="go">Играть</button><button id="fs" style="display:none;background:#3a4030;color:var(--tx);margin-top:4px;font-size:16px"></button><p id="fsh" class="tg" style="display:none;max-width:320px;line-height:1.5"></p><button id="shop" style="background:#3a4030;color:var(--tx);margin-top:4px;font-size:16px">🔧 Гараж · <span id="co">0</span> 🪙</button><button id="invb" style="background:#3a4030;color:var(--tx);margin-top:4px;font-size:16px">🎒 Инвентарь</button><a class="lk" href="index.html">☰ Меню игр</a><div id="au"></div></div>
 <script>
 const $=s=>document.querySelector(s),cv=$('#c'),x=cv.getContext('2d'),gr=document.createElement('canvas'),g=gr.getContext('2d');
 const R=(a,b)=>b===undefined?Math.random()*a:a+Math.random()*(b-a),C=(v,a,b)=>Math.max(a,Math.min(b,v)),PI=Math.PI;
@@ -234,16 +196,12 @@ const ARM={l:[20,70],m:[35,140],h:[50,260]},PEN={l:[30,110],m:[45,170],h:[65,250
 const ASIDE=.7,AREAR=.5,PENVAR=.25;           // толщина борта и кормы от лба; разброс пробития ±25%
 const AMMOT=385; // вместимость боекомплекта = 385 выстрелов непрерывной стрельбы (Шакал 2500)
 // типы снарядов: pn/dm — множители пробития и урона, v — скорость полёта, pr — цена за 100 шт. при калибре 20 мм (дальше × калибр/20)
-const SHELL={ap:{n:'Бронебойный (базовый)',s:'ББ',pn:1,dm:1,v:1,pr:5},pc:{n:'Бронебойный подкалиберный',s:'БП',pn:1.4,dm:.75,v:1.25,pr:12},he:{n:'Осколочно-фугасный',s:'ОФ',pn:.45,dm:1.6,v:1,pr:3}},SHK=['ap','pc','he'],SHKT=t=>t.t<2?['ap']:t.t<5?['ap','pc']:SHK; // доступные типы: I — только ББ, II–IV — ББ и БП, с V — ещё и ОФ
+const SHELL={ap:{n:'Бронебойный (базовый)',s:'ББ',pn:1,dm:1,v:1,pr:5},pc:{n:'Бронебойный подкалиберный',s:'БП',pn:1.4,dm:.75,v:1.25,pr:12},he:{n:'Осколочно-фугасный',s:'ОФ',pn:.45,dm:1.6,v:1,pr:3}},SHK=['ap','pc','he'];
 const CLS_OFF={l:0,m:2,h:4},CN={l:'ЛТ',m:'СТ',h:'ТТ'}; // сдвиг ступени врагов по классу танка (СТ и ТТ сразу встречают более сильных врагов)
 const BOSS_TIME=300,BOSS_MIN=4; // секунд на убийство босса; сколько призванных боссом танков может быть одновременно
 const RW_MIN=.2,FIRST_MUL=.5; // награда за слабые волны: ступень врагов / ступень танка, но не меньше RW_MIN; бонус за первое прохождение волны
-const AP_FREE_TIER=1,REPAIR_COST=0,MINAM=.5,HE_SPL=1.2,HE_MIN=.15; // бронебойные бесплатны до этой ступени; цена ремонта (×ступень); минимум боекомплекта для боя; радиус осколков фугаса (клеток); минимум урона фугаса без пробития
+const AP_FREE_TIER=3,REPAIR_COST=0,MINAM=.5,HE_SPL=1.2,HE_MIN=.15; // бронебойные бесплатны до этой ступени; цена ремонта (×ступень); минимум боекомплекта для боя; радиус осколков фугаса (клеток); минимум урона фугаса без пробития
 const TANKS=TD.map(a=>({id:a[0]+a[1]+a[2].toLowerCase(),c:a[0],t:a[1],v:a[2],n:a[3],hp:a[4]*10,sp:a[5],tt:a[6],dm:Math.round(a[7]*100)/10,cd:a[8],rk:a[9],r:{l:.5,m:.55,h:.65}[a[0]]+.01*(a[1]-1),wt:{l:8+1.5*(a[1]-1),m:22+2.5*(a[1]-1),h:40+4*(a[1]-1)}[a[0]],ab:Math.round(lerp(ARM[a[0]][0],ARM[a[0]][1],a[1])),pn:Math.round(lerp(PEN[a[0]][0],PEN[a[0]][1],a[1])),cal:Math.round(lerp(CAL[a[0]][0],CAL[a[0]][1],a[1]))}));
-const TANKS0=TANKS.map(t=>({...t}));
-let TSO={}; // правки админа: id → {hp,sp,tt,dm,cd,rk,ab,pn,cal,wt,n}
-function tsApply(map){TSO=map||{};TANKS.forEach((t,i)=>{Object.assign(t,TANKS0[i]);const o=TSO[t.id];t.ed=!!o;if(o)for(const k in o)t[k]=o[k]})}
-function tsLoad(){return fetch(API+'/api/tstats').then(r=>r.json()).then(j=>{tsApply(j.stats);if(typeof ovStat=='function')try{ovStat()}catch(e){}}).catch(()=>{})}
 const capOf=t=>Math.round(AMMOT/t.cd);
 const crB=t=>({l:10,m:8,h:5}[t.c]+.5*(t.t-1)); // базовый шанс крита по борту: у лёгких выше, у тяжёлых ниже
 const FIRST={l:0,m:2000,h:5000};  // цена первого танка класса в монетах (лёгкий даётся бесплатно)
@@ -252,9 +210,9 @@ const XFX=10;                     // сколько свободного опы�
 let NEC=0;                        // шанс союзника-некроманта (из навыка)
 const PCRIT_MUL=2,BCRIT_CH=15,BCRIT_MUL=1.5; // крит: множитель урона игрока; шанс и множитель крита босса по игроку (удар в борт/корму)
 const RAM_DMG=10,RAM_BACK=25,RAM_CAP=60;      // таран: урон врагу на полной скорости, ответный урон игроку и его потолок
-const defSv=()=>({v:3,rev:0,mw:{l:0,m:0,h:0},kl:{l:0,m:0,h:0},lt:{},am:{},st:{},brk:{},co:0,tank:'l1',tk:['l1'],xp:{},fx:0,mod:{},eq:{},sk:{},sks:{}});
+const defSv=()=>({v:3,rev:0,mw:{l:0,m:0,h:0},kl:{l:0,m:0,h:0},lt:{},am:{},brk:{},co:0,tank:'l1',tk:['l1'],xp:{},fx:0,mod:{},eq:{},sk:{},sks:{}});
 let sv=defSv();try{const o=JSON.parse(localStorage.getItem('tk')||'{}');if(o.v>=2)Object.assign(sv,o);else{sv.co=+o.co||0}}catch(e){}
-function normSv(){sv.st=sv.st&&typeof sv.st=='object'?sv.st:{};sv.tk=(sv.tk||[]).filter(id=>TANKS.some(t=>t.id==id));if(!sv.tk.includes('l1'))sv.tk.unshift('l1');if(!sv.tk.includes(sv.tank))sv.tank='l1';sv.xp=sv.xp||{};sv.fx=+sv.fx||0;sv.mod=sv.mod||{};sv.eq=sv.eq||{};sv.sk=sv.sk||{};sv.sks=sv.sks||{};if(typeof sv.am=='number'&&Number.isFinite(sv.am))sv.lg=sv.am;if(!sv.am||typeof sv.am!='object')sv.am={};sv.brk=sv.brk&&typeof sv.brk=='object'?sv.brk:{};if(typeof sv.mw!='object'||!sv.mw){const old=Math.max(0,Math.floor(+sv.mw||0)),c0=(TANKS.find(t=>t.id==sv.tank)||{c:'l'}).c;sv.mw={l:0,m:0,h:0};sv.mw[c0]=old} // старый общий рекорд переходит классу выбранного танка
+function normSv(){sv.tk=(sv.tk||[]).filter(id=>TANKS.some(t=>t.id==id));if(!sv.tk.includes('l1'))sv.tk.unshift('l1');if(!sv.tk.includes(sv.tank))sv.tank='l1';sv.xp=sv.xp||{};sv.fx=+sv.fx||0;sv.mod=sv.mod||{};sv.eq=sv.eq||{};sv.sk=sv.sk||{};sv.sks=sv.sks||{};if(typeof sv.am=='number'&&Number.isFinite(sv.am))sv.lg=sv.am;if(!sv.am||typeof sv.am!='object')sv.am={};sv.brk=sv.brk&&typeof sv.brk=='object'?sv.brk:{};if(typeof sv.mw!='object'||!sv.mw){const old=Math.max(0,Math.floor(+sv.mw||0)),c0=(TANKS.find(t=>t.id==sv.tank)||{c:'l'}).c;sv.mw={l:0,m:0,h:0};sv.mw[c0]=old} // старый общий рекорд переходит классу выбранного танка
 sv.kl=sv.kl&&typeof sv.kl=='object'?sv.kl:{};sv.lt=sv.lt&&typeof sv.lt=='object'?sv.lt:{};for(const c of['l','m','h']){sv.mw[c]=Math.max(0,Math.floor(+sv.mw[c]||0));sv.kl[c]=Math.max(0,Math.floor(+sv.kl[c]||0))}}normSv();
 /* Монеты ведутся как журнал: любое изменение sv.co копится в qPend (сумма ещё не отправленных операций), а сервер складывает их сам.
    Так устаревшая вкладка или повторная отправка не могут перезаписать баланс. coSilent — выставить баланс без записи операции (после ответа сервера). */
@@ -290,13 +248,7 @@ const rtot=r=>r.ap+r.pc+r.he;
 function rack(id){id=id||sv.tank;const t=TK(id),cap=capOf(t);let r=sv.am[id];
  if(!r)r=sv.am[id]={ap:id=='l1'?(Number.isFinite(sv.lg)?Math.min(sv.lg,cap):cap):Math.floor(cap/2),pc:0,he:0};
  for(const k of SHK)r[k]=Math.max(0,Math.floor(+r[k]||0));
- {const av=SHKT(t);for(const k of SHK)if(!av.includes(k)&&r[k]>0){r.ap+=r[k];r[k]=0}}
  if(rtot(r)>cap){const x=cap/rtot(r);for(const k of SHK)r[k]=Math.floor(r[k]*x)}return r}
-/* Склад: купленные снаряды (только платные типы), лежат у конкретного танка, не больше вместимости на каждый тип */
-function stk(id){sv.st=sv.st&&typeof sv.st=='object'?sv.st:{};const t=TK(id),cap=capOf(t),av=SHKT(t);let r=sv.st[id];if(!r)r=sv.st[id]={ap:0,pc:0,he:0};for(const k of SHK){r[k]=av.includes(k)&&shp(t,k)>0?Math.min(cap,Math.max(0,Math.floor(+r[k]||0))):0}return r}
-// что произойдёт при заправке до d: сначала берём со склада, остальное докупаем; лишнее из боекомплекта уходит на склад
-function planAm(t,d){const r=rack(t.id),S=stk(t.id),o={},cap=capOf(t);let cost=0;for(const k of SHK){const need=d[k]-r[k],pd=shp(t,k)>0;if(need>0){const use=pd?Math.min(S[k],need):0,buy=need-use;o[k]={use,buy,ret:0};cost+=Math.ceil(buy*shp(t,k)/100)}else o[k]={use:0,buy:0,ret:pd?-need:0}}return{cost,o}}
-function applyAm(t,d){const pl=planAm(t,d),S=stk(t.id),cap=capOf(t);sv.co-=pl.cost;for(const k of SHK){S[k]=Math.max(0,S[k]-pl.o[k].use+pl.o[k].ret);if(shp(t,k)>0)S[k]=Math.min(S[k],cap-d[k])}sv.am[t.id]={ap:d.ap,pc:d.pc,he:d.he};return pl.cost}
 const needAm=t=>Math.ceil(capOf(t)*MINAM);
 const repCost=t=>REPAIR_COST*t.t;
 function wtabR(){const t=$('#wtabs');if(!t)return;t.innerHTML='';for(const c of['l','m','h']){const mine=sv.tk.map(id=>TK(id)).filter(x=>x.c==c).sort((a,b)=>b.t-a.t),b=document.createElement('button');b.textContent=CN[c]+' · '+sv.mw[c];b.disabled=!mine.length;if(c==TK().c)b.className='on';
@@ -356,7 +308,7 @@ function report(w,sc,fin){if(tok&&runTok){const t=TK();api('/api/tank',{run:runT
 
 /* ===== Облачное сохранение (Cloudflare D1): работает после входа через Steam; без входа прогресс только в этом браузере =====
    Разделы независимы (у каждого своя версия на сервере): tanks, xp, mods, skills, ammo, waves; монеты — журнал операций. */
-const PARTS={tanks:['tk','tank','lt'],xp:['xp','fx'],mods:['mod','eq'],skills:['sk','sks'],ammo:['am','brk','lg','st'],waves:['mw','kl']};
+const PARTS={tanks:['tk','tank','lt'],xp:['xp','fx'],mods:['mod','eq'],skills:['sk','sks'],ammo:['am','brk','lg'],waves:['mw','kl']};
 const partOf=k=>{const o={};for(const f of PARTS[k])if(sv[f]!==undefined)o[f]=sv[f];return o};
 const uid=()=>crypto.randomUUID?crypto.randomUUID():Math.random().toString(36).slice(2)+Date.now().toString(36);
 const persistQ=()=>{try{localStorage.setItem('tk-q',JSON.stringify({pend:qPend,inflight:qIn}))}catch(e){}};
@@ -508,13 +460,13 @@ function kill(e){if(!e.sm){sv.kl[TK().c]++;runKills++}const rs=e.type!='B'&&al.l
 function vec(s){const dx=s.x-s.ox,dy=s.y-s.oy,h=Math.hypot(dx,dy)||1,m=Math.min(1,h/(S*2.2));return{x:dx/h*m,y:dy/h*m,m}}
 
 function hitP(v,quiet){p.hp-=v;p.fl=.08;hurt=.3;shake=Math.max(shake,5);vib(30);if(!quiet)dnum(p,v,'#ff6a5a','-');if(p.hp<=0)die()}
-function ovStat(){if(typeof dqLoad=='function'&&Date.now()-dqT>20000)dqLoad();const t=TK(),e=$('#t2'),br=!!sv.brk[sv.tank];e.textContent='Танк «'+t.n+'» '+(br?'разбит — почините его в гараже':'к бою готов');e.style.color=br?'#ff8a7a':'#8fd48a'}
+function ovStat(){const t=TK(),e=$('#t2'),br=!!sv.brk[sv.tank];e.textContent='Танк «'+t.n+'» '+(br?'разбит — почините его в гараже':'к бою готов');e.style.color=br?'#ff8a7a':'#8fd48a'}
 function ppShow(h,t,btns){$('#pph').textContent=h;$('#ppt').textContent=t;const b=$('#ppb');b.innerHTML='';for(const[l,fn,c]of btns){const x=document.createElement('button');x.textContent=l;if(c)x.style.cssText=c;x.onclick=()=>{$('#pp').classList.remove('s');if(fn)fn()};b.appendChild(x)}$('#pp').classList.add('s')}
-function quickFill(t){const r=rack(),cap=capOf(t),pr=shp(t,'ap'),S=stk(t.id);let need=cap-rtot(r);if(need>0){const u=pr>0?Math.min(S.ap,need):0;S.ap-=u;r.ap+=u;need-=u}if(need>0){const n=pr>0?Math.min(need,Math.floor(sv.co*100/pr)):need;sv.co-=pr>0?Math.ceil(n*pr/100):0;r.ap+=n}if(rtot(r)<needAm(t))r.ap+=needAm(t)-rtot(r);svs();$('#co').textContent=sv.co}
+function quickFill(t){const r=rack(),cap=capOf(t),pr=shp(t,'ap'),need=cap-rtot(r);if(need>0){const n=pr>0?Math.min(need,Math.floor(sv.co*100/pr)):need;sv.co-=pr>0?Math.ceil(n*pr/100):0;r.ap+=n}if(rtot(r)<needAm(t))r.ap+=needAm(t)-rtot(r);svs();$('#co').textContent=sv.co}
 function tryGo(){if(cloudBusy){$('#t2').textContent='Загрузка прогресса…';$('#t2').style.color='#f2c14e';return}const t=TK(),r=rack(),T=rtot(r),cap=capOf(t),pr=shp(t,'ap');
  if(sv.brk[sv.tank]){ppShow('Танк разбит','Танк «'+t.n+'» нужно починить в гараже (карточка танка → «Ремонт»).',[['В гараж',()=>$('#shop').click()],['Отмена']]);return}
  if(T>=cap){startBattle();return}
- const full=Math.ceil(Math.max(0,cap-T-(pr>0?stk(t.id).ap:0))*pr/100),afford=pr==0||sv.co>=full,any=pr==0||sv.co*100>=pr,lbl=T<needAm(t)&&!any?'Паёк штаба · бесплатно':'Пополнить · '+(pr==0?'бесплатно':afford?full+' 🪙':'на '+sv.co+' 🪙');
+ const full=Math.ceil((cap-T)*pr/100),afford=pr==0||sv.co>=full,any=pr==0||sv.co*100>=pr,lbl=T<needAm(t)&&!any?'Паёк штаба · бесплатно':'Пополнить · '+(pr==0?'бесплатно':afford?full+' 🪙':'на '+sv.co+' 🪙');
  const btns=[];if(T>=needAm(t))btns.push(['В бой',startBattle]);btns.push([lbl,()=>{quickFill(t);tryGo()}]);btns.push(['Отмена']);
  ppShow('Ваш боекомплект не полный',(T<needAm(t)?'Заряжено '+T+' из '+cap+'. Для боя нужно минимум '+needAm(t)+'.':'Заряжено '+T+' из '+cap+'. Выйти в бой с неполным боекомплектом?'),btns)}
 function endScr(t1,t2){over=true;bossT=-1;if(atFront)selW=MW()+1;wselR();svs();cloudApplyQ();cloudFlush();setPause(0);$('#t1').textContent=t1;ovStat();$('#go').textContent='Играть снова';$('#co').textContent=sv.co;$('#ov').classList.remove('h')}
@@ -687,15 +639,15 @@ function modTxt(t,m,L){const P=MODP[m][L-1],h=v=>Math.round(t.hp*v);
  if(m=='e')return[`Скорость ${f1(t.sp*(P.sp||1))}`,`ХП ${h(P.hp||1)}`];
  return[`Корпус ${f1(Math.min(14,(5+t.sp*.8)*(P.htm||1)))}`,`Рикошет ${f1(t.rk+(P.rk||0))}%`,`Скорость ${f1(t.sp*(P.sp||1))}`]}
 function ammoHTML(t){const cap=capOf(t),e=eff(t),r=rack(t.id);if(!gdr||gdrId!=t.id){gdr={ap:r.ap,pc:r.pc,he:r.he};gdrId=t.id}
- const av=SHKT(t),rows=SHK.map(k=>{const q=SHELL[k],pr=shp(t,k);if(!av.includes(k))return `<div class='rw' style='opacity:.5'><div><b>${q.s}</b> <span class='tg'>${q.n}</span><br><span class='ts'>🔒 доступен со ступени ${k=='pc'?'II':'V'}</span></div></div>`;return `<div class='rw'><div><b>${q.s}</b> <span class='tg'>${q.n}</span><br><span class='ts'>пробитие <b>${Math.round(e.pn*q.pn)}</b> · урон <b>${f1(e.dm*q.dm)}</b><br>${pr?pr+' 🪙 за 100 · на складе <b>'+stk(t.id)[k]+'</b>':'бесплатно'}</span></div><input type='range' min='0' max='${cap}' step='1' data-sl='${k}'><b data-sv='${k}'></b></div>`}).join('');
- return `<div class='amb'><div class='mt' style='width:auto'>Боекомплект <span class='tg'>· у каждого танка свой${av.length>1?' · все типы вместе до '+cap:' · до '+cap}</span></div>${rows}<div class='bar' data-bar><div></div></div><div class='ts' data-tot style='max-width:none'></div><div class='cd' style='justify-content:flex-start'><button data-ab='buy'></button><button data-ab='ration' style='display:none'>Паёк штаба<span class='st'>бесплатно</span></button><button data-ab='rst'>Отмена</button></div><span class='tg'>При уменьшении ползунка монеты не возвращаются. Что купили, остаётся на складе (в инвентаре): со склада грузится бесплатно, платите только за недостающее. Ползунок упирается в свободное место, другие типы сами не уменьшаются.</span></div>`}
+ const rows=SHK.map(k=>{const q=SHELL[k],pr=shp(t,k);return `<div class='rw'><div><b>${q.s}</b> <span class='tg'>${q.n}</span><br><span class='ts'>пробитие <b>${Math.round(e.pn*q.pn)}</b> · урон <b>${f1(e.dm*q.dm)}</b><br>${pr?pr+' 🪙 за 100':'бесплатно'}</span></div><input type='range' min='0' max='${cap}' step='${cap>=500?5:1}' data-sl='${k}'><b data-sv='${k}'></b></div>`}).join('');
+ return `<div class='amb'><div class='mt' style='width:auto'>Боекомплект <span class='tg'>· у каждого танка свой · все типы вместе до ${cap}</span></div>${rows}<div class='bar' data-bar><div></div></div><div class='ts' data-tot style='max-width:none'></div><div class='cd' style='justify-content:flex-start'><button data-ab='buy'></button><button data-ab='full'>Долить до полного<span class='st'>базовыми</span></button><button data-ab='min'>До ${Math.round(MINAM*100)}%</button><button data-ab='ration' style='display:none'>Паёк штаба<span class='st'>бесплатно</span></button><button data-ab='rst'>Отмена</button></div><span class='tg'>При уменьшении ползунка монеты не возвращаются. Превысили вместимость — остальные типы уменьшаются пропорционально.</span></div>`}
 function ammoUpd(u,t){const cap=capOf(t),r=rack(t.id),d=gdr,T=rtot(d);let cost=0;
-  for(const k of SHK){const sl=u.querySelector(`[data-sl='${k}']`);if(sl){sl.value=d[k];u.querySelector(`[data-sv='${k}']`).textContent=d[k]}}cost=planAm(t,d).cost;
+ for(const k of SHK){u.querySelector(`[data-sl='${k}']`).value=d[k];u.querySelector(`[data-sv='${k}']`).textContent=d[k];cost+=Math.ceil(Math.max(0,d[k]-r[k])*shp(t,k)/100)}
  const bar=u.querySelector('[data-bar]');bar.firstChild.style.width=Math.min(100,T/cap*100)+'%';bar.classList.toggle('bad',T<needAm(t));
  u.querySelector('[data-tot]').innerHTML='Заряжено <b>'+T+'</b> / '+cap+' · '+(T<needAm(t)?'<span style="color:#ff8a7a">для боя нужно минимум '+needAm(t)+'</span>':T<cap?'в бой можно, но боекомплект не полный':'полный');
  const same=SHK.every(k=>d[k]==r[k]),b=u.querySelector("[data-ab='buy']");b.disabled=same||sv.co<cost;b.innerHTML=(cost?'Заправить':'Применить')+`<span class='st ${sv.co>=cost?'ok':'no'}'>${cost} 🪙</span>`;
  const rt=u.querySelector("[data-ab='ration']"),rtn=rtot(r),need=needAm(t)-rtn;rt.style.display=need>0&&Math.ceil(need*shp(t,'ap')/100)>sv.co?'':'none';
- u.querySelector("[data-ab='rst']").disabled=same}
+ u.querySelector("[data-ab='full']").disabled=T>=cap;u.querySelector("[data-ab='min']").disabled=T>=needAm(t);u.querySelector("[data-ab='rst']").disabled=same}
 function cardHTML(t){const mine=own(t.id),e=eff(t),o=openInfo(t),on=sv.tank==t.id,xp=sv.xp[t.id]||0;let act;
  if(mine)act=on?`<button disabled>✓ в бою</button>`:`<button data-a='sel'>В бой</button>`;
  else if(o.lock)act=`<button disabled>🔒 ${o.why}</button>`;
@@ -723,7 +675,7 @@ function garage(){const u=$('#up');let h='',body='';
   body=`<p class='tg' style='padding:28px 0;font-size:15px'>Пока нет предложений</p>`}
  else if(gtk){const tt=TK(gtk);h=`<div class='cd'><button data-a='back' style='min-width:0'>← К дереву</button><button data-a='skins' style='min-width:0;border-color:${gsk?'#e8a73a':'transparent'}'>${gsk?'Модули и навыки':'Скины'}</button></div>`;body=`<p style='min-height:20px;color:#e8a73a'>${gmsg}</p>`+(gsk?skinsHTML(tt):cardHTML(tt))}
  else{const n=Math.floor(sv.fx/XFX);h=`<p>Свободный опыт: ${sv.fx} · Опыт копится на танке, на котором играете</p>`;
-  body=`<div class='cd'>${Object.entries(CL).map(([k,nm])=>`<button data-c='${k}' style='border-color:${gcl==k?'#e8a73a':'transparent'}'>${nm}</button>`).join('')}</div>${treeHTML(gcl)}<div class='cd'><button data-x='1'${n<1?' disabled':''}>Обменять свободный опыт<span class='st'>${n} 🪙 за ${n*XFX} оп.</span></button></div>`}
+  body=`<div class='cd'>${Object.entries(CL).map(([k,nm])=>`<button data-c='${k}' style='border-color:${gcl==k?'#e8a73a':'transparent'}'>${nm}</button>`).join('')}</div>${treeHTML(gcl)}<div class='cd'><button data-x='1'${n<1?' disabled':''}>Обменять свободный опыт<span class='st'>${n} 🪙 за ${n*XFX} оп.</span></button><button data-a='shop'>🛒 Магазин<span class='st'>пока нет предложений</span></button></div>`}
 ovStat();wselR();$('#t1').textContent='🪖 Танчики';
  u.innerHTML=`<h2>Гараж · ${sv.co} 🪙</h2>${h}${body}<button class='cl'>Назад</button>`;u.classList.remove('h');
  const sync=()=>{svs();TKc=eff(TK());$('#co').textContent=sv.co};
@@ -732,12 +684,13 @@ ovStat();wselR();$('#t1').textContent='🪖 Танчики';
  u.querySelectorAll('[data-c]').forEach(b=>b.onclick=()=>{gcl=b.dataset.c;garage()});
  u.querySelectorAll('[data-rp]').forEach(b=>b.onclick=()=>{const t=TK(gtk),c=repCost(t);if(sv.co>=c){sv.co-=c;delete sv.brk[t.id];sync();gmsg='Танк отремонтирован'}else gmsg='Не хватает монет на ремонт';garage()});
  if(gtk&&!gsk&&own(gtk)&&u.querySelector('[data-sl]')){const t=TK(gtk),cap=capOf(t),r=rack(t.id);ammoUpd(u,t);
-  u.querySelectorAll('[data-sl]').forEach(inp=>inp.oninput=()=>{const k=inp.dataset.sl,d=gdr,os=SHK.filter(x=>x!=k).reduce((a,x)=>a+d[x],0);const fr=cap-os,stp=1;let v=Math.round(+inp.value);d[k]=Math.max(0,Math.min(v,fr));ammoUpd(u,t)});
+  u.querySelectorAll('[data-sl]').forEach(inp=>inp.oninput=()=>{const k=inp.dataset.sl,d=gdr;d[k]=Math.min(cap,+inp.value);const o=SHK.filter(x=>x!=k),os=o.reduce((a,x)=>a+d[x],0);let ex=rtot(d)-cap;
+   if(ex>0){if(os<=0)d[k]=cap;else{const ex0=ex;for(const x of o){const c=Math.min(d[x],Math.floor(ex0*d[x]/os));d[x]-=c;ex-=c}for(const x of o){if(ex<=0)break;const c=Math.min(d[x],ex);d[x]-=c;ex-=c}}}ammoUpd(u,t)});
   u.querySelectorAll('[data-ab]').forEach(b=>b.onclick=()=>{const a=b.dataset.ab,d=gdr;
-   if(a=='buy'){const cost=planAm(t,d).cost;if(sv.co>=cost){applyAm(t,d);sync();gdr=null;gmsg=cost?'Боекомплект заправлен':'Боекомплект загружен со склада'}else gmsg='Не хватает монет';garage();return}
+   if(a=='buy'){let cost=0;for(const k of SHK)cost+=Math.ceil(Math.max(0,d[k]-r[k])*shp(t,k)/100);if(sv.co>=cost){sv.co-=cost;sv.am[t.id]={ap:d.ap,pc:d.pc,he:d.he};sync();gdr=null;gmsg='Боекомплект заправлен'}else gmsg='Не хватает монет';garage();return}
    if(a=='rst'){gdr=null;garage();return}
    if(a=='ration'){const need=needAm(t)-rtot(r);if(need>0){r.ap+=need;svs();gdr=null;gmsg='Паёк штаба: +'+need+' бронебойных'}garage();return}
-   ammoUpd(u,t)})}
+   if(a=='full')d.ap+=cap-rtot(d);if(a=='min'&&rtot(d)<needAm(t))d.ap+=needAm(t)-rtot(d);ammoUpd(u,t)})}
  u.querySelectorAll('.nd').forEach(b=>b.onclick=()=>{gdr=null;gtk=b.dataset.k;gmsg='';gsk=0;garage()});
  u.querySelectorAll("[data-a='back']").forEach(b=>b.onclick=()=>{gtk=null;gmsg='';gsk=0;garage()});
  u.querySelectorAll("[data-a='skins']").forEach(b=>b.onclick=()=>{gsk=gsk?0:1;gmsg='';garage()});
@@ -769,7 +722,7 @@ function startBattle(){
  if(wbPend&&!wb){wbBegin();return}
  atFront=selW==MW()+1;
  try{const d=document.documentElement,fs=d.requestFullscreen||d.webkitRequestFullscreen;(fs?Promise.resolve(fs.call(d)):Promise.reject()).then(()=>screen.orientation.lock('landscape')).catch(()=>{try{screen.orientation.lock('landscape').catch(()=>{})}catch(_){}})}catch(_){}A();if(ac&&ac.state==='suspended')ac.resume();$('#ov').classList.add('h');$('#sb').style.display='flex';$('#sh').style.display='flex';$('#mn').style.display='block';$('#ps').style.display='block';reset();started=true}
-$('#go').onclick=()=>{wbPend=null;tryGo()};$('#invb').onclick=()=>{invOpen();invLoad().then(()=>{if($('#evw').classList.contains('on')&&$('#evw').querySelector('.ig')&&!$('#evw .cz'))invOpen()})};
+$('#go').onclick=()=>{wbPend=null;tryGo()};$('#invb').onclick=()=>{invOpen();invLoad().then(()=>{if($('#evw').classList.contains('on')&&$('#evw').querySelector('.ab'))invOpen()})};
 function setPause(v){paused=v?1:0;$('#pz').classList.toggle('s',!!paused);$('#ps').textContent=paused?'▶':'⏸';st.L=st.R=null;ms.down=0}
 $('#ps').onclick=()=>{if(started&&!over&&!pause)setPause(!paused)};$('#rs').onclick=()=>setPause(0);
 $('#dai').onclick=()=>{aimOn=aimOn?0:1;try{localStorage.setItem('tk-aim',aimOn)}catch(e){}aimBtn()};aimBtn();$('#mn').onpointerdown=e=>e.stopPropagation();$('#mn').onclick=dzOpen;$('#dcn').onclick=()=>{$('#dz').classList.remove('s');setPause(dzWas)};$('#dsr').onclick=desert;$('#dz').onpointerdown=e=>e.stopPropagation();
@@ -788,7 +741,7 @@ function evRender(){const box=$('#evs'),tr=$('#evt'),dt=$('#evd');if(!box)return
   c.innerHTML=BZ.replace('%s','l')+BZ.replace('%s','r')+'<span class="ei"'+(e.img?' style="background-image:url('+esc(e.img)+')"':'')+'>'+(e.img?'':e.ico||(e.type=='boss'?'👹':'📣'))+'</span><span class="et"><b>'+esc(e.title)+'</b><small>'+sub+'</small></span>';
   c.onclick=()=>evOpen(e.id);tr.appendChild(c);const d=document.createElement('i');dt.appendChild(d)});
  dt.style.display=L.length>1?'flex':'none';evDots();}
-function evDots(){const tr=$('#evt'),ds=$('#evd').children;if(!ds.length)return;$('#evd').style.visibility=tr.scrollWidth>tr.clientWidth+2?'':'hidden';const w=tr.firstElementChild?tr.firstElementChild.offsetWidth+14:1,k=Math.round(tr.scrollLeft/w);[...ds].forEach((d,i)=>d.className=i==k?'on':'')}
+function evDots(){const tr=$('#evt'),ds=$('#evd').children;if(!ds.length)return;const w=tr.firstElementChild?tr.firstElementChild.offsetWidth+14:1,k=Math.round(tr.scrollLeft/w);[...ds].forEach((d,i)=>d.className=i==k?'on':'')}
 function evLoad(){return api('/api/boss').then(j=>{EVS=Array.isArray(j.events)?j.events:[];if(j.now)evOff=j.now-Date.now();evRender()}).catch(()=>{})}
 function evOpen(id){const e=EVS.find(v=>v.id==id);if(!e)return;const w=$('#evw'),st=evSt(e),b=e.type=='boss',t=TK();
  w.style.setProperty('--ec',b?'#ff6a3d':'#4aa8ff');w.style.setProperty('--eg',b?'255,106,61':'74,168,255');
@@ -796,18 +749,17 @@ function evOpen(id){const e=EVS.find(v=>v.id==id);if(!e)return;const w=$('#evw')
  if(b){const pc=Math.max(0,Math.round(e.hpNow/e.hp*100)),top=(e.top||[]).slice(0,5);ok=t.t>=e.min&&t.t<=e.max;
   const mine=sv.tk.map(i=>TK(i)).filter(x=>x.t>=e.min&&x.t<=e.max).map(x=>x.n);
   h+='<div class="rw" style="flex-direction:column;gap:2px;border:0"><span>Здоровье босса</span><div class="hb"><div style="width:'+pc+'%"></div></div><b style="text-align:left">'+e.hpNow.toLocaleString('ru-RU')+' / '+e.hp.toLocaleString('ru-RU')+' HP</b></div>'
-  +'<div class="rw"><span>Попытки</span><b>'+(e.me?'сегодня осталось '+e.me.left+' из '+(e.att+(e.me.gx||0))+(e.me.gprice!=null?'<br><small style="color:#a9bddd">докупить попытку: '+e.me.gprice+' 💎 (ещё '+(e.me.gmax-e.me.gx)+')</small>':'')+(e.me.price!==null?'<br><small style="color:#a9bddd">сброс: '+e.me.price+' 🪙 (ещё '+(e.rst-e.me.resets)+')</small>':e.me.resets?'<br><small style="color:#a9bddd">сбросы на сегодня закончились</small>':''):e.att+' в день · до '+e.rst+' платных сбросов')+'</b></div>'+(e.me&&e.me.dayCap?'<div class="rw"><span>Лимит урона на сегодня</span><b class="'+(e.me.dayLeft>0?'':'no')+'">'+e.me.dayDmg.toLocaleString('ru-RU')+' / '+e.me.dayCap.toLocaleString('ru-RU')+'</b></div>':'')+(e.me&&e.me.dmg?'<div class="rw"><span>Ваш урон</span><b>'+e.me.dmg.toLocaleString('ru-RU')+(e.me.rank?' · место '+e.me.rank:'')+'</b></div>':'')
+  +'<div class="rw"><span>Попытки</span><b>'+(e.me?'сегодня осталось '+e.me.left+' из '+e.att+(e.me.price!==null?'<br><small style="color:#a9bddd">сброс: '+e.me.price+' 🪙 (ещё '+(e.rst-e.me.resets)+')</small>':e.me.resets?'<br><small style="color:#a9bddd">сбросы на сегодня закончились</small>':''):e.att+' в день · до '+e.rst+' платных сбросов')+'</b></div>'+(e.me&&e.me.dayCap?'<div class="rw"><span>Лимит урона на сегодня</span><b class="'+(e.me.dayLeft>0?'':'no')+'">'+e.me.dayDmg.toLocaleString('ru-RU')+' / '+e.me.dayCap.toLocaleString('ru-RU')+'</b></div>':'')+(e.me&&e.me.dmg?'<div class="rw"><span>Ваш урон</span><b>'+e.me.dmg.toLocaleString('ru-RU')+(e.me.rank?' · место '+e.me.rank:'')+'</b></div>':'')
   +'<div class="rw"><span>Начало</span><b>'+evDate(e.from)+'</b></div><div class="rw"><span>Окончание</span><b>'+evDate(e.to)+(st=='on'?'<br><small style="color:#a9bddd">осталось '+evLeft(e.to-evNow())+'</small>':'')+'</b></div>'
   +'<div class="rw"><span>Техника</span><b>'+e.min+'–'+e.max+' уровень</b></div>'
   +'<div class="rw"><span>Ваш танк</span><b class="'+(ok?'ok':'no')+'">«'+esc(t.n)+'» · '+t.t+' ур. '+(ok?'— допущен':'— не подходит')+'</b></div>'
   +(!ok&&mine.length?'<div class="rw"><span>Подойдут</span><b>'+esc(mine.join(', '))+'</b></div>':'')
   +(top.length?'<div class="rw" style="flex-direction:column;gap:3px"><span>Лучшие по урону</span>'+top.map((r,i)=>'<b style="text-align:left;font-weight:600">'+(i+1)+'. '+esc(r.n||'Игрок')+' — '+r.dmg.toLocaleString('ru-RU')+'</b>').join('')+'</div>':'')+'<div class="rw"><span>Награда</span><b>🪙 1 монета за '+(e.rate||300)+' урона<br><small style="color:#a9bddd">плюс шанс на ключи и кристаллы</small></b></div>';
   btn=st=='dead'?'<button disabled>Босс побеждён</button>':st=='soon'?'<button disabled>Начнётся '+evDate(e.from)+'</button>':!ok?'<button disabled>Нужен танк '+e.min+'–'+e.max+' ур.</button>':(e.me&&e.me.dayLeft<=0?'<button disabled>Лимит урона на сегодня исчерпан</button>':'<button id="evgo">⚔ В бой</button>');
-  if(st=='on'&&ok&&e.me&&e.me.dayLeft>0&&e.me.left<=0&&e.me.price!==null)btn='<button id="evrs">🔄 Сбросить попытки · '+e.me.price+' 🪙</button>';
-  if(st=='on'&&ok&&e.me&&e.me.dayLeft>0&&e.me.left<=0&&e.me.gprice!=null)btn+='<button id="evgb">💎 Докупить попытку · '+e.me.gprice+' 💎</button>';}
+  if(st=='on'&&ok&&e.me&&e.me.dayLeft>0&&e.me.left<=0&&e.me.price!==null)btn='<button id="evrs">🔄 Сбросить попытки · '+e.me.price+' 🪙</button>';}
  w.innerHTML='<div class="bx">'+h+'<div class="bt">'+btn+'<button class="x" id="evx">Закрыть</button></div></div>';w.classList.add('on');
  $('#evx').onclick=()=>w.classList.remove('on');w.onclick=ev=>{if(ev.target===w)w.classList.remove('on')};
- const g=$('#evgo');if(g)g.onclick=()=>{w.classList.remove('on');wbGo(e)};const rb=$('#evrs');if(rb)rb.onclick=()=>{w.classList.remove('on');wbReset(e)};const gb=$('#evgb');if(gb)gb.onclick=()=>{w.classList.remove('on');wbBuy(e)}}
+ const g=$('#evgo');if(g)g.onclick=()=>{w.classList.remove('on');wbGo(e)};const rb=$('#evrs');if(rb)rb.onclick=()=>{w.classList.remove('on');wbReset(e)}}
 
 /* ===== Бой с мировым боссом ===== */
 let wb=null,wbPend=null,wbBoss=null;
@@ -828,8 +780,6 @@ function wbFail(e,ev){const c=e&&e.error;
  if(c=='no_attempts'){const m=e.me||{};ppShow('Попытки закончились','На сегодня попыток не осталось.'+(m.price!=null?' Можно сбросить за '+m.price+' 🪙.':' Сбросов на сегодня тоже нет, приходите завтра.'),m.price!=null?[['Сбросить · '+m.price+' 🪙',()=>wbReset(ev)],['Отмена']]:[['Понятно']]);evLoad();return}
  const T={day_cap:'Дневной лимит урона на этого босса исчерпан. Приходите завтра.',boss_dead:'Босс уже побеждён.',not_active:'Событие сейчас не идёт.',bad_tank:'Этот танк не подходит для босса.',tank_not_owned:'Танк ещё не сохранён в облаке. Подождите синхронизации и попробуйте снова.',unauthorized:'Войдите в аккаунт.'};
  ppShow('Не удалось начать',T[c]||'Нет связи с сервером, попробуйте ещё раз.',[['Понятно']]);evLoad()}
-async function wbBuy(ev){try{await syncNow();const j=await api('/api/boss/buy',{id:ev.id});invSet(j);await evLoad();ppShow('Попытка куплена','Списано '+j.paid+' 💎. Осталось попыток: '+j.me.left+'.',[['В бой',()=>wbGo(ev)],['Позже']])}
- catch(e){await invLoad();ppShow('Не получилось',({no_gems:'Не хватает кристаллов.',no_more:'Докупить больше нельзя: на сегодня лимит.',busy:'Повторите через секунду.',not_active:'Босс сейчас не активен.',unauthorized:'Войдите в аккаунт.'})[e&&e.error]||'Нет связи с сервером.',[['Ок']])}}
 async function wbReset(ev){try{await syncNow();const j=await api('/api/boss/reset',{id:ev.id});coFrom(j);await evLoad();ppShow('Попытки восстановлены','Списано '+j.paid+' 🪙. Осталось попыток: '+j.me.left+'.',[['В бой',()=>wbGo(ev)],['Позже']])}
  catch(e){const c=e&&e.error;ppShow('Сброс не выполнен',c=='no_gold'?'Не хватает монет: нужно '+e.need+' 🪙, у вас '+e.bal+' 🪙.':c=='no_resets'?'Сбросы на сегодня закончились.':c=='nothing_to_reset'?'Попытки ещё не тратились.':'Нет связи с сервером.',[['Понятно']])}}
 function wbBtns(){updSb()}
@@ -877,7 +827,7 @@ function wbSubmit(){const w=wb;if(!w)return;api('/api/boss/finish',{run:w.run,dm
   else ppShow('Нет связи','Урон '+w.dmg+' пока не отправлен. Повторить?',[['Повторить',wbSubmit],['В меню',wbMenu]])})}
 function wbResult(w,j){const ev=w.ev,me=j.me||{left:0,price:null},t=w.why=='time'?'Время вышло':w.why=='dead'?'Танк уничтожен':'Выход из боя';
  const lines=['Нанесено урона: '+w.dmg.toLocaleString('ru-RU')+(j.capped?' (засчитано '+j.applied.toLocaleString('ru-RU')+')':''),'Награда: +'+j.reward.toLocaleString('ru-RU')+' 🪙 (1 за '+(j.rate||300)+' урона)'+(j.dayLimited?'\nДостигнут дневной лимит урона':''),'У босса осталось: '+Math.round(j.hpNow).toLocaleString('ru-RU')+' HP'+(j.dead?'\n☠ Босс побеждён!':''),'Попыток сегодня: '+me.left+' из '+ev.att];if(j.drops&&(j.drops.key||j.drops.gem))lines.splice(2,0,'Выпало: '+(j.drops.key?'🔑 ×'+j.drops.key+' ':'')+(j.drops.gem?'💎 ×'+j.drops.gem:''));
- const btns=[];if(me.left>0&&!j.dead)btns.push(['⚔ Ещё раз',()=>{wbMenu();wbGo(ev)}]);else if(me.price!=null&&!j.dead)btns.push(['🔄 Сбросить · '+me.price+' 🪙',()=>{wbMenu();wbReset(ev)}]);if(me.left<=0&&me.gprice!=null&&!j.dead)btns.push(['💎 Докупить попытку · '+me.gprice+' 💎',()=>{wbMenu();wbBuy(ev)}]);btns.push(['В меню',wbMenu]);ppShow(t,lines.join('\n'),btns)}
+ const btns=[];if(me.left>0&&!j.dead)btns.push(['⚔ Ещё раз',()=>{wbMenu();wbGo(ev)}]);else if(me.price!=null&&!j.dead)btns.push(['🔄 Сбросить · '+me.price+' 🪙',()=>{wbMenu();wbReset(ev)}]);btns.push(['В меню',wbMenu]);ppShow(t,lines.join('\n'),btns)}
 function wbMenu(){wbBtns();invLoad();wb=null;wbBoss=null;wbPend=null;$('#wbh').classList.remove('on');endScr('🪖 Танчики','');evLoad()}
 function wbDz(){const q=$('#dz p');if(!q)return;if(!wbDz.o)wbDz.o=q.textContent;q.textContent=wb?'Выйти из боя? Нанесённый урон будет засчитан, а попытка сгорит.':wbDz.o;$('#dsr').textContent=wb?'Выйти из боя':'Дезертировать'}
 addEventListener('pagehide',()=>{if(wb&&!wb.done&&wbBoss){const d=Math.max(0,Math.round(wbBoss.hp0-wbBoss.hp));if(d>0)api('/api/boss/finish',{run:wb.run,dmg:d},{ka:1}).catch(()=>{})}});
@@ -890,165 +840,30 @@ const BTN={x:'salvo',s:'shield',d:'dbl'},ITEMS=[
  {k:'key',ico:'🔑',n:'Ключ',d:'Открывает сундук.',h:'В инвентаре нажмите «Открыть сундук».',w:'Только в инвентаре. Падает с мирового босса.'},
  {k:'chest',ico:'📦',n:'Сундук',d:'Внутри золото 10–200, редко щит, залп или двойная стрельба.',h:'Нужен ключ. Ежедневный бесплатный сундук ключа не требует.',w:'Только в инвентаре.'},
  {k:'gem',ico:'💎',n:'Кристаллы',d:'Особая валюта: за них покупают сундуки.',h:'Тратятся в инвентаре, кнопка «Купить сундук».',w:'Только в инвентаре. Падают с мирового босса.'}];
-let INV=null,invDaily=null,invPrice=30,invPay=null;
-function updSb(){document.querySelectorAll('#sb button').forEach(b=>{const k=b.dataset.s,it=BTN[k],n=INV?INV[it]||0:0,ic=b.textContent.split(' ')[0];b.textContent=ic+' '+n;b.style.opacity=(!n||(wb&&wb.used[k]))?'.35':''});$('#trb').style.display=tok?'flex':'none';$('#gemn').textContent=INV?INV.gem||0:0;const fb=$('#frb');fb.disabled=invDaily!==false;fb.classList.toggle('rdy',invDaily===false);fb.firstChild.textContent=invDaily===false?'🎁 Сундук':'🎁 завтра'}
-let invKeyPrice=20;
-function invSet(j){if(!j)return;if(j.items)INV=j.items;if(j.chestPrice)invPrice=j.chestPrice;if(j.keyPrice)invKeyPrice=j.keyPrice;if(j.daily)invDaily=j.daily.claimed;if(j.pay)invPay=j.pay;updSb()}
-document.addEventListener('visibilitychange',()=>{if(!document.hidden&&tok&&$('#evw').classList.contains('on')&&$('#evw').querySelector('.pay'))invLoad().then(()=>invOpen())});
+let INV=null,invDaily=null,invPrice=30;
+function updSb(){document.querySelectorAll('#sb button').forEach(b=>{const k=b.dataset.s,it=BTN[k],n=INV?INV[it]||0:0,ic=b.textContent.split(' ')[0];b.textContent=ic+' '+n;b.style.opacity=(!n||(wb&&wb.used[k]))?'.35':''});const ib=$('#invb');if(ib)ib.textContent='🎒 Инвентарь'+(INV&&invDaily===false?' · 🎁':'')}
+function invSet(j){if(!j)return;if(j.items)INV=j.items;if(j.chestPrice)invPrice=j.chestPrice;if(j.daily)invDaily=j.daily.claimed;updSb()}
 function invLoad(){if(!tok){INV=null;updSb();return Promise.resolve()}return api('/api/inv').then(j=>{invSet(j);return j}).catch(()=>{})}
 function invUse(it,op,n){op=op||('u'+Math.random().toString(36).slice(2,10)+Date.now().toString(36));api('/api/inv/use',{op,item:it}).then(j=>invSet(j)).catch(e=>{if(e&&e.error){invLoad();return}if((n||0)<4)setTimeout(()=>invUse(it,op,(n||0)+1),3000)})}
 const itName=k=>(ITEMS.find(i=>i.k==k)||{}).n||k;
-const lootTxt0=l=>l.gold?'+'+l.gold+' 🪙 золота':'🎁 '+itName(l.item)+' ×1';
-function payBox(){if(!invPay||!invPay.on)return '';const r=invPay.rate;return '<div class="pay"><b>💎 Пополнить кристаллы</b><br>Поддержать проект и получить кристаллы: 1 ₽ = '+r+' 💎<br>Сумма: <input id="pysum" type="number" min="10" max="10000" value="100"> ₽ = <b id="pyg">'+Math.floor(100*r)+'</b> 💎<div class="pb"><button data-t="AC">💳 Картой</button><button data-t="PC">ЮMoney</button></div><small>Оплата откроется в новой вкладке. Кристаллы приходят в течение минуты после оплаты, потом вернитесь в игру. Это добровольная поддержка проекта; кристаллы не возвращаются и не обмениваются на деньги.</small></div>'}
-function payBind(){const sm=$('#pysum');if(!sm)return;sm.oninput=()=>{$('#pyg').textContent=Math.max(0,Math.floor((+sm.value||0)*invPay.rate))};
- document.querySelectorAll('#evw .pay .pb button').forEach(b=>b.onclick=()=>{const v=Math.floor(+sm.value);if(!(v>=10&&v<=10000)){sm.focus();return}
-  const f=document.createElement('form');f.method='POST';f.action='https://yoomoney.ru/quickpay/confirm';f.target='_blank';
-  const o={receiver:invPay.wallet,'quickpay-form':'button',paymentType:b.dataset.t,sum:v,label:invPay.label,targets:'Кристаллы в игре Танчики',successURL:location.href.split('#')[0]};
-  for(const k in o){const i=document.createElement('input');i.type='hidden';i.name=k;i.value=o[k];f.appendChild(i)}document.body.appendChild(f);f.submit();f.remove()})}
-
-/* ===== Иконки предметов. Свои картинки: впишите путь в ITEM_IMG, например salvo:'img/salvo.png' (квадрат, PNG/WebP/SVG). Пусто — рисуется встроенная иконка. ===== */
-const ITEM_IMG={salvo:'',shield:'',dbl:'',key:'',chest:'',gem:'',gold:''};
-const RC={salvo:'#b07cff',shield:'#b07cff',dbl:'#b07cff',key:'#f2c14e',chest:'#f2c14e',gem:'#4fc3ff',gold:'#f2c14e'};
-const SVG={
- salvo:'<defs><radialGradient id="iS" cx=".5" cy=".5" r=".6"><stop offset="0" stop-color="#fff6c0"/><stop offset=".5" stop-color="#ffb23a"/><stop offset="1" stop-color="#e2461f"/></radialGradient></defs><path d="BURST" fill="url(#iS)" stroke="#7a2210" stroke-width="2" stroke-linejoin="round"/><circle cx="32" cy="32" r="7" fill="#fffbe6"/>',
- shield:'<defs><linearGradient id="iH" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#7fc4ff"/><stop offset="1" stop-color="#2459b8"/></linearGradient></defs><path d="M32 5 L55 13 V31 C55 45 45 55 32 60 C19 55 9 45 9 31 V13 Z" fill="url(#iH)" stroke="#0d2a5c" stroke-width="3" stroke-linejoin="round"/><path d="M32 11 L49 17 V31 C49 41 42 49 32 54 Z" fill="#fff" opacity=".2"/><path d="M32 19 V45 M21 29 H43" stroke="#e8f4ff" stroke-width="4" stroke-linecap="round"/>',
- dbl:'<defs><linearGradient id="iD" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff29a"/><stop offset="1" stop-color="#ff9a1f"/></linearGradient></defs><path d="M38 3 L13 36 H29 L22 61 L51 24 H34 Z" fill="url(#iD)" stroke="#8a4b00" stroke-width="2.5" stroke-linejoin="round"/>',
- key:'<defs><linearGradient id="iK" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffe58a"/><stop offset="1" stop-color="#d4961a"/></linearGradient></defs><path d="M30 32 L54 56" stroke="#7a5200" stroke-width="11" stroke-linecap="round"/><path d="M30 32 L54 56" stroke="url(#iK)" stroke-width="7" stroke-linecap="round"/><path d="M45 47 l7-7 M51 53 l6-6" stroke="#7a5200" stroke-width="8" stroke-linecap="round"/><path d="M45 47 l7-7 M51 53 l6-6" stroke="url(#iK)" stroke-width="4" stroke-linecap="round"/><circle cx="21" cy="21" r="14" fill="url(#iK)" stroke="#7a5200" stroke-width="3"/><circle cx="21" cy="21" r="5.5" fill="#0c1c3c"/>',
- chest:'<defs><linearGradient id="iW" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#c98a4a"/><stop offset="1" stop-color="#7a4721"/></linearGradient></defs><g class="lid"><path d="M7 30 V22 C7 12 18 8 32 8 C46 8 57 12 57 22 V30 Z" fill="url(#iW)" stroke="#4a2a10" stroke-width="3" stroke-linejoin="round"/><path d="M7 23 H57" stroke="#f2c14e" stroke-width="5"/></g><g class="bd"><rect x="7" y="30" width="50" height="27" rx="4" fill="url(#iW)" stroke="#4a2a10" stroke-width="3"/><rect x="7" y="30" width="50" height="6" fill="#f2c14e"/><rect x="28" y="34" width="8" height="12" rx="2" fill="#f2c14e" stroke="#7a5200" stroke-width="2"/></g>',
- gem:'<defs><linearGradient id="iG" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#b5f0ff"/><stop offset=".5" stop-color="#3fb0ff"/><stop offset="1" stop-color="#1d56c9"/></linearGradient></defs><path d="M20 8 H44 L58 24 L32 58 L6 24 Z" fill="url(#iG)" stroke="#0b3b6b" stroke-width="3" stroke-linejoin="round"/><path d="M6 24 H58 M20 8 L26 24 L32 58 L38 24 L44 8 M26 24 H38" stroke="#fff" stroke-opacity=".6" stroke-width="1.8" fill="none"/>',
- gold:'<defs><radialGradient id="iC" cx=".4" cy=".35" r=".8"><stop offset="0" stop-color="#fff0a0"/><stop offset="1" stop-color="#d79a1c"/></radialGradient></defs><circle cx="32" cy="32" r="26" fill="url(#iC)" stroke="#7a5200" stroke-width="3"/><circle cx="32" cy="32" r="18" fill="none" stroke="#a8730d" stroke-width="3"/><path d="M26 24 H38 M26 32 H38 M26 40 H38" stroke="#a8730d" stroke-width="3" stroke-linecap="round"/>'};
-SVG.salvo=SVG.salvo.replace('BURST','M32.0 2.0 L35.9 17.5 L47.0 6.0 L42.6 21.4 L58.0 17.0 L46.5 28.1 L62.0 32.0 L46.5 35.9 L58.0 47.0 L42.6 42.6 L47.0 58.0 L35.9 46.5 L32.0 62.0 L28.1 46.5 L17.0 58.0 L21.4 42.6 L6.0 47.0 L17.5 35.9 L2.0 32.0 L17.5 28.1 L6.0 17.0 L21.4 21.4 L17.0 6.0 L28.1 17.5Z');
-SVG.ap='<defs><linearGradient id="sA" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#8a6a2a"/><stop offset=".5" stop-color="#f0d27a"/><stop offset="1" stop-color="#8a6a2a"/></linearGradient></defs><path d="M32 4 C40 12 42 22 42 30 V54 H22 V30 C22 22 24 12 32 4Z" fill="url(#sA)" stroke="#4a3510" stroke-width="3" stroke-linejoin="round"/><rect x="20" y="50" width="24" height="9" rx="2" fill="#b08a3a" stroke="#4a3510" stroke-width="3"/>';
-SVG.pc='<defs><linearGradient id="sP" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#6d7a8c"/><stop offset=".5" stop-color="#e6eef9"/><stop offset="1" stop-color="#6d7a8c"/></linearGradient></defs><path d="M32 3 C36 14 37 24 37 32 V54 H27 V32 C27 24 28 14 32 3Z" fill="url(#sP)" stroke="#2b3544" stroke-width="3" stroke-linejoin="round"/><rect x="20" y="50" width="24" height="9" rx="2" fill="#8a96a8" stroke="#2b3544" stroke-width="3"/>';
-SVG.he='<defs><linearGradient id="sE" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#8a3a1a"/><stop offset=".5" stop-color="#ff9a5a"/><stop offset="1" stop-color="#8a3a1a"/></linearGradient></defs><path d="M32 6 C41 12 44 22 44 30 V54 H20 V30 C20 22 23 12 32 6Z" fill="url(#sE)" stroke="#4a1a0a" stroke-width="3" stroke-linejoin="round"/><rect x="20" y="22" width="24" height="5" fill="#ffe08a"/><rect x="18" y="50" width="28" height="9" rx="2" fill="#b0653a" stroke="#4a1a0a" stroke-width="3"/>';
-RC.ap=RC.pc=RC.he='#c9b27a';
-const icon=(k,c)=>ITEM_IMG[k]?'<img class="'+(c||'')+'" src="'+ITEM_IMG[k]+'" alt="">':'<svg class="'+(c||'')+'" viewBox="0 0 64 64">'+SVG[k]+'</svg>';
-let invSel='chest',invPin='chest';
-function invDet(k,prev){const i=ITEMS.find(x=>x.k==k),I=INV||{},n=I[k]||0;let act='';
- if(!prev&&k=='chest'){const can=Math.min(I.chest||0,I.key||0);act='<div class="oa">'+[1,5,10].map(q=>'<button data-o="'+q+'"'+(can>=q?'':' disabled')+'>Открыть ×'+q+'</button>').join('')+'</div>'+(can<1?'<small>'+(!I.chest?'Нет сундуков':'Нет ключей')+'</small>':'')}
- return '<div class="dh"><span class="di" style="--rc:'+RC[k]+'">'+icon(k)+'</span><div><b>'+i.n+'<em>× '+n+'</em></b><span>'+i.d+'</span></div></div><small>Как использовать: '+i.h+'</small><small>Где работает: '+i.w+'</small>'+act+(k=='key'||k=='chest'||k=='gem'?'<button class="mini buy" data-sh="'+(k=='gem'?'pay':'shop')+'" style="display:block;margin:10px 0 0 auto;align-self:auto">'+(k=='gem'?'Пополнить':'Купить')+'</button>':'<span class="ns">не продаётся</span>')}
-
-const SHN={ap:'ББ',pc:'БП',he:'ОФ'};
-function shellRows(){const rows=[];for(const t of TANKS){if(!sv.st||!sv.st[t.id])continue;const S=stk(t.id);for(const k of SHK)if(S[k]>0)rows.push({t,k,n:S[k]})}rows.sort((a,b)=>b.t.t-a.t.t||(a.t.n<b.t.n?-1:1));return rows}
-function sellOpen(id,k){const t=TK(id),S=stk(id),w=$('#evw'),pr=shp(t,k),max=S[k];if(!max||!pr){invOpen();return}
- const z=document.createElement('div');z.className='cz sl';
- z.innerHTML='<div class="sbx"><h3>Продать снаряды</h3><div class="sh2"><span class="di" style="--rc:'+RC[k]+'">'+icon(k)+'</span><div><b>'+SHELL[k].n+'</b><br><small>'+t.n+' · ступень '+RM[t.t-1]+'</small></div></div><p>Цена продажи — 50% от закупочной ('+f1(pr/2)+' 🪙 за 100 шт.)</p><input type="range" min="1" max="'+max+'" value="'+max+'" step="1"><div class="sq"><b id="sqn"></b> шт. → <b id="sqc"></b> 🪙</div><div class="oa"><button id="sqok">Продать</button><button id="sqx">Отмена</button></div></div>';
- w.appendChild(z);const r=z.querySelector('input'),upd=()=>{const q=+r.value;$('#sqn').textContent=q;$('#sqc').textContent=Math.floor(q*pr/200)};r.oninput=upd;upd();
- $('#sqx').onclick=()=>z.remove();
- $('#sqok').onclick=()=>{const q=Math.min(+r.value,stk(id)[k]);if(q<1)return;const got=Math.floor(q*pr/200);stk(id)[k]-=q;sv.co+=got;svs();$('#co').textContent=sv.co;if(typeof cloudFlush=='function')cloudFlush();z.remove();invOpen();ppShow('Продано',q+' шт. · '+SHN[k]+' · '+t.n+'\n+'+got+' 🪙',[['Ок']])}}
-function lootSum(L){const g=L.reduce((a,l)=>a+(l.gold||0),0),it={};L.forEach(l=>{if(l.item)it[l.item]=(it[l.item]||0)+1});return{g,it}}
-function chestAnim(L,done){const w=$('#evw'),z=document.createElement('div'),T=[];let end=false;z.className='cz';
- z.innerHTML='<div class="cst"><div class="ch"><svg viewBox="0 0 64 64">'+SVG.chest+'</svg><i class="gl"></i></div><div class="cl"></div><div class="cr"></div></div><button class="cx">Пропустить</button>';w.appendChild(z);
- const ch=z.querySelector('.ch'),cl=z.querySelector('.cl'),cr=z.querySelector('.cr'),cx=z.querySelector('.cx');
- const card=l=>'<div class="lc" style="--rc:'+(l.gold?RC.gold:RC[l.item])+'">'+icon(l.gold?'gold':l.item)+'<b>'+(l.gold?'+'+l.gold:itName(l.item))+'</b></div>';
- const fin=()=>{if(end)return;end=true;T.forEach(clearTimeout);ch.className='ch open';const S=lootSum(L);cl.innerHTML='';
-  cr.innerHTML=(L.length>1?'<h3>Получено за '+L.length+' сундуков</h3>':'')+(L.length==1?card(L[0]):'<div class="sm">'+(S.g?'<div class="lc" style="--rc:'+RC.gold+'">'+icon('gold')+'<b>+'+S.g+' 🪙</b></div>':'')+Object.keys(S.it).map(k=>'<div class="lc" style="--rc:'+RC[k]+'">'+icon(k)+'<b>'+itName(k)+' ×'+S.it[k]+'</b></div>').join('')+'</div>');
-  cx.textContent='Забрать';cx.className='cx ok';cx.onclick=()=>{z.remove();done&&done()}};
- cx.onclick=fin;
- T.push(setTimeout(()=>{ch.className='ch shake'},50));
- T.push(setTimeout(()=>{ch.className='ch open'},L.length>1?650:1000));
- if(L.length==1){T.push(setTimeout(()=>{cr.innerHTML=card(L[0]);cr.className='cr pop'},1450));T.push(setTimeout(fin,1500))}
- else{let t=950;L.forEach(l=>{T.push(setTimeout(()=>{const d=document.createElement('div');d.innerHTML=card(l);d.firstChild.classList.add('fly');cl.appendChild(d.firstChild)},t));t+=260});T.push(setTimeout(fin,t+700))}}
-const evErr={no_key:'Нет ключа.',no_chest:'Нет сундука.',already_claimed:'Сегодня уже получали.',no_gems:'Не хватает кристаллов.',unauthorized:'Войдите в аккаунт.'};
-function shellHTML(){const rows=shellRows();if(!rows.length)return '<h3 class="sh">Снаряды</h3><p class="em">Здесь появятся снаряды, которые вы купили в гараже и не взяли в бой.</p>';
- return '<h3 class="sh">Снаряды</h3><div class="sr">'+rows.map(r=>'<div class="sw"><span class="di" style="--rc:'+RC[r.k]+'">'+icon(r.k)+'</span><div class="it"><b>'+SHELL[r.k].n+'<em>× '+r.n+'</em></b><small>'+r.t.n+' · ступень '+RM[r.t.t-1]+'</small></div><button class="sb" data-id="'+r.t.id+'" data-k="'+r.k+'">Продать</button></div>').join('')+'</div>'}
-function invWin(html){const w=$('#evw');w.style.setProperty('--ec','#f2c14e');w.style.setProperty('--eg','242,193,78');w.innerHTML='<div class="bx">'+html+'<div class="bt"><button class="x" id="evx">Закрыть</button></div></div>';w.classList.add('on');$('#evx').onclick=()=>w.classList.remove('on');w.onclick=ev=>{if(ev.target===w)w.classList.remove('on')};return w}
-function needLogin(t){invWin('<h2>'+t+'</h2><p>Предметы и кристаллы хранятся в облаке. Войдите в аккаунт (Steam, Google или Discord).</p>')}
-function invOpen(){if(!tok)return needLogin('🎒 Инвентарь');
- const I=INV||{},tiles=ITEMS.map(i=>'<button class="it2'+(I[i.k]?'':' z')+(i.k==invPin?' sel':'')+'" data-k="'+i.k+'" style="--rc:'+RC[i.k]+'">'+icon(i.k)+'<span class="cn">'+(I[i.k]||0)+'</span></button>').join('');
- const w=invWin('<h2>🎒 Инвентарь</h2><div class="ig">'+tiles+'</div><div id="ivdet" class="dt"></div>'+shellHTML());
- const det=$('#ivdet'),show=(k,prev)=>{det.innerHTML=invDet(k,prev);if(!prev){det.querySelectorAll('[data-o]').forEach(b=>b.onclick=()=>openN(+b.dataset.o));det.querySelectorAll('[data-sh]').forEach(b=>b.onclick=()=>b.dataset.sh=='pay'?payOpen():shopOpen())}};
- const openN=n=>{det.querySelectorAll('button').forEach(b=>b.disabled=true);api('/api/inv/open',{n}).then(j=>{invSet(j);if(j.coins!==undefined)coFrom({bal:j.coins});chestAnim(j.loots||[j.loot],invOpen)}).catch(e=>{invLoad().then(invOpen);ppShow('Не получилось',evErr[e&&e.error]||'Нет связи с сервером.',[['Ок',invOpen]])})};
- show(invPin);
- const hov=matchMedia('(hover:hover)').matches;
- w.querySelectorAll('.it2').forEach(b=>{b.onclick=()=>{invPin=b.dataset.k;w.querySelectorAll('.it2').forEach(x=>x.classList.toggle('sel',x==b));show(invPin)};if(hov)b.onmouseenter=()=>show(b.dataset.k,b.dataset.k!=invPin)});
- if(hov)w.querySelector('.ig').onmouseleave=()=>show(invPin);
- w.querySelectorAll('.sb').forEach(b=>b.onclick=()=>sellOpen(b.dataset.id,b.dataset.k))}
-function payOpen(){if(!tok)return needLogin('💎 Кристаллы');
- invLoad().then(()=>{const on=invPay&&invPay.on;invWin('<h2>💎 Кристаллы</h2><p>У вас <b>'+((INV&&INV.gem)||0)+'</b> 💎. Кристаллы нужны для покупки сундуков в магазине.</p>'+(on?payBox():'<p>Пополнение сейчас недоступно.</p>'));payBind()})}
-function shopOpen(){if(!tok)return needLogin('🛒 Магазин');
- invLoad().then(()=>{const g=(INV&&INV.gem)||0,P=invPrice,K=invKeyPrice,btn=(it,p,n)=>'<button data-it="'+it+'" data-b="'+n+'"'+(g>=p*n?'':' disabled')+'>×'+n+'<small>'+p*n+' 💎</small></button>';
-  const row=(it,p,nm,ds)=>'<div class="dt"><div class="dh"><span class="di" style="--rc:'+RC[it]+'">'+icon(it)+'</span><div><b>'+nm+'</b><span>'+ds+'</span></div></div><div class="oa sa">'+btn(it,p,1)+btn(it,p,5)+btn(it,p,10)+'</div></div>';
-  const w=invWin('<h2>🛒 Магазин</h2><p>У вас <b>'+g+'</b> 💎 <button class="mini" id="shp">Пополнить</button></p>'+row('chest',P,'Сундук','Золото 10–200, редко щит, залп или двойная стрельба. Открывается ключом.')+row('key',K,'Ключ','Открывает один сундук.'));
-  $('#shp').onclick=payOpen;
-  w.querySelectorAll('[data-b]').forEach(b=>b.onclick=()=>{const n=+b.dataset.b,it=b.dataset.it,p=it=='key'?K:P;w.querySelectorAll('[data-b]').forEach(x=>x.disabled=true);api('/api/inv/buy',{item:it,n}).then(j=>{invSet(j);shopOpen();ppShow('Куплено',(it=='key'?'🔑 Ключей: ':'📦 Сундуков: ')+n+' за '+p*n+' 💎\n'+(it=='key'?'Ключи нужны для открытия сундуков в инвентаре.':'Открывайте их в инвентаре (нужны ключи).'),[['Ок']])}).catch(e=>{shopOpen();ppShow('Не получилось',evErr[e&&e.error]||'Нет связи с сервером.',[['Ок']])})})})}
-function dailyGo(){if(!tok)return needLogin('🎁 Бесплатный сундук');const b=$('#frb');if(b)b.disabled=true;
- api('/api/inv/daily',{}).then(j=>{invSet(j);if(j.coins!==undefined)coFrom({bal:j.coins});const w=$('#evw');w.innerHTML='';w.classList.add('on');chestAnim([j.loot],()=>w.classList.remove('on'))}).catch(e=>{invLoad();ppShow('Не получилось',evErr[e&&e.error]||'Нет связи с сервером.',[['Ок']])})}
-$('#gemb').onclick=payOpen;$('#frb').onclick=dailyGo;$('#mkt').onclick=shopOpen;
-/* ===== Ежедневные задания ===== */
-let DQ=null,dqT=0;
-function dqLabel(){const b=$('#dqb');if(!b)return;const r=DQ?DQ.tasks.filter(x=>!x.claimed&&x.have>=x.n).length+((DQ.tasks.every(x=>x.claimed)&&!DQ.bonus.claimed)?1:0):0;b.textContent='📋 Задания'+(r?' · 🎁 '+r:'');b.style.borderColor=r?'#f2c14e':''}
-function dqLoad(){if(!tok)return Promise.resolve();dqT=Date.now();return api('/api/dq',{}).then(j=>{DQ=j;dqLabel();return j}).catch(()=>{})}
-function dqLeft(ms){const h=Math.floor(ms/3600000),m=Math.floor(ms%3600000/60000);return h+' ч '+m+' мин'}
-function dqOpen(){if(!tok)return needLogin('📋 Задания');
- dqLoad().then(()=>{if(!DQ){ppShow('Не получилось','Нет связи с сервером.',[['Ок']]);return}
-  const all=DQ.tasks.every(x=>x.claimed),rows=DQ.tasks.map(x=>{const ok=x.have>=x.n,pc=Math.round(x.have/x.n*100);
-   return '<div class="dt"><div class="dh"><div><b>'+x.name+'</b><span>'+x.have+' / '+x.n+' · награда '+x.g+' 🪙</span></div></div><div style="height:8px;border-radius:5px;background:#17233b;margin:8px 0"><div style="height:100%;width:'+pc+'%;border-radius:5px;background:'+(ok?'#f2c14e':'#4f78c4')+'"></div></div>'+(x.claimed?'<small>✅ Получено</small>':'<div class="oa"><button data-q="'+x.i+'"'+(ok?'':' disabled')+'>Забрать '+x.g+' 🪙</button></div>')+'</div>'}).join('');
-  const bonus='<div class="dt"><div class="dh"><span class="di" style="--rc:'+RC.key+'">'+icon('key')+'</span><div><b>Все три задания</b><span>Шанс получить ключ: '+Math.round(DQ.bonus.chance*100)+'%</span></div></div>'+(DQ.bonus.claimed?'<small>✅ Получено</small>':'<div class="oa"><button data-q="b"'+(all?'':' disabled')+'>Забрать бонус</button></div>')+'</div>';
-  const w=invWin('<h2>📋 Задания дня</h2><p>Обновятся через '+dqLeft(DQ.left)+'. Считаются бои в обычных волнах.</p>'+rows+bonus);
-  w.querySelectorAll('[data-q]').forEach(b=>b.onclick=()=>{w.querySelectorAll('[data-q]').forEach(x=>x.disabled=true);const q=b.dataset.q;
-   api('/api/dq/claim',{i:q=='b'?'b':+q}).then(j=>{DQ=j.dq;if(j.items)INV=j.items;if(j.coins!==undefined)coFrom({bal:j.coins});updSb();dqLabel();dqOpen();ppShow('Награда получена',j.gold?'+'+j.gold+' 🪙':(j.key?'🔑 Вам выпал ключ!':'В этот раз ключ не выпал.'),[['Ок']])}).catch(e=>{dqOpen();ppShow('Не получилось',e&&e.error=='not_done'?'Задание ещё не выполнено.':'Нет связи с сервером.',[['Ок']])})})})}
-$('#dqb').onclick=dqOpen;
-/* ===== Админ-панель (видна только админам, включается переключателем в профиле) ===== */
-const ADF=[['n','Название','text'],['hp','Здоровье'],['sp','Скорость'],['tt','Поворот башни'],['dm','Урон за выстрел'],['cd','Перезарядка, с'],['rk','Рикошет, %'],['ab','Броня'],['pn','Пробитие'],['cal','Калибр'],['wt','Вес']];
-let ADMIN=false;
-function adLoad(){ADMIN=false;const b=$('#adb');if(b)b.style.display='none';let on=false;try{on=localStorage.getItem('rm-adm')=='1'}catch(e){}if(!tok||!on)return Promise.resolve();return api('/api/admin/me',{}).then(j=>{ADMIN=!!(j&&j.admin);if(b)b.style.display=ADMIN?'':'none'}).catch(()=>{})}
-function adOpen(tab){if(!ADMIN)return;tab=tab||'t';
- const w=invWin('<h2>⚙ Админ-панель</h2><div class="oa" style="margin-bottom:8px"><button id="adt1"'+(tab=='t'?' style="outline:2px solid #f2c14e"':'')+'>Танки</button><button id="adt2"'+(tab=='e'?' style="outline:2px solid #f2c14e"':'')+'>События</button><button id="adt3"'+(tab=='c'?' style="outline:2px solid #f2c14e"':'')+'>Цены</button></div><div id="adc"></div>');
- $('#adt1').onclick=()=>adOpen('t');$('#adt2').onclick=()=>adOpen('e');$('#adt3').onclick=()=>adOpen('c');
- if(tab=='e')adEvents($('#adc'));else if(tab=='c')adCfg($('#adc'));else adTanks($('#adc'))}
-function adTanks(host){
- const opts=TANKS.map(t=>'<option value="'+t.id+'">'+CN[t.c]+' '+t.t+' · '+t.n+(t.ed?' ✎':'')+'</option>').join('');
- host.innerHTML='<p>Характеристики танков. Правки сохраняются на сервере и действуют у всех игроков (после обновления страницы). ✎ — танк изменён.</p><div class="dt"><div class="dh"><div><b>ТТХ танка</b></div></div><select id="adt" style="width:100%;padding:8px;border-radius:8px;margin:6px 0">'+opts+'</select><div id="adf" style="display:grid;grid-template-columns:1fr 110px;gap:6px 10px;align-items:center;text-align:left"></div><div class="oa" style="margin-top:10px"><button id="ads">Сохранить</button><button id="adr">Сбросить к стандарту</button></div><small id="adm"></small></div>';
- const sel=$('#adt'),box=$('#adf'),msg=$('#adm');
- const fill=()=>{const t=TK(sel.value),d=TANKS0[TANKS.indexOf(t)];box.innerHTML=ADF.map(f=>'<label>'+f[1]+'<small style="display:block;opacity:.6">станд.: '+d[f[0]]+'</small></label><input data-k="'+f[0]+'" type="'+(f[2]||'number')+'" step="any" value="'+String(t[f[0]]).replace(/"/g,'&quot;')+'" style="padding:7px;border-radius:8px;border:1px solid #3a4a6a;background:#0e1a33;color:inherit;width:100%;box-sizing:border-box">').join('');msg.textContent=''};
- sel.onchange=fill;fill();
- const send=body=>{$('#ads').disabled=$('#adr').disabled=true;return api('/api/admin/tank',body).then(j=>{tsApply(j.stats);const v=sel.value;sel.innerHTML=TANKS.map(t=>'<option value="'+t.id+'">'+CN[t.c]+' '+t.t+' · '+t.n+(t.ed?' ✎':'')+'</option>').join('');sel.value=v;fill();msg.textContent='✅ Сохранено. Игрокам нужно обновить страницу.';$('#ads').disabled=$('#adr').disabled=false;try{ovStat()}catch(e){}}).catch(e=>{msg.textContent='Ошибка: '+(e&&(e.key?e.error+' ('+e.key+')':e.error)||'нет связи');$('#ads').disabled=$('#adr').disabled=false})};
- $('#ads').onclick=()=>{const t=TK(sel.value),d=TANKS0[TANKS.indexOf(t)],set={};box.querySelectorAll('input').forEach(i=>{const k=i.dataset.k,v=i.type=='number'?(i.value===''?'':Number(i.value)):i.value.trim();set[k]=(v===''||v==d[k])?'':v});send({id:t.id,set})};
- $('#adr').onclick=()=>send({id:sel.value,reset:true})}
-
-const INP='padding:7px;border-radius:8px;border:1px solid #3a4a6a;background:#0e1a33;color:inherit;width:100%;box-sizing:border-box';
-
-function adCfg(host){
- host.innerHTML='<p>Цены и настройки экономики. Сохраняются на сервере и действуют сразу у всех (до 15 секунд на обновление). Пустое поле — стандартное значение (или то, что задано в Cloudflare).</p><div class="dt" style="text-align:left"><div id="adcf" style="display:grid;grid-template-columns:1fr 120px;gap:6px 10px;align-items:center"></div><div class="oa" style="margin-top:10px"><button id="acs">Сохранить</button></div><small id="adm"></small></div>';
- const msg=$('#adm'),box=$('#adcf');let items=[];
- const draw=()=>{box.innerHTML=items.map(i=>'<label>'+i.l+'<small style="display:block;opacity:.6">'+(i.v?'изменено · ':'')+'стандарт: '+(i.cf||i.d)+(i.cf?' (Cloudflare)':'')+'</small></label><input data-k="'+i.k+'" value="'+i.v.replace(/"/g,'&quot;')+'" placeholder="'+(i.cf||i.d)+'" style="'+INP+'">').join('')};
- const run=b=>api('/api/admin/cfg',b).then(j=>{items=j.items;draw();return j});
- run({}).catch(()=>{msg.textContent='Нет связи с сервером.'});
- $('#acs').onclick=()=>{const set={};box.querySelectorAll('input').forEach(i=>{set[i.dataset.k]=i.value.trim()});$('#acs').disabled=true;run({set}).then(()=>{msg.textContent='✅ Сохранено.';$('#acs').disabled=false;try{invLoad()}catch(e){}}).catch(e=>{msg.textContent='Ошибка: неверное значение'+(e&&e.key?' ('+e.key+')':'');$('#acs').disabled=false})}}
-function adLeft(ms){if(ms<=0)return 'истекло';const d=Math.floor(ms/864e5),h=Math.floor(ms%864e5/36e5);return (d?d+' д ':'')+h+' ч'}
-function adEvents(host,edit){
- host.innerHTML='<p>События и боссы. Изменения видны игрокам сразу (плашки на главном экране обновляются раз в минуту).</p><div id="ade"></div><div class="dt" id="adn"></div><small id="adm"></small>';
- const msg=$('#adm'),call=b=>api('/api/admin/event',b).then(j=>{if(j&&j.error)throw j;return j}),fail=e=>{msg.textContent='Ошибка: '+(e&&e.error||'нет связи')},again=()=>{evLoad();adEvents(host)};
- const F=(id,l,v,ty,ph)=>'<label>'+l+'</label><input id="'+id+'" type="'+(ty||'text')+'" step="any" value="'+String(v==null?'':v).replace(/"/g,'&quot;')+'" placeholder="'+(ph||'')+'" style="'+INP+'">';
- const form=e=>{const n=$('#adn');n.innerHTML='<div class="dh"><div><b>'+(e?'Изменить событие':'Новое событие')+'</b></div></div><div style="display:grid;grid-template-columns:1fr 130px;gap:6px 10px;align-items:center;text-align:left">'+
-  (e?'':'<label>Тип</label><select id="af-type" style="'+INP+'"><option value="boss">Мировой босс</option><option value="news">Объявление</option></select>')+
-  F('af-title','Название',e?e.title:'Мировой босс')+F('af-text','Текст',e?e.text:'')+(e?'':F('af-hp','Здоровье босса',100000,'number'))+
-  F('af-days',e?'Завершить через, дней':'Длительность, дней',e?'':7,'number',e?'не менять':'')+F('af-min','Танки от уровня',e?e.minl:8,'number')+F('af-max','Танки до уровня',e?e.maxl:10,'number')+
-  F('af-att','Попыток в день',e?e.att:3,'number')+F('af-rst','Платных сбросов',e?e.rst:3,'number')+F('af-pr','Цены сбросов, 🪙',e&&e.prices?JSON.parse(e.prices).join(','):'','text','1000,1500,2250')+
-  '</div><div class="oa" style="margin-top:10px"><button id="af-ok">'+(e?'Сохранить':'Создать')+'</button>'+(e?'<button id="af-no">Отмена</button>':'')+'</div>';
-  const g=i=>$('#'+i).value.trim();
-  $('#af-ok').onclick=()=>{const b={do:e?'set':'new',title:g('af-title'),text:g('af-text'),days:g('af-days'),min:g('af-min'),max:g('af-max'),att:g('af-att'),rst:g('af-rst'),prices:g('af-pr')};if(e)b.id=e.id;else{b.type=$('#af-type').value;b.hp=g('af-hp');if(!b.days)b.days='7'}
-   $('#af-ok').disabled=true;call(b).then(again).catch(e=>{fail(e);$('#af-ok').disabled=false})};
-  if(e)$('#af-no').onclick=()=>form(null)};
- call({do:'list'}).then(j=>{const L=j.events||[],box=$('#ade'),now=Date.now();
-  box.innerHTML=L.length?L.map((e,i)=>{const boss=e.type=='boss',st=e.state=='on'&&e.to_t>now?'идёт':e.state=='off'?'остановлено':e.state=='end'||e.to_t<=now?'завершено':e.state;
-   return '<div class="dt" style="text-align:left"><div class="dh"><div><b>'+(boss?'👹 ':'📣 ')+e.title.replace(/</g,'&lt;')+'</b><span>'+st+' · '+(boss?'HP '+e.hp_now+' / '+e.hp+' · ':'')+'до: '+adLeft(e.to_t-now)+'</span></div></div><div class="oa" style="flex-wrap:wrap">'+
-    '<button data-a="ed" data-i="'+i+'">✎ Изменить</button>'+(e.state=='off'?'<button data-a="start" data-i="'+i+'">▶ Запустить</button>':'<button data-a="stop" data-i="'+i+'">⏸ Остановить</button>')+
-    (boss?'<button data-a="hp" data-i="'+i+'">❤ Здоровье</button>':'')+'<button data-a="del" data-i="'+i+'">🗑 Удалить</button></div></div>'}).join(''):'<p>Событий пока нет.</p>';
-  box.querySelectorAll('[data-a]').forEach(b=>b.onclick=()=>{const e=L[+b.dataset.i],a=b.dataset.a;
-   if(a=='ed'){form(e);$('#adn').scrollIntoView({block:'nearest'});return}
-   if(a=='del'){if(!confirm('Удалить «'+e.title+'» вместе с уроном и попытками игроков? Это нельзя отменить.'))return;call({do:'del',id:e.id}).then(again).catch(fail);return}
-   if(a=='hp'){const v=prompt('Новое текущее здоровье босса (сейчас '+e.hp_now+' из '+e.hp+')',e.hp_now);if(v===null)return;call({do:'hp',id:e.id,hp:v}).then(again).catch(fail);return}
-   call({do:a,id:e.id}).then(again).catch(fail)});
-  form(edit||null)}).catch(fail)}
-$('#adb').onclick=adOpen;
-
-
+const lootTxt=l=>l.gold?'+'+l.gold+' 🪙 золота':'🎁 '+itName(l.item)+' ×1';
+function invOpen(){const w=$('#evw');w.style.setProperty('--ec','#f2c14e');w.style.setProperty('--eg','242,193,78');
+ if(!tok){w.innerHTML='<div class="bx"><h2>🎒 Инвентарь</h2><p>Предметы хранятся в облаке. Войдите в аккаунт (Steam, Google или Discord), чтобы получать и использовать их.</p><div class="bt"><button class="x" id="evx">Закрыть</button></div></div>';w.classList.add('on');$('#evx').onclick=()=>w.classList.remove('on');return}
+ const I=INV||{},rows=ITEMS.map(i=>'<div class="iv"><span class="ic">'+i.ico+'</span><div class="it"><b>'+i.n+'<em>× '+(I[i.k]||0)+'</em></b><span>'+i.d+'</span><small>Как использовать: '+i.h+'</small><small>Где работает: '+i.w+'</small><small>Продаётся: нет</small></div></div>').join('');
+ const can=I.chest>0&&I.key>0;
+ w.innerHTML='<div class="bx"><h2>🎒 Инвентарь</h2><p>Всё, что вы получили в игре. В бой автоматически берётся всё имеющееся количество.</p><div class="ab">'
+ +'<button id="ivd"'+(invDaily?' disabled':'')+'>🎁 Ежедневный сундук'+(invDaily?'<small>уже получен сегодня</small>':'<small>бесплатно, ключ не нужен</small>')+'</button>'
+ +'<button id="ivo"'+(can?'':' disabled')+'>📦 Открыть сундук<small>'+(can?'потратит 1 сундук и 1 ключ':!I.chest?'нет сундуков':'нет ключей')+'</small></button>'
+ +'<button id="ivb"'+((I.gem||0)>=invPrice?'':' disabled')+'>🛒 Купить сундук · '+invPrice+' 💎<small>у вас '+(I.gem||0)+' 💎</small></button></div>'+rows+'<div class="bt"><button class="x" id="evx">Закрыть</button></div></div>';
+ w.classList.add('on');$('#evx').onclick=()=>w.classList.remove('on');w.onclick=ev=>{if(ev.target===w)w.classList.remove('on')};
+ const act=(id,url,body,ok)=>{const b=$(id);if(b)b.onclick=()=>{b.disabled=true;api(url,body).then(j=>{invSet(j);if(j.coins!==undefined)coFrom({bal:j.coins});w.classList.remove('on');ok(j)}).catch(e=>{b.disabled=false;ppShow('Не получилось',({already_claimed:'Сегодня уже получали.',no_key:'Нет ключа.',no_chest:'Нет сундука.',no_gems:'Не хватает кристаллов.',unauthorized:'Войдите в аккаунт.'})[e&&e.error]||'Нет связи с сервером.',[['Ок',invOpen]])})}};
+ act('#ivd','/api/inv/daily',{},j=>ppShow('Ежедневный сундук',lootTxt(j.loot),[['Ок',invOpen]]));
+ act('#ivo','/api/inv/open',{},j=>ppShow('Сундук открыт',lootTxt(j.loot),[['Ок',invOpen]]));
+ act('#ivb','/api/inv/buy',{item:'chest',n:1},j=>ppShow('Куплено','📦 Сундук ×1 за '+invPrice+' 💎',[['Ок',invOpen]]))}
 (function(){const tr=$('#evt');if(tr)tr.addEventListener('scroll',evDots,{passive:true});setInterval(()=>{if(!$('#ov').classList.contains('h')&&!$('#evw').classList.contains('on'))evLoad()},60000)})();
 function mzFit(){const z=(innerWidth>=900&&innerHeight>=600)?Math.max(1,Math.min(2.2,Math.min(innerWidth/1000,innerHeight/800))):1;document.documentElement.style.setProperty('--mz',z.toFixed(2))}
 mzFit();addEventListener('resize',mzFit);
-tsLoad();adLoad();evLoad();invLoad();dqLoad();tinit();renderAuth();ovStat();try{const m=sessionStorage.getItem('tk-msg');if(m){sessionStorage.removeItem('tk-msg');$('#t2').textContent=m;$('#t2').style.color='#f2c14e'}}catch(e){}checkSeason().then(cloudLoad,cloudLoad);
+evLoad();invLoad();tinit();renderAuth();ovStat();try{const m=sessionStorage.getItem('tk-msg');if(m){sessionStorage.removeItem('tk-msg');$('#t2').textContent=m;$('#t2').style.color='#f2c14e'}}catch(e){}checkSeason().then(cloudLoad,cloudLoad);
 requestAnimationFrame(loop);
 </script>
 </body>

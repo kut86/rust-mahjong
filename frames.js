@@ -56,6 +56,12 @@
       '@keyframes pfx-edge{0%{--bc:var(--c0)}25%{--bc:var(--c1)}50%{--bc:var(--c2)}75%{--bc:var(--c3)}100%{--bc:var(--c0)}}' +
       '@keyframes pfx-run{to{background-position:32px 0,-32px 100%,0 32px,100% -32px}}' +
       '@keyframes pfx-sheen{0%{background-position:160% 0,0 0}100%{background-position:-60% 0,0 0}}' +
+      '.pfx-im{position:absolute;z-index:3;pointer-events:none;left:calc((1 - var(--k,1.4))*50%);top:calc((1 - var(--k,1.4))*50%);width:calc(var(--k,1.4)*100%);height:calc(var(--k,1.4)*100%)}' +
+      '.pfx-im.d{z-index:4}.pfx-im>img{width:100%;height:100%;object-fit:contain;display:block}' +
+      '.pfx-im.sp{animation:pfx-spin var(--is,20s) linear infinite}.pfx-im.pu>img{animation:pfx-pulse 2.2s ease-in-out infinite}' +
+      '.pfx-sk{fill:#fff;animation:pfx-flick calc(var(--sp,2.4s)*.8) steps(1,end) infinite}' +
+      '@keyframes pfx-pulse{0%,100%{transform:scale(.94);opacity:.85}50%{transform:scale(1.06);opacity:1}}' +
+      '@keyframes pfx-sheen4{0%{background-position:160% 0,0 0,0 0,50% 50%}100%{background-position:-60% 0,0 0,0 0,50% 50%}}' +
       '@keyframes pfx-spin{to{transform:rotate(360deg)}}' +
       '@keyframes pfx-shoot{0%{stroke-dashoffset:1;opacity:1}16%{stroke-dashoffset:0;opacity:1}30%{opacity:.9}48%{opacity:0;stroke-dashoffset:0}100%{opacity:0;stroke-dashoffset:0}}' +
       '@keyframes pfx-flick{0%{opacity:1}12%{opacity:.15}24%{opacity:1}38%{opacity:.35}52%{opacity:1}70%{opacity:0}85%{opacity:.8}100%{opacity:1}}' +
@@ -70,7 +76,7 @@
 
   // Лучи-молнии, расходящиеся от рамки наружу
   function boltsSvg(d, key, cls) {
-    var svg = mk('svg', { viewBox: '0 0 100 100', class: 'pfx-l ' + cls }), rnd = rng(hash(key)), n = d.bolts || 8;
+    var svg = mk('svg', { viewBox: '0 0 100 100', class: 'pfx-l ' + cls }), rnd = rng(hash(key)), n = d.bolts === 0 ? 0 : (d.bolts || 8);
     for (var i = 0; i < n; i++) {
       var a = (i / n) * Math.PI * 2 + (rnd() - 0.5) * 0.35, len = R0 * (d.len || 0.3) * (0.7 + rnd() * 0.6), r = R0 + 1.5, steps = 4, pts = [];
       for (var k = 0; k <= steps; k++) {
@@ -85,7 +91,7 @@
   }
   // Молнии, бегущие дугами по кругу вокруг рамки
   function arcsSvg(d, key) {
-    var svg = mk('svg', { viewBox: '0 0 100 100', class: 'pfx-l d' }), rnd = rng(hash(key + 'a')), n = d.arcs || 5;
+    var svg = mk('svg', { viewBox: '0 0 100 100', class: 'pfx-l d' }), rnd = rng(hash(key + 'a')), n = d.arcs === 0 ? 0 : (d.arcs || 5);
     for (var i = 0; i < n; i++) {
       var a0 = (i / n) * Math.PI * 2 + rnd() * 0.3, span = 0.5 + rnd() * 0.45, r = R0 + 6 + rnd() * 4, steps = 9, pts = [];
       for (var k = 0; k <= steps; k++) {
@@ -94,6 +100,24 @@
       }
       var p = mk('polyline', { points: pts.join(' '), class: 'pfx-a', stroke: d.colors[i % d.colors.length], 'stroke-width': d.width || 2 });
       p.style.animationDelay = (-rnd() * (d.speed || 2)).toFixed(2) + 's';
+      svg.appendChild(p);
+    }
+    return svg;
+  }
+  // Картинка из репозитория вокруг аватара (вращение и пульсация по параметрам)
+  function imgLayer(d, below) {
+    var s = document.createElement('span'); s.className = 'pfx-im' + (below ? '' : ' d') + (d.spin > 0 ? ' sp' : '') + (d.pulse ? ' pu' : '');
+    s.style.setProperty('--k', d.imgScale || (below ? 1.35 : 1.7)); if (d.spin > 0) s.style.setProperty('--is', d.spin + 's');
+    var im = document.createElement('img'); im.src = d.img; im.alt = ''; im.onerror = function () { s.style.display = 'none'; }; s.appendChild(im);
+    return s;
+  }
+  // Мерцающие искры вокруг аватара
+  function sparksSvg(d, key) {
+    var svg = mk('svg', { viewBox: '0 0 100 100', class: 'pfx-l f' }), rnd = rng(hash(key + 's')), n = d.sparks || 0, c = d.colors || ['#fff'];
+    for (var i = 0; i < n; i++) {
+      var a = rnd() * Math.PI * 2, rr = R0 + 3 + rnd() * 14, r = 0.7 + rnd() * 1.3;
+      var p = mk('circle', { cx: (50 + Math.cos(a) * rr).toFixed(1), cy: (50 + Math.sin(a) * rr).toFixed(1), r: r.toFixed(2), class: 'pfx-sk', fill: c[i % c.length] });
+      p.style.animationDelay = (-rnd() * (d.speed || 2.4)).toFixed(2) + 's'; p.style.fill = c[i % c.length];
       svg.appendChild(p);
     }
     return svg;
@@ -118,9 +142,12 @@
       ring.style.background = 'conic-gradient(' + fr.colors.concat(fr.colors[0]).join(',') + ')';
       if (fr.ring === 0) ring.style.display = 'none';
       w.appendChild(ring);
-      var s1 = boltsSvg(fr, f[0], 'f'); s1.style.setProperty('--sp', (fr.speed || 3) + 's'); s1.style.setProperty('--gl', fr.glow || '#8ab4ff'); w.appendChild(s1);
+      if (fr.bolts !== 0) { var s1 = boltsSvg(fr, f[0], 'f'); s1.style.setProperty('--sp', (fr.speed || 3) + 's'); s1.style.setProperty('--gl', fr.glow || '#8ab4ff'); w.appendChild(s1); }
+      if (fr.img) w.appendChild(imgLayer(fr, true));
     }
     if (dc) {
+      if (dc.img) w.appendChild(imgLayer(dc, false));
+      if (dc.sparks) { var s4 = sparksSvg(dc, f[1]); s4.style.setProperty('--sp', (dc.speed || 2.4) + 's'); w.appendChild(s4); }
       var s2 = arcsSvg(dc, f[1]); s2.style.setProperty('--sp', (dc.speed || 2.4) + 's'); s2.style.setProperty('--gl', dc.glow || '#b07cff'); w.appendChild(s2);
       if (dc.bolts) { var s3 = boltsSvg({ colors: dc.colors, bolts: dc.bolts, len: dc.len, width: dc.width, speed: dc.speed }, f[1] + 'b', 'f'); s3.style.setProperty('--sp', (dc.speed || 2.4) + 's'); s3.style.setProperty('--gl', dc.glow || '#b07cff'); w.appendChild(s3); }
     }
@@ -141,7 +168,7 @@
     var p = PLATES[ident(f && f[2], 'bg:')];
     if (!p || !tr) return;
     css();
-    var c = p.colors, g = c.map(function (x, i) { return x + (i % 2 ? '24' : '38') + ' ' + Math.round(i / (c.length - 1) * 100) + '%'; });
+    var c = p.colors.length < 2 ? [p.colors[0], p.colors[0]] : p.colors, g = c.map(function (x, i) { return x + (i % 2 ? '24' : '38') + ' ' + Math.round(i / (c.length - 1) * 100) + '%'; });
     tr.classList.add('pfx-pl');
     var single = mode === 1 || mode === true;
     if (single) tr.classList.add('pfx-s');
@@ -154,9 +181,31 @@
       if (single || mode === 't') tr.classList.add('pfx-t');
       if (single || mode === 'b') tr.classList.add('pfx-b');
       for (var i = 0; i < 4; i++) tr.style.setProperty('--c' + i, c[i % c.length]);
-      tr.style.setProperty('--zh', zig(c, false)); tr.style.setProperty('--zv', zig(c, true));
+      if (p.bolts !== false) { tr.style.setProperty('--zh', zig(c, false)); tr.style.setProperty('--zv', zig(c, true)); }
+    }
+    if (p.sheen === false || p.img) { // свой набор слоёв: [блик] + градиент + [затемнение + картинка]
+      var L = [], Z = [], sh = p.sheen !== false;
+      if (sh) { L.push('linear-gradient(100deg,transparent 38%,rgba(255,255,255,.16) 50%,transparent 62%)'); Z.push('260% 100%'); }
+      L.push('var(--pg)'); Z.push('100% 100%');
+      if (p.img) { var dm = p.imgDim === undefined ? 0.55 : p.imgDim; L.push('linear-gradient(rgba(35,39,42,' + dm + '),rgba(35,39,42,' + dm + '))'); Z.push('100% 100%'); L.push('url("' + p.img + '")'); Z.push('cover'); }
+      tr.style.backgroundImage = L.join(','); tr.style.backgroundSize = Z.join(','); tr.style.backgroundRepeat = 'no-repeat'; tr.style.backgroundPosition = p.img ? (sh ? '160% 0,0 0,0 0,50% 50%' : '0 0,0 0,50% 50%') : '0 0';
+      tr.style.animationName = sh ? (p.img ? 'pfx-sheen4' : 'pfx-sheen') : 'none';
+      if (!sh) tr.style.animation = 'none';
     }
   }
-  window.PFX = { FRAMES: FRAMES, DECOS: DECOS, PLATES: PLATES, el: el, row: row, has: function (f) { return !!(f && (f[0] || f[1])); },
+  /* PFX.define({'fr:имя': {n:'Название', d:{…параметры…}}, …}) — подключить украшения, созданные в админке (приходят с сервера). */
+  function define(map) {
+    for (var id in map) {
+      var t = id.slice(0, 3), k = id.slice(3), v = map[id], o = {}; for (var p in v.d) o[p] = v.d[p]; o.n = v.n; if (!o.colors || !o.colors.length) o.colors = ['#4fc3ff', '#b07cff', '#ff5fd2', '#ffd24a'];
+      if (t === 'fr:') FRAMES[k] = o; else if (t === 'dc:') DECOS[k] = o; else if (t === 'bg:') PLATES[k] = o;
+    }
+  }
+  /* PFX.preview(kind, d, size) — пробный показ ещё не сохранённого украшения: kind 'fr' | 'dc' | 'bg'. Для 'bg' вернёт строку таблицы. */
+  function preview(kind, d, size) {
+    define({ [kind + ':__pv']: { n: '…', d: d } });
+    if (kind === 'bg') { var t = document.createElement('table'), tr = document.createElement('tr'), td = document.createElement('td'); t.style.cssText = 'width:100%;border-collapse:collapse'; td.style.cssText = 'height:56px;padding:0 12px;text-align:left'; td.appendChild(el('', 'A', ['', '', ''], 32)); td.appendChild(document.createTextNode('Ник игрока')); tr.appendChild(td); t.appendChild(tr); row(tr, ['', '', 'bg:__pv'], 1); return t; }
+    return el('', 'A', [kind === 'fr' ? 'fr:__pv' : '', kind === 'dc' ? 'dc:__pv' : '', ''], size || 64);
+  }
+  window.PFX = { FRAMES: FRAMES, DECOS: DECOS, PLATES: PLATES, define: define, preview: preview, el: el, row: row, has: function (f) { return !!(f && (f[0] || f[1])); },
     name: function (id) { var t = id && id.slice(0, 3), k = id && id.slice(3); return t === 'fr:' ? (FRAMES[k] || {}).n || id : t === 'dc:' ? (DECOS[k] || {}).n || id : t === 'bg:' ? (PLATES[k] || {}).n || id : id; } };
 })();

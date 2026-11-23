@@ -150,6 +150,7 @@ a.btn{display:inline-block;background:#1b2838;color:#fff;text-decoration:none;bo
 <script>
 // Адрес вашего сервера (Cloudflare Worker)
 var API='https://rust-mahjong-api.rust-pve.workers.dev';
+try{fetch(API+'/api/cosdefs').then(function(r){return r.json()}).then(function(j){if(window.PFX&&j&&j.defs)PFX.define(j.defs)}).catch(function(){})}catch(e){} // украшения, созданные в админке
 var $=function(i){return document.getElementById(i)};
 
 // ====== Вход через Steam (токен общий для всех игр, хранится в localStorage) ======
