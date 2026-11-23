@@ -182,7 +182,7 @@ body:has(#ov:not(.h)) #hud,body:has(#up:not(.h)) #hud{visibility:hidden}
 <div id="sh"><button data-k="ap"><b>ББ</b><i></i></button><button data-k="pc"><b>БП</b><i></i></button><button data-k="he"><b>ОФ</b><i></i></button></div><div id='sb'><button data-s='x'>💥 25</button><button data-s='s'>🛡 20</button><button data-s='d'>⚡ 15</button></div>
 <div id="evw"></div>
 <div id="rot"><b>📱</b>Поверните телефон горизонтально<a href="index.html" style="margin-top:6px;color:var(--tx);background:#3a4030;border-radius:14px;padding:12px 28px;font-size:16px;font-weight:700;text-decoration:none">☰ Меню игр</a></div>
-<div id="ov"><div id="evs"><div id="evt"></div><div id="evd"></div></div><div id="trb" style="display:none"><button id="frb"><span>🎁 Сундук</span></button><button id="gemb">💎 <span id="gemn">0</span></button></div><h1 id="t1">🪖 Танчики</h1><p id="t2">Левый палец — движение, правый — прицел и огонь. На компьютере: WASD, мышь, клик.</p><div class="tg" style="margin-top:2px">Стартовая волна</div><div id="wtabs"></div><div id="wsel"></div><button id="go">Играть</button><button id="fs" style="display:none;background:#3a4030;color:var(--tx);margin-top:4px;font-size:16px"></button><p id="fsh" class="tg" style="display:none;max-width:320px;line-height:1.5"></p><button id="shop" style="background:#3a4030;color:var(--tx);margin-top:4px;font-size:16px">🔧 Гараж · <span id="co">0</span> 🪙</button><button id="mkt" style="background:#3a4030;color:var(--tx);margin-top:4px;font-size:16px">🛒 Магазин</button><button id="dqb" style="background:#3a4030;color:var(--tx);margin-top:4px;font-size:16px">📋 Задания</button><button id="invb" style="background:#3a4030;color:var(--tx);margin-top:4px;font-size:16px">🎒 Инвентарь</button><a class="lk" href="index.html">☰ Меню игр</a><div id="au"></div></div>
+<div id="ov"><div id="evs"><div id="evt"></div><div id="evd"></div></div><div id="trb" style="display:none"><button id="frb"><span>🎁 Сундук</span></button><button id="gemb">💎 <span id="gemn">0</span></button></div><h1 id="t1">🪖 Танчики</h1><p id="t2">Левый палец — движение, правый — прицел и огонь. На компьютере: WASD, мышь, клик.</p><div class="tg" style="margin-top:2px">Стартовая волна</div><div id="wtabs"></div><div id="wsel"></div><button id="go">Играть</button><button id="fs" style="display:none;background:#3a4030;color:var(--tx);margin-top:4px;font-size:16px"></button><p id="fsh" class="tg" style="display:none;max-width:320px;line-height:1.5"></p><button id="shop" style="background:#3a4030;color:var(--tx);margin-top:4px;font-size:16px">🔧 Гараж · <span id="co">0</span> 🪙</button><button id="mkt" style="background:#3a4030;color:var(--tx);margin-top:4px;font-size:16px">🛒 Магазин</button><button id="dqb" style="background:#3a4030;color:var(--tx);margin-top:4px;font-size:16px">📋 Задания</button><button id="invb" style="background:#3a4030;color:var(--tx);margin-top:4px;font-size:16px">🎒 Инвентарь</button><button id="adb" style="display:none;background:#40303a;color:var(--tx);margin-top:4px;font-size:16px">⚙ Админ</button><a class="lk" href="index.html">☰ Меню игр</a><div id="au"></div></div>
 <script>
 const $=s=>document.querySelector(s),cv=$('#c'),x=cv.getContext('2d'),gr=document.createElement('canvas'),g=gr.getContext('2d');
 const R=(a,b)=>b===undefined?Math.random()*a:a+Math.random()*(b-a),C=(v,a,b)=>Math.max(a,Math.min(b,v)),PI=Math.PI;
@@ -240,6 +240,10 @@ const BOSS_TIME=300,BOSS_MIN=4; // секунд на убийство босса
 const RW_MIN=.2,FIRST_MUL=.5; // награда за слабые волны: ступень врагов / ступень танка, но не меньше RW_MIN; бонус за первое прохождение волны
 const AP_FREE_TIER=1,REPAIR_COST=0,MINAM=.5,HE_SPL=1.2,HE_MIN=.15; // бронебойные бесплатны до этой ступени; цена ремонта (×ступень); минимум боекомплекта для боя; радиус осколков фугаса (клеток); минимум урона фугаса без пробития
 const TANKS=TD.map(a=>({id:a[0]+a[1]+a[2].toLowerCase(),c:a[0],t:a[1],v:a[2],n:a[3],hp:a[4]*10,sp:a[5],tt:a[6],dm:Math.round(a[7]*100)/10,cd:a[8],rk:a[9],r:{l:.5,m:.55,h:.65}[a[0]]+.01*(a[1]-1),wt:{l:8+1.5*(a[1]-1),m:22+2.5*(a[1]-1),h:40+4*(a[1]-1)}[a[0]],ab:Math.round(lerp(ARM[a[0]][0],ARM[a[0]][1],a[1])),pn:Math.round(lerp(PEN[a[0]][0],PEN[a[0]][1],a[1])),cal:Math.round(lerp(CAL[a[0]][0],CAL[a[0]][1],a[1]))}));
+const TANKS0=TANKS.map(t=>({...t}));
+let TSO={}; // правки админа: id → {hp,sp,tt,dm,cd,rk,ab,pn,cal,wt,n}
+function tsApply(map){TSO=map||{};TANKS.forEach((t,i)=>{Object.assign(t,TANKS0[i]);const o=TSO[t.id];t.ed=!!o;if(o)for(const k in o)t[k]=o[k]})}
+function tsLoad(){return fetch(API+'/api/tstats').then(r=>r.json()).then(j=>{tsApply(j.stats);if(typeof ovStat=='function')try{ovStat()}catch(e){}}).catch(()=>{})}
 const capOf=t=>Math.round(AMMOT/t.cd);
 const crB=t=>({l:10,m:8,h:5}[t.c]+.5*(t.t-1)); // базовый шанс крита по борту: у лёгких выше, у тяжёлых ниже
 const FIRST={l:0,m:2000,h:5000};  // цена первого танка класса в монетах (лёгкий даётся бесплатно)
@@ -985,11 +989,66 @@ function dqOpen(){if(!tok)return needLogin('📋 Задания');
   w.querySelectorAll('[data-q]').forEach(b=>b.onclick=()=>{w.querySelectorAll('[data-q]').forEach(x=>x.disabled=true);const q=b.dataset.q;
    api('/api/dq/claim',{i:q=='b'?'b':+q}).then(j=>{DQ=j.dq;if(j.items)INV=j.items;if(j.coins!==undefined)coFrom({bal:j.coins});updSb();dqLabel();dqOpen();ppShow('Награда получена',j.gold?'+'+j.gold+' 🪙':(j.key?'🔑 Вам выпал ключ!':'В этот раз ключ не выпал.'),[['Ок']])}).catch(e=>{dqOpen();ppShow('Не получилось',e&&e.error=='not_done'?'Задание ещё не выполнено.':'Нет связи с сервером.',[['Ок']])})})})}
 $('#dqb').onclick=dqOpen;
+/* ===== Админ-панель (видна только админам, включается переключателем в профиле) ===== */
+const ADF=[['n','Название','text'],['hp','Здоровье'],['sp','Скорость'],['tt','Поворот башни'],['dm','Урон за выстрел'],['cd','Перезарядка, с'],['rk','Рикошет, %'],['ab','Броня'],['pn','Пробитие'],['cal','Калибр'],['wt','Вес']];
+let ADMIN=false;
+function adLoad(){ADMIN=false;const b=$('#adb');if(b)b.style.display='none';let on=false;try{on=localStorage.getItem('rm-adm')=='1'}catch(e){}if(!tok||!on)return Promise.resolve();return api('/api/admin/me',{}).then(j=>{ADMIN=!!(j&&j.admin);if(b)b.style.display=ADMIN?'':'none'}).catch(()=>{})}
+function adOpen(tab){if(!ADMIN)return;tab=tab||'t';
+ const w=invWin('<h2>⚙ Админ-панель</h2><div class="oa" style="margin-bottom:8px"><button id="adt1"'+(tab=='t'?' style="outline:2px solid #f2c14e"':'')+'>Танки</button><button id="adt2"'+(tab=='e'?' style="outline:2px solid #f2c14e"':'')+'>События</button><button id="adt3"'+(tab=='c'?' style="outline:2px solid #f2c14e"':'')+'>Цены</button></div><div id="adc"></div>');
+ $('#adt1').onclick=()=>adOpen('t');$('#adt2').onclick=()=>adOpen('e');$('#adt3').onclick=()=>adOpen('c');
+ if(tab=='e')adEvents($('#adc'));else if(tab=='c')adCfg($('#adc'));else adTanks($('#adc'))}
+function adTanks(host){
+ const opts=TANKS.map(t=>'<option value="'+t.id+'">'+CN[t.c]+' '+t.t+' · '+t.n+(t.ed?' ✎':'')+'</option>').join('');
+ host.innerHTML='<p>Характеристики танков. Правки сохраняются на сервере и действуют у всех игроков (после обновления страницы). ✎ — танк изменён.</p><div class="dt"><div class="dh"><div><b>ТТХ танка</b></div></div><select id="adt" style="width:100%;padding:8px;border-radius:8px;margin:6px 0">'+opts+'</select><div id="adf" style="display:grid;grid-template-columns:1fr 110px;gap:6px 10px;align-items:center;text-align:left"></div><div class="oa" style="margin-top:10px"><button id="ads">Сохранить</button><button id="adr">Сбросить к стандарту</button></div><small id="adm"></small></div>';
+ const sel=$('#adt'),box=$('#adf'),msg=$('#adm');
+ const fill=()=>{const t=TK(sel.value),d=TANKS0[TANKS.indexOf(t)];box.innerHTML=ADF.map(f=>'<label>'+f[1]+'<small style="display:block;opacity:.6">станд.: '+d[f[0]]+'</small></label><input data-k="'+f[0]+'" type="'+(f[2]||'number')+'" step="any" value="'+String(t[f[0]]).replace(/"/g,'&quot;')+'" style="padding:7px;border-radius:8px;border:1px solid #3a4a6a;background:#0e1a33;color:inherit;width:100%;box-sizing:border-box">').join('');msg.textContent=''};
+ sel.onchange=fill;fill();
+ const send=body=>{$('#ads').disabled=$('#adr').disabled=true;return api('/api/admin/tank',body).then(j=>{tsApply(j.stats);const v=sel.value;sel.innerHTML=TANKS.map(t=>'<option value="'+t.id+'">'+CN[t.c]+' '+t.t+' · '+t.n+(t.ed?' ✎':'')+'</option>').join('');sel.value=v;fill();msg.textContent='✅ Сохранено. Игрокам нужно обновить страницу.';$('#ads').disabled=$('#adr').disabled=false;try{ovStat()}catch(e){}}).catch(e=>{msg.textContent='Ошибка: '+(e&&(e.key?e.error+' ('+e.key+')':e.error)||'нет связи');$('#ads').disabled=$('#adr').disabled=false})};
+ $('#ads').onclick=()=>{const t=TK(sel.value),d=TANKS0[TANKS.indexOf(t)],set={};box.querySelectorAll('input').forEach(i=>{const k=i.dataset.k,v=i.type=='number'?(i.value===''?'':Number(i.value)):i.value.trim();set[k]=(v===''||v==d[k])?'':v});send({id:t.id,set})};
+ $('#adr').onclick=()=>send({id:sel.value,reset:true})}
+
+const INP='padding:7px;border-radius:8px;border:1px solid #3a4a6a;background:#0e1a33;color:inherit;width:100%;box-sizing:border-box';
+
+function adCfg(host){
+ host.innerHTML='<p>Цены и настройки экономики. Сохраняются на сервере и действуют сразу у всех (до 15 секунд на обновление). Пустое поле — стандартное значение (или то, что задано в Cloudflare).</p><div class="dt" style="text-align:left"><div id="adcf" style="display:grid;grid-template-columns:1fr 120px;gap:6px 10px;align-items:center"></div><div class="oa" style="margin-top:10px"><button id="acs">Сохранить</button></div><small id="adm"></small></div>';
+ const msg=$('#adm'),box=$('#adcf');let items=[];
+ const draw=()=>{box.innerHTML=items.map(i=>'<label>'+i.l+'<small style="display:block;opacity:.6">'+(i.v?'изменено · ':'')+'стандарт: '+(i.cf||i.d)+(i.cf?' (Cloudflare)':'')+'</small></label><input data-k="'+i.k+'" value="'+i.v.replace(/"/g,'&quot;')+'" placeholder="'+(i.cf||i.d)+'" style="'+INP+'">').join('')};
+ const run=b=>api('/api/admin/cfg',b).then(j=>{items=j.items;draw();return j});
+ run({}).catch(()=>{msg.textContent='Нет связи с сервером.'});
+ $('#acs').onclick=()=>{const set={};box.querySelectorAll('input').forEach(i=>{set[i.dataset.k]=i.value.trim()});$('#acs').disabled=true;run({set}).then(()=>{msg.textContent='✅ Сохранено.';$('#acs').disabled=false;try{invLoad()}catch(e){}}).catch(e=>{msg.textContent='Ошибка: неверное значение'+(e&&e.key?' ('+e.key+')':'');$('#acs').disabled=false})}}
+function adLeft(ms){if(ms<=0)return 'истекло';const d=Math.floor(ms/864e5),h=Math.floor(ms%864e5/36e5);return (d?d+' д ':'')+h+' ч'}
+function adEvents(host,edit){
+ host.innerHTML='<p>События и боссы. Изменения видны игрокам сразу (плашки на главном экране обновляются раз в минуту).</p><div id="ade"></div><div class="dt" id="adn"></div><small id="adm"></small>';
+ const msg=$('#adm'),call=b=>api('/api/admin/event',b).then(j=>{if(j&&j.error)throw j;return j}),fail=e=>{msg.textContent='Ошибка: '+(e&&e.error||'нет связи')},again=()=>{evLoad();adEvents(host)};
+ const F=(id,l,v,ty,ph)=>'<label>'+l+'</label><input id="'+id+'" type="'+(ty||'text')+'" step="any" value="'+String(v==null?'':v).replace(/"/g,'&quot;')+'" placeholder="'+(ph||'')+'" style="'+INP+'">';
+ const form=e=>{const n=$('#adn');n.innerHTML='<div class="dh"><div><b>'+(e?'Изменить событие':'Новое событие')+'</b></div></div><div style="display:grid;grid-template-columns:1fr 130px;gap:6px 10px;align-items:center;text-align:left">'+
+  (e?'':'<label>Тип</label><select id="af-type" style="'+INP+'"><option value="boss">Мировой босс</option><option value="news">Объявление</option></select>')+
+  F('af-title','Название',e?e.title:'Мировой босс')+F('af-text','Текст',e?e.text:'')+(e?'':F('af-hp','Здоровье босса',100000,'number'))+
+  F('af-days',e?'Завершить через, дней':'Длительность, дней',e?'':7,'number',e?'не менять':'')+F('af-min','Танки от уровня',e?e.minl:8,'number')+F('af-max','Танки до уровня',e?e.maxl:10,'number')+
+  F('af-att','Попыток в день',e?e.att:3,'number')+F('af-rst','Платных сбросов',e?e.rst:3,'number')+F('af-pr','Цены сбросов, 🪙',e&&e.prices?JSON.parse(e.prices).join(','):'','text','1000,1500,2250')+
+  '</div><div class="oa" style="margin-top:10px"><button id="af-ok">'+(e?'Сохранить':'Создать')+'</button>'+(e?'<button id="af-no">Отмена</button>':'')+'</div>';
+  const g=i=>$('#'+i).value.trim();
+  $('#af-ok').onclick=()=>{const b={do:e?'set':'new',title:g('af-title'),text:g('af-text'),days:g('af-days'),min:g('af-min'),max:g('af-max'),att:g('af-att'),rst:g('af-rst'),prices:g('af-pr')};if(e)b.id=e.id;else{b.type=$('#af-type').value;b.hp=g('af-hp');if(!b.days)b.days='7'}
+   $('#af-ok').disabled=true;call(b).then(again).catch(e=>{fail(e);$('#af-ok').disabled=false})};
+  if(e)$('#af-no').onclick=()=>form(null)};
+ call({do:'list'}).then(j=>{const L=j.events||[],box=$('#ade'),now=Date.now();
+  box.innerHTML=L.length?L.map((e,i)=>{const boss=e.type=='boss',st=e.state=='on'&&e.to_t>now?'идёт':e.state=='off'?'остановлено':e.state=='end'||e.to_t<=now?'завершено':e.state;
+   return '<div class="dt" style="text-align:left"><div class="dh"><div><b>'+(boss?'👹 ':'📣 ')+e.title.replace(/</g,'&lt;')+'</b><span>'+st+' · '+(boss?'HP '+e.hp_now+' / '+e.hp+' · ':'')+'до: '+adLeft(e.to_t-now)+'</span></div></div><div class="oa" style="flex-wrap:wrap">'+
+    '<button data-a="ed" data-i="'+i+'">✎ Изменить</button>'+(e.state=='off'?'<button data-a="start" data-i="'+i+'">▶ Запустить</button>':'<button data-a="stop" data-i="'+i+'">⏸ Остановить</button>')+
+    (boss?'<button data-a="hp" data-i="'+i+'">❤ Здоровье</button>':'')+'<button data-a="del" data-i="'+i+'">🗑 Удалить</button></div></div>'}).join(''):'<p>Событий пока нет.</p>';
+  box.querySelectorAll('[data-a]').forEach(b=>b.onclick=()=>{const e=L[+b.dataset.i],a=b.dataset.a;
+   if(a=='ed'){form(e);$('#adn').scrollIntoView({block:'nearest'});return}
+   if(a=='del'){if(!confirm('Удалить «'+e.title+'» вместе с уроном и попытками игроков? Это нельзя отменить.'))return;call({do:'del',id:e.id}).then(again).catch(fail);return}
+   if(a=='hp'){const v=prompt('Новое текущее здоровье босса (сейчас '+e.hp_now+' из '+e.hp+')',e.hp_now);if(v===null)return;call({do:'hp',id:e.id,hp:v}).then(again).catch(fail);return}
+   call({do:a,id:e.id}).then(again).catch(fail)});
+  form(edit||null)}).catch(fail)}
+$('#adb').onclick=adOpen;
+
 
 (function(){const tr=$('#evt');if(tr)tr.addEventListener('scroll',evDots,{passive:true});setInterval(()=>{if(!$('#ov').classList.contains('h')&&!$('#evw').classList.contains('on'))evLoad()},60000)})();
 function mzFit(){const z=(innerWidth>=900&&innerHeight>=600)?Math.max(1,Math.min(2.2,Math.min(innerWidth/1000,innerHeight/800))):1;document.documentElement.style.setProperty('--mz',z.toFixed(2))}
 mzFit();addEventListener('resize',mzFit);
-evLoad();invLoad();dqLoad();tinit();renderAuth();ovStat();try{const m=sessionStorage.getItem('tk-msg');if(m){sessionStorage.removeItem('tk-msg');$('#t2').textContent=m;$('#t2').style.color='#f2c14e'}}catch(e){}checkSeason().then(cloudLoad,cloudLoad);
+tsLoad();adLoad();evLoad();invLoad();dqLoad();tinit();renderAuth();ovStat();try{const m=sessionStorage.getItem('tk-msg');if(m){sessionStorage.removeItem('tk-msg');$('#t2').textContent=m;$('#t2').style.color='#f2c14e'}}catch(e){}checkSeason().then(cloudLoad,cloudLoad);
 requestAnimationFrame(loop);
 </script>
 </body>
