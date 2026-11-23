@@ -129,6 +129,7 @@ a.btn{display:inline-block;background:#1b2838;color:#fff;text-decoration:none;bo
   <div class="cmh">Никнейм</div>
   <div class="cmnk"><input id="cmin" maxlength="16" placeholder="Новый ник (3–16 символов)" autocomplete="off"><button id="cmok">Сменить</button></div>
   <p class="cmt" id="cmpr"></p>
+  <label id="cmad" style="display:none;margin:8px 0;font-size:.9rem"><input type="checkbox" id="cmadc"> ⚙ Админ-режим (в «Танчиках» появится кнопка «Админ»)</label>
   <p id="cmmsg" style="min-height:1.3em;color:var(--rustHi);font-size:.9rem;margin:6px 0"></p>
   <div class="row2"><button id="cmcl">Закрыть</button></div>
 </div></div>
@@ -253,6 +254,7 @@ function cmRender(){
     items.forEach(function(id){var b=document.createElement('button');b.textContent=id?PFX.name(id):'Нет';if(id===cur)b.className='on';
       b.onclick=function(){var fr=slot==='fr'?id:j.fr,dc=slot==='dc'?id:j.dc,bg=slot==='bg'?id:(j.bg||'');api('/api/cos/equip',{fr:fr,dc:dc,bg:bg}).then(function(r){CM=r;$('cmmsg').textContent='';cmRender()}).catch(function(e){$('cmmsg').textContent=cmErr(e)})};host.appendChild(b)});
   }
+  (function(){var l=$('cmad'),c=$('cmadc');l.style.display=j.admin?'':'none';if(!j.admin)return;try{c.checked=localStorage.getItem('rm-adm')=='1'}catch(e){}c.onchange=function(){try{localStorage.setItem('rm-adm',c.checked?'1':'0')}catch(e){}}})();
   fill($('cmfr'),'fr:',j.fr,'fr');fill($('cmdc'),'dc:',j.dc,'dc');fill($('cmbg'),'bg:',j.bg||'','bg');
   $('cmempty').textContent=j.owned.length?'Рамки, украшения и подложки выдаются за победу над мировым боссом в «Танчиках».':'Пока ничего нет. Рамку, украшение и подложку получают все, кто нанёс урон мировому боссу, когда его победят.';
   $('cmpr').textContent=j.nickFree?'Первая смена ника бесплатна.':'Смена ника: '+j.nickPrice+' 💎 (у вас '+j.gems+' 💎). Кристаллы — в «Танчиках».';
