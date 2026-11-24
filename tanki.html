@@ -243,9 +243,11 @@ const AP_FREE_TIER=1,REPAIR_COST=0,MINAM=.5,HE_SPL=1.2,HE_MIN=.15; // броне
 const TANKS=TD.map(a=>({id:a[0]+a[1]+a[2].toLowerCase(),c:a[0],t:a[1],v:a[2],n:a[3],hp:a[4]*10,sp:a[5],tt:a[6],dm:Math.round(a[7]*100)/10,cd:a[8],rk:a[9],r:{l:.5,m:.55,h:.65}[a[0]]+.01*(a[1]-1),wt:{l:8+1.5*(a[1]-1),m:22+2.5*(a[1]-1),h:40+4*(a[1]-1)}[a[0]],ab:Math.round(lerp(ARM[a[0]][0],ARM[a[0]][1],a[1])),pn:Math.round(lerp(PEN[a[0]][0],PEN[a[0]][1],a[1])),cal:Math.round(lerp(CAL[a[0]][0],CAL[a[0]][1],a[1]))}));
 const TANKS0=TANKS.map(t=>({...t}));
 let TSO={}; // правки админа: id → {hp,sp,tt,dm,cd,rk,ab,pn,cal,wt,n}
-let BOTR={}; // эталоны врагов: класс+ступень → характеристики. Берутся из заводских танков игрока и правок «Боты», правки танков игрока их НЕ меняют
+let BOTR={},BOTD={}; // ТТХ врагов (класс+ступень → те же поля, что у танка игрока). BOTD — заводские значения, BOTR — с правками «Боты» (id bt:<класс><ступень>)
 function tsApply(map){TSO=map||{};TANKS.forEach((t,i)=>{Object.assign(t,TANKS0[i]);const o=TSO[t.id];t.ed=!!o;if(o)for(const k in o)t[k]=o[k]});
- BOTR={};for(const c of['l','m','h'])for(let n=1;n<=10;n++){const b=TANKS0.find(q=>q.c==c&&q.t==n&&q.v!='B')||TANKS0[0],o=TSO['bot:'+c+n];BOTR[c+n]=Object.assign({},b,o||{},{ed:!!o})}}
+ BOTR={};BOTD={};for(const c of['l','m','h'])for(let n=1;n<=10;n++){const b=TANKS0.find(q=>q.c==c&&q.t==n&&q.v!='B')||TANKS0[0],o=TSO['bt:'+c+n],
+  d={hp:Math.round(b.dm*HK*100)/100,dm:Math.round(b.hp/HD*100)/100,sp:b.sp,tt:b.tt,cd:b.cd,rk:0,ab:b.ab,pn:b.pn,wt:b.wt}; // заводские: здоровье врага = HK попаданий равного игрока, урон = 1/HD здоровья игрока
+  BOTD[c+n]=d;BOTR[c+n]=Object.assign({},d,o||{},{ed:!!o,d})}}
 tsApply({});
 function tsLoad(){return fetch(API+'/api/tstats').then(r=>r.json()).then(j=>{tsApply(j.stats);if(typeof ovStat=='function')try{ovStat()}catch(e){}}).catch(()=>{})}
 const capOf=t=>Math.round(AMMOT/t.cd);
@@ -484,8 +486,8 @@ function hitZone(ang,vx,vy){const d=Math.abs(ad(Math.atan2(vy,vx),ang+PI));retur
 const pens=(pn,ar,h)=>pn*(1+R(-PENVAR,PENVAR))>=ar[h.z]/Math.cos(h.al); // пробитие ±25% против брони зоны / cos угла
 const etier=w=>Math.max(1,Math.min(10,1+Math.floor((w-1)/ETIER_WAVES)+CLS_OFF[TK().c]));
 const refT=(c,t)=>BOTR[c+t]||BOTR.l1; // танк игрока того же класса и ступени — эталон для врага
-function mk(t){const Y=TY[t],r=Y.r*S;const[px,py]=spawnPos(r);const et=etier(wave),f=refT(Y.cl,et),bv=((wave/5|0)-1)%3,H_=Math.max(1,Math.ceil(f.dm*HK*Y.hpk)),ab=f.ab*Y.ark;eload(t,et);if(t=='B')bload(bv);
- return{type:t,tier:et,hp:H_,mh:H_,bv,sp:+(f.sp*Y.spk).toFixed(2),c:t=='B'?['#8c1f1f','#a0501a','#1f5a8c'][bv]:Y.c,r:Y.r,pts:Math.round(Y.pts*(1+.5*(et-1))),cdMax:Y.cd,x:px,y:py,a:PI/2,t:PI/2,cd:R(1,2),ph:R(6),w:0,rc:0,fl:0,tr:0,ar:[ab,ab*ASIDE,ab*AREAR],pen:f.pn*Y.pnk,dmg:f.hp/HD*Y.dmk,wt:f.wt*Y.wtk,vk:Y.vk||1,blife:Y.bl||1.3,aimT:0}}
+function mk(t){const Y=TY[t],r=Y.r*S;const[px,py]=spawnPos(r);const et=etier(wave),f=refT(Y.cl,et),bv=((wave/5|0)-1)%3,H_=Math.max(1,Math.ceil(f.hp*Y.hpk)),ab=f.ab*Y.ark;eload(t,et);if(t=='B')bload(bv);
+ return{type:t,tier:et,hp:H_,mh:H_,bv,sp:+(f.sp*Y.spk).toFixed(2),c:t=='B'?['#8c1f1f','#a0501a','#1f5a8c'][bv]:Y.c,r:Y.r,pts:Math.round(Y.pts*(1+.5*(et-1))),cdMax:Y.cd*(f.cd/f.d.cd),ak:f.d.tt/f.tt,rk:f.rk,x:px,y:py,a:PI/2,t:PI/2,cd:R(1,2),ph:R(6),w:0,rc:0,fl:0,tr:0,ar:[ab,ab*ASIDE,ab*AREAR],pen:f.pn*Y.pnk,dmg:f.dm*Y.dmk,wt:f.wt*Y.wtk,vk:Y.vk||1,blife:Y.bl||1.3,aimT:0}}
 // состав волны: какие типы врагов открыты к этой волне; снайперов не больше 1 (с 40-й волны 2), ремонтников не больше 2
 function compose(){const n=Math.min(3+wave*2,WAVE_MAX),av=Object.keys(UNLOCK).filter(k=>wave>=UNLOCK[k]),cnt={},list=[],cap=k=>k=='Z'?(wave<40?1:2):k=='R'?2:99;
  for(let i=0;i<n;i++){let tot=0;const w=av.map(k=>{const v=(cnt[k]||0)>=cap(k)?0:WTS[k]*(wave-UNLOCK[k]<5?1.6:1);tot+=v;return v});let r=Math.random()*tot,k=av[0];for(let j=0;j<av.length;j++){if((r-=w[j])<=0){k=av[j];break}}cnt[k]=(cnt[k]||0)+1;list.push(k)}
@@ -560,7 +562,7 @@ function update(dt){camUpd();
   moveT(e,Math.cos(ang)*mv,Math.sin(ang)*mv,dt);e.a=la(e.a,mv<0?ang+PI:ang,dt*6);
   if(!(ty=='Z'&&e.aimT>0&&e.aimT<=.4))e.t=la(e.t,Math.atan2(dy,dx),dt*(ty=='h'?2:ty=='Z'?2.2:3.5));e.cd-=dt;
   if(ty=='Z'){ // снайпер: красная линия 1,2 с (первые 0,8 с следит, последние 0,4 с замирает), потом быстрый выстрел
-   if(e.aimT>0){e.aimT-=dt;if(e.aimT<=0){shoot(e,false,0);e.cd=e.cdMax*R(.9,1.2)}}else if(e.cd<=0&&d<28*S)e.aimT=1.2}
+   if(e.aimT>0){e.aimT-=dt;if(e.aimT<=0){shoot(e,false,0);e.cd=e.cdMax*R(.9,1.2)}}else if(e.cd<=0&&d<28*S)e.aimT=1.2*(e.ak||1)}
   else if(ty=='R'){e.hc=(e.hc==null?2:e.hc)-dt;if(e.hc<=0){e.hc=3;healNear(e)}}
   else{if(e.br>0){e.bc-=dt;if(e.bc<=0){shoot(e,false,.04);e.br--;e.bc=.13}}if(e.cd<=0&&d<(ty=='M'?20:14)*S&&inV(e,S*.6)){efire(e);e.cd=e.cdMax*R(.8,1.3)*(ty=='B'&&e.hp<e.mh/2?.6:1)}}
   for(const o of en)if(o!==e){const ex=e.x-o.x,ey=e.y-o.y,dd=Math.hypot(ex,ey),m=(e.r+o.r)*S;if(dd<m&&dd>.01){e.x+=ex/dd*(m-dd)*.5;e.y+=ey/dd*(m-dd)*.5}}
@@ -570,7 +572,7 @@ function update(dt){camUpd();
   for(const o of ob)if(b.life>0&&b.x>o.x&&b.x<o.x+o.w&&b.y>o.y&&b.y<o.y+o.h){b.life=0;spark(b.x,b.y);if(!o.steel&&--o.hp<=0){crate(o);o.dead=1}}
   if(b.life<=0)continue;
   if(b.own){for(const e of en)if(!e.dead&&!(b.h&&b.h.includes(e))&&Math.hypot(b.x-e.x,b.y-e.y)<e.r*S){if(b.pr)(b.h=b.h||[]).push(e);else b.life=0;e.fl=.08;spark(b.x,b.y);sfx(3);{const hz=hitZone(e.a,b.vx,b.vy);
-   const pr=b.pn!=null?penr(b.pn,e.ar,hz):{ok:true,f:1};if(!pr.ok&&!b.he){if(!(e.npT>0)){dtxt(e.x,e.y-e.r*S*1.5-S*1.25,'Не пробил','#aab4c0');e.npT=.5}}
+   const pr=b.pn!=null?penr(b.pn,e.ar,hz):{ok:true,f:1};if(e.rk>0&&hz.z==0&&Math.random()*100<e.rk){if(!(e.npT>0)){dtxt(e.x,e.y-e.r*S*1.5-S*1.25,'Рикошет','#9fd8ff');e.npT=.5}}else if(!pr.ok&&!b.he){if(!(e.npT>0)){dtxt(e.x,e.y-e.r*S*1.5-S*1.25,'Не пробил','#aab4c0');e.npT=.5}}
    else{let dd=(b.dm||1)*(pr.ok?1:Math.max(HE_MIN,pr.f))*(b.he&&e.heRes||1),cr=false;if(b.pl&&pr.ok&&TKc.cr>0&&hz.z>0&&Math.random()*100<TKc.cr){dd*=PCRIT_MUL;cr=true} // крит: пробитие в борт/корму
    const dl=Math.min(dd,Math.max(e.hp,0));WS.d+=dl;if(b.pl&&TKc.vamp&&!over)p.hp=Math.min(p.mhp,p.hp+dl*TKc.vamp);
    if(cr)dtxt(e.x,e.y-e.r*S*1.5-S*1.25,'КРИТ '+Math.round(dd*10)/10,'#ff8a2a',1);else dnum(e,dd);e.hp-=dd;if(b.he)splash(b,e,b.dm||1)}}if(e.hp<=0)kill(e);if(!b.pr)break}}
@@ -1001,19 +1003,18 @@ function adOpen(tab){if(!ADMIN)return;tab=tab||'t';
  const w=invWin('<h2>⚙ Админ-панель</h2><div class="oa" style="margin-bottom:8px"><button id="adt1"'+(tab=='t'?' style="outline:2px solid #f2c14e"':'')+'>Танки</button><button id="adt5"'+(tab=='b'?' style="outline:2px solid #f2c14e"':'')+'>Боты</button><button id="adt2"'+(tab=='e'?' style="outline:2px solid #f2c14e"':'')+'>События</button><button id="adt3"'+(tab=='c'?' style="outline:2px solid #f2c14e"':'')+'>Цены</button><button id="adt4"'+(tab=='d'?' style="outline:2px solid #f2c14e"':'')+'>Украшения</button></div><div id="adc"></div>');
  $('#adt1').onclick=()=>adOpen('t');$('#adt2').onclick=()=>adOpen('e');$('#adt3').onclick=()=>adOpen('c');$('#adt4').onclick=()=>adOpen('d');$('#adt5').onclick=()=>adOpen('b');
  if(tab=='e')adEvents($('#adc'));else if(tab=='c')adCfg($('#adc'));else if(tab=='d')adCos($('#adc'));else if(tab=='b')adBots($('#adc'));else adTanks($('#adc'))}
-// Характеристики врагов: по классу и ступени. Не зависят от танков игрока
-const ADB=[['dm','Здоровье бота (база)'],['hp','Урон бота по игроку (база)'],['sp','Скорость'],['ab','Броня'],['pn','Пробитие'],['wt','Вес']];
+// ТТХ ботов: те же характеристики, что у танка игрока, по классу и ступени. Не зависят от танков игрока
+const ADB=[['hp','Здоровье'],['sp','Скорость'],['tt','Поворот башни'],['dm','Урон за выстрел'],['cd','Перезарядка, с'],['rk','Рикошет, %'],['ab','Броня'],['pn','Пробитие'],['wt','Вес']];
 function adBots(host){
  const ids=[];for(const c of['l','m','h'])for(let n=1;n<=10;n++)ids.push(c+n);
- const optHtml=()=>ids.map(id=>'<option value="'+id+'">Враги '+CN[id[0]]+' · ступень '+id.slice(1)+(BOTR[id].ed?' ✎':'')+'</option>').join('');
- host.innerHTML='<p>Характеристики ботов. Это отдельные настройки: правки танков игрока на ботов не влияют, а правки ботов не влияют на игрока. Враги ступени N берутся из этой таблицы, а затем множатся на свой тип (разведчик, снайпер, босс и т.д.). ✎ — изменено.</p><div class="dt"><div class="dh"><div><b>ТТХ ботов</b></div></div><select id="abt" style="width:100%;padding:8px;border-radius:8px;margin:6px 0">'+optHtml()+'</select><div id="abf" style="display:grid;grid-template-columns:1fr 110px;gap:6px 10px;align-items:center;text-align:left"></div><div class="oa" style="margin-top:10px"><button id="abs">Сохранить</button><button id="abr">Сбросить к стандарту</button></div><small id="abm"></small></div>';
+ const optHtml=()=>ids.map(id=>'<option value="'+id+'">Боты '+CN[id[0]]+' · ступень '+id.slice(1)+(BOTR[id].ed?' ✎':'')+'</option>').join('');
+ host.innerHTML='<p>ТТХ ботов. Те же характеристики, что у танка игрока, но отдельные: правки танков игрока на ботов не влияют, а правки ботов не влияют на игрока. Боты ступени N берутся из этой таблицы, затем значения множатся на тип врага (разведчик, снайпер, босс и т.д.). Перезарядка и поворот башни меняют темп врага пропорционально заводскому значению. ✎ — изменено.</p><div class="dt"><div class="dh"><div><b>ТТХ ботов</b></div></div><select id="abt" style="width:100%;padding:8px;border-radius:8px;margin:6px 0">'+optHtml()+'</select><div id="abf" style="display:grid;grid-template-columns:1fr 110px;gap:6px 10px;align-items:center;text-align:left"></div><div class="oa" style="margin-top:10px"><button id="abs">Сохранить</button><button id="abr">Сбросить к стандарту</button></div><small id="abm"></small></div>';
  const sel=$('#abt'),box=$('#abf'),msg=$('#abm');
- const base=id=>BOTR[id];
- const fill=()=>{const id=sel.value,b=base(id),d=Object.assign({},TANKS0.find(q=>q.c==id[0]&&q.t==id.slice(1)&&q.v!='B')||TANKS0[0]);box.innerHTML=ADB.map(f=>'<label>'+f[1]+'<small style="display:block;opacity:.6">станд.: '+d[f[0]]+'</small></label><input data-k="'+f[0]+'" type="number" step="any" value="'+b[f[0]]+'" style="padding:7px;border-radius:8px;border:1px solid #3a4a6a;background:#0e1a33;color:inherit;width:100%;box-sizing:border-box">').join('');msg.textContent=''};
+ const fill=()=>{const id=sel.value,b=BOTR[id],d=BOTD[id];box.innerHTML=ADB.map(f=>'<label>'+f[1]+'<small style="display:block;opacity:.6">станд.: '+d[f[0]]+'</small></label><input data-k="'+f[0]+'" type="number" step="any" value="'+b[f[0]]+'" style="padding:7px;border-radius:8px;border:1px solid #3a4a6a;background:#0e1a33;color:inherit;width:100%;box-sizing:border-box">').join('');msg.textContent=''};
  sel.onchange=fill;fill();
  const send=body=>{$('#abs').disabled=$('#abr').disabled=true;return api('/api/admin/tank',body).then(j=>{tsApply(j.stats);const v=sel.value;sel.innerHTML=optHtml();sel.value=v;fill();msg.textContent='✅ Сохранено. Игрокам нужно обновить страницу.';$('#abs').disabled=$('#abr').disabled=false}).catch(e=>{msg.textContent='Ошибка: '+(e&&(e.key?e.error+' ('+e.key+')':e.error)||'нет связи');$('#abs').disabled=$('#abr').disabled=false})};
- $('#abs').onclick=()=>{const id=sel.value,d=TANKS0.find(q=>q.c==id[0]&&q.t==id.slice(1)&&q.v!='B')||TANKS0[0],set={};box.querySelectorAll('input').forEach(i=>{const k=i.dataset.k,v=i.value===''?'':Number(i.value);set[k]=(v===''||v==d[k])?'':v});send({id:'bot:'+id,set})};
- $('#abr').onclick=()=>send({id:'bot:'+sel.value,reset:true})}
+ $('#abs').onclick=()=>{const id=sel.value,d=BOTD[id],set={};box.querySelectorAll('input').forEach(i=>{const k=i.dataset.k,v=i.value===''?'':Number(i.value);set[k]=(v===''||v==d[k])?'':v});send({id:'bt:'+id,set})};
+ $('#abr').onclick=()=>send({id:'bt:'+sel.value,reset:true})}
 function adTanks(host){
  const opts=TANKS.map(t=>'<option value="'+t.id+'">'+CN[t.c]+' '+t.t+' · '+t.n+(t.ed?' ✎':'')+'</option>').join('');
  host.innerHTML='<p>Характеристики танков. Правки сохраняются на сервере и действуют у всех игроков (после обновления страницы). ✎ — танк изменён.</p><div class="dt"><div class="dh"><div><b>ТТХ танка</b></div></div><select id="adt" style="width:100%;padding:8px;border-radius:8px;margin:6px 0">'+opts+'</select><div id="adf" style="display:grid;grid-template-columns:1fr 110px;gap:6px 10px;align-items:center;text-align:left"></div><div class="oa" style="margin-top:10px"><button id="ads">Сохранить</button><button id="adr">Сбросить к стандарту</button></div><small id="adm"></small></div>';
