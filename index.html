@@ -65,6 +65,9 @@ a.btn{display:inline-block;background:#1b2838;color:#fff;text-decoration:none;bo
 .pf .av2{width:72px;height:72px;border-radius:50%;border:2px solid var(--rust);margin:2px auto 6px;display:block}
 .pf h3{margin:0 0 12px}.pf .lnk{display:flex;align-items:center;justify-content:space-between;gap:10px;border-top:1px solid var(--line);padding:10px 2px;text-align:left}
 .pf .lnk b{display:block}.pf .lnk small{color:var(--muted)}.pf .okk{color:#6fe08a;white-space:nowrap}
+.lb tr.bn td{height:68px;font-weight:600;text-shadow:0 1px 3px #000,0 0 10px rgba(0,0,0,.85)}
+.lb tr.bn td a{font-size:1.05rem}
+.lb tr.bn td.bs{text-align:right;padding-right:12px;line-height:1.25}.lb tr.bn td.bs b{font-size:1.15rem;color:#fff}.lb tr.bn td.bs small{display:block;font-weight:500;color:#e6e0d0;font-size:.78rem}
 .plst{margin:4px 0 0;text-align:left;font-size:.9rem}
 .plst div{display:flex;justify-content:space-between;gap:10px;border-top:1px solid var(--line);padding:6px 2px}
 .plst b{font-weight:600}.plst span{color:var(--muted)}
@@ -386,11 +389,18 @@ function copyText(t,b){
   function old(){var a=document.createElement('textarea');a.value=t;a.style.cssText='position:fixed;opacity:0';document.body.appendChild(a);a.select();try{document.execCommand('copy');ok()}catch(e){b.textContent='Выделите и скопируйте'}document.body.removeChild(a)}
   if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(t).then(ok,old);else old();
 }
-function avAppend(host,p){if(window.PFX&&PFX.has(p.f)){host.appendChild(PFX.el(p.a,p.n,p.f,24));return}if(p.a&&p.a.indexOf('https://')===0){var im=document.createElement('img');im.className='av';im.src=p.a;im.alt='';host.appendChild(im)}}
+function avAppend(host,p,sz){if(window.PFX&&PFX.has(p.f)){host.appendChild(PFX.el(p.a,p.n,p.f,sz||24));return}if(p.a&&p.a.indexOf('https://')===0){var im=document.createElement('img');im.className='av';im.src=p.a;im.alt='';host.appendChild(im)}}
 function cardRows(p,i,body){
   var X=p.x||[0,0,0],K=p.k||[0,0,0],N=['ЛТ','СТ','ТТ'],top=['l','m','h'].indexOf(p.tc),isMe=me&&p.id===me.sid;
   function cell(t,c,tr){var d=document.createElement('td');if(c)d.className=c;d.textContent=t;tr.appendChild(d);return d}
   function row(c){var r=document.createElement('tr');r.className=c+(isMe?' me':'');body.appendChild(r);return r}
+  if(window.PFX&&p.f&&p.f[2]){ // игрок с подложкой: одна широкая строка-баннер, вся статистика — в карточке игрока
+    var W=Math.max.apply(null,X),R=row('ch bn');cell(i+1,'rk',R);
+    var bn=document.createElement('td');avAppend(bn,p,40);
+    var ba=document.createElement('a');ba.textContent=p.n;ba.style.cursor='pointer';bn.appendChild(ba);R.appendChild(bn);
+    var bs=cell('','bs',R);bs.colSpan=3;bs.innerHTML='<b>'+(top>=0?N[top]+' ':'')+W+'</b> волн<small>очки '+(p.s||0)+'</small>';
+    R.style.cursor='pointer';R.onclick=function(){openPlayer(p)};PFX.row(R,p.f,1);return;
+  }
   var A=row('ch'),rk=cell(i+1,'rk',A);rk.rowSpan=4;var rowsAll=[A];
   var nm=document.createElement('td');
   avAppend(nm,p);
