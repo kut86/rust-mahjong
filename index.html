@@ -274,17 +274,18 @@ var CM=null;
 function cmErr(e){var m={nick_len:'Ник: от 3 до 16 символов.',nick_chars:'Только буквы, цифры, пробел, _ . -',nick_bad:'Такой ник использовать нельзя.',nick_reserved:'Это имя зарезервировано.',taken:'Этот ник уже занят.',same:'Это уже ваш ник.',busy:'Повторите через секунду.',no_gems:'Не хватает кристаллов'+(e&&e.need?' (нужно '+e.need+' 💎)':'')+'.',not_owned:'Эта рамка вам недоступна.'};return (e&&m[e.error])||'Нет связи с сервером.'}
 function cmRender(){
   var j=CM;if(!j)return;
-  var cp=$('cmpv');cp.innerHTML='';var ct=document.createElement('table'),cr=document.createElement('tr'),cd=document.createElement('td');ct.style.cssText='width:100%;height:100%;border-collapse:collapse';cd.style.cssText='text-align:center;padding:0;border:0';cd.appendChild(PFX.el(j.a||'',j.n,[j.fr,j.dc],64));cr.appendChild(cd);ct.appendChild(cr);cp.appendChild(ct);PFX.row(cr,[j.fr,j.dc,j.bg||''],1);$('cmn').textContent=j.n;$('pfn').textContent=j.n;if(me&&j.a&&me.a!==j.a){me.a=j.a;renderAuth();var pa=$('pfav');if(pa){pa.src=j.a;pa.style.display='block'}}
+  var cp=$('cmpv');cp.innerHTML='';var ct=document.createElement('table'),cr=document.createElement('tr'),cd=document.createElement('td');ct.style.cssText='width:100%;height:100%;border-collapse:collapse';cd.style.cssText='text-align:center;padding:0;border:0';cd.appendChild(PFX.el(j.a||'',j.n,[j.fr,j.dc],64));cr.appendChild(cd);ct.appendChild(cr);cp.appendChild(ct);PFX.row(cr,[j.fr,j.dc,j.bg||''],1);$('cmn').textContent=j.n;$('pfn').textContent=j.n;if(me&&(me.a!==j.a||me.n!==j.n)){api('/api/me').then(rememberMethods).then(function(){var pa=$('pfav');if(pa&&me&&me.a&&me.a.indexOf('https://')===0){pa.src=me.a;pa.style.display='block'}}).catch(function(){})}
   function fill(host,pre,cur,slot){
     host.innerHTML='';
-    var items=[''].concat(j.owned.filter(function(x){return x.indexOf(pre)===0}));
-    items.forEach(function(id){var b=document.createElement('button');b.textContent=id?PFX.name(id):(slot==='av'?'Свой':'Нет');if(id===cur)b.className='on';
-      if(slot==='av'){var im=id&&PFX.AVATARS[id.slice(3)]?PFX.AVATARS[id.slice(3)].img:j.na;if(im){b.className+=' avb';b.textContent='';var t=document.createElement('img');t.src=im;t.alt='';b.appendChild(t);b.appendChild(document.createTextNode(id?PFX.name(id):'Свой'))}}
+    var items=(slot==='av'?[]:['']).concat(j.owned.filter(function(x){return x.indexOf(pre)===0}));
+    if(slot==='av')cur=cur||j.avStub||'';
+    items.forEach(function(id){var b=document.createElement('button');b.textContent=id?PFX.name(id):'Нет';if(id===cur)b.className='on';
+      if(slot==='av'){var im=PFX.AVATARS[id.slice(3)]?PFX.AVATARS[id.slice(3)].img:'';if(im){b.className+=' avb';b.textContent='';var t=document.createElement('img');t.src=im;t.alt='';b.appendChild(t);b.appendChild(document.createTextNode(PFX.name(id)))}}
       b.onclick=function(){var fr=slot==='fr'?id:j.fr,dc=slot==='dc'?id:j.dc,bg=slot==='bg'?id:(j.bg||''),av=slot==='av'?id:(j.av||'');api('/api/cos/equip',{fr:fr,dc:dc,bg:bg,av:av}).then(function(r){CM=r;$('cmmsg').textContent='';cmRender()}).catch(function(e){$('cmmsg').textContent=cmErr(e)})};host.appendChild(b)});
   }
   (function(){var l=$('cmad'),c=$('cmadc');l.style.display=j.admin?'':'none';if(!j.admin)return;try{c.checked=localStorage.getItem('rm-adm')=='1'}catch(e){}c.onchange=function(){try{localStorage.setItem('rm-adm',c.checked?'1':'0')}catch(e){}}})();
   fill($('cmav'),'av:',j.av||'','av');fill($('cmfr'),'fr:',j.fr,'fr');fill($('cmdc'),'dc:',j.dc,'dc');fill($('cmbg'),'bg:',j.bg||'','bg');
-  $('cmempty').textContent=j.owned.length?'Рамки, украшения и подложки выдаются за победу над мировым боссом в «Танчиках».':'Пока ничего нет. Рамку, украшение и подложку получают все, кто нанёс урон мировому боссу, когда его победят.';
+  $('cmempty').textContent=j.owned.length?'Аватары, рамки, украшения и подложки выдаются за победу над мировым боссом в «Танчиках».':'Пока ничего нет. Рамку, украшение и подложку получают все, кто нанёс урон мировому боссу, когда его победят.';
   $('cmpr').textContent=j.nickFree?'Первая смена ника бесплатна.':'Смена ника: '+j.nickPrice+' 💎 (у вас '+j.gems+' 💎). Кристаллы — в «Танчиках».';
 }
 function openCosmetics(){
@@ -304,7 +305,7 @@ $('cmok').onclick=function(){
   api('/api/nick',{nick:v,op:'n'+Math.random().toString(36).slice(2,10)+Date.now().toString(36)}).then(function(r){CM=r;$('cmin').value='';$('cmmsg').textContent='Ник изменён ✓';cmRender()}).catch(function(e){$('cmmsg').textContent=cmErr(e)}).then(function(){b.disabled=false});
 };
 // Какие способы входа привязаны к аккаунту, под которым играли на этом устройстве (хранится только в браузере)
-function rememberMethods(j){if(j&&j.av&&me&&me.a!==j.av){me.a=j.av;renderAuth()}try{localStorage.setItem('rm-methods',JSON.stringify({steam:!!j.steam,google:!!j.google,discord:!!j.discord}))}catch(e){}}
+function rememberMethods(j){if(j&&j.token&&me){try{localStorage.setItem('rm-token',j.token)}catch(e){}setTok(j.token);renderAuth()}try{localStorage.setItem('rm-methods',JSON.stringify({steam:!!j.steam,google:!!j.google,discord:!!j.discord}))}catch(e){}}
 function knownMethods(){try{var m=JSON.parse(localStorage.getItem('rm-methods')||'null');return m&&(m.steam||m.google||m.discord)?m:null}catch(e){return null}}
 var NAMES={steam:'Steam',google:'Google',discord:'Discord'};
 function openLogin(){
