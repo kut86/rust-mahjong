@@ -208,15 +208,17 @@
   function define(map) {
     for (var id in map) {
       var t = id.slice(0, 3), k = id.slice(3), v = map[id], o = {}; for (var p in v.d) o[p] = v.d[p]; o.n = v.n; if (!o.colors || !o.colors.length) o.colors = ['#4fc3ff', '#b07cff', '#ff5fd2', '#ffd24a'];
-      if (t === 'fr:') FRAMES[k] = o; else if (t === 'dc:') DECOS[k] = o; else if (t === 'bg:') PLATES[k] = o;
+      if (t === 'fr:') FRAMES[k] = o; else if (t === 'dc:') DECOS[k] = o; else if (t === 'bg:') PLATES[k] = o; else if (t === 'av:') AVATARS[k] = o;
     }
   }
   /* PFX.preview(kind, d, size) — пробный показ ещё не сохранённого украшения: kind 'fr' | 'dc' | 'bg'. Для 'bg' вернёт строку таблицы. */
   function preview(kind, d, size) {
     define({ [kind + ':__pv']: { n: '…', d: d } });
+    if (kind === 'av') { var im = document.createElement('img'); im.src = d.img || ''; im.alt = ''; im.style.cssText = 'width:' + (size || 64) + 'px;height:' + (size || 64) + 'px;border-radius:50%;object-fit:cover;border:2px solid var(--rust,#c4511f)'; return im; }
     if (kind === 'bg') { var t = document.createElement('table'), tr = document.createElement('tr'), td = document.createElement('td'); t.style.cssText = 'width:100%;border-collapse:collapse'; td.style.cssText = 'height:56px;padding:0 12px;text-align:left'; td.appendChild(el('', 'A', ['', '', ''], 32)); td.appendChild(document.createTextNode('Ник игрока')); tr.appendChild(td); t.appendChild(tr); row(tr, ['', '', 'bg:__pv'], 1); return t; }
     return el('', 'A', [kind === 'fr' ? 'fr:__pv' : '', kind === 'dc' ? 'dc:__pv' : '', ''], size || 64);
   }
-  window.PFX = { FRAMES: FRAMES, DECOS: DECOS, PLATES: PLATES, define: define, preview: preview, el: el, row: row, has: function (f) { return !!(f && (f[0] || f[1])); },
-    name: function (id) { var t = id && id.slice(0, 3), k = id && id.slice(3); return t === 'fr:' ? (FRAMES[k] || {}).n || id : t === 'dc:' ? (DECOS[k] || {}).n || id : t === 'bg:' ? (PLATES[k] || {}).n || id : id; } };
+  var AVATARS = {}; // аватары из папки img/avatar (создаются в админке)
+  window.PFX = { AVATARS: AVATARS, FRAMES: FRAMES, DECOS: DECOS, PLATES: PLATES, define: define, preview: preview, el: el, row: row, has: function (f) { return !!(f && (f[0] || f[1])); },
+    name: function (id) { var t = id && id.slice(0, 3), k = id && id.slice(3); return t === 'fr:' ? (FRAMES[k] || {}).n || id : t === 'dc:' ? (DECOS[k] || {}).n || id : t === 'bg:' ? (PLATES[k] || {}).n || id : t === 'av:' ? (AVATARS[k] || {}).n || id : id; } };
 })();

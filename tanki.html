@@ -1011,17 +1011,18 @@ function adTanks(host){
 const INP='padding:7px;border-radius:8px;border:1px solid #3a4a6a;background:#0e1a33;color:inherit;width:100%;box-sizing:border-box';
 
 /* --- Украшения: создание рамок, украшений и подложек прямо в игре --- */
-const REPO='kut86/rust-mahjong',COS_DIR='img/cos';
+const REPO='kut86/rust-mahjong',COS_DIR='img/cos',cosDir=k=>k=='av'?'img/avatar':COS_DIR;
 const COSF={ // поля: [ключ, подпись, тип n|b|i, значение по умолчанию, подсказка]
  fr:[['ring','Бегущая обводка, px (0 — нет)','n',3],['bolts','Молнии наружу, шт (0 — нет)','n',8],['len','Длина молний (0–1)','n',.3],['width','Толщина линий','n',2.4],['img','Картинка','i',''],['imgScale','Размер картинки (×аватар)','n',1.35],['spin','Вращение картинки, с за оборот (0 — нет)','n',0],['pulse','Пульсация картинки','b',0]],
  dc:[['arcs','Молнии дугами по кругу, шт','n',4],['bolts','Молнии наружу, шт','n',0],['sparks','Искры, шт','n',8],['len','Длина молний (0–1)','n',.4],['width','Толщина линий','n',2],['img','Картинка (крылья, нимб…)','i',''],['imgScale','Размер картинки (×аватар)','n',1.7],['spin','Вращение картинки, с за оборот (0 — нет)','n',0],['pulse','Пульсация картинки','b',0]],
+ av:[['img','Картинка аватара (папка img/avatar, лучше квадрат)','i',''],['free','Доступен всем (первый такой — заглушка тем, у кого нет своего аватара)','b',0]],
  bg:[['edge','Бегущий ободок','b',1],['bolts','Молнии по краю','b',1],['sheen','Бегущий блик','b',1],['img','Картинка-фон (лучше узкая полоса или узор)','i',''],['imgDim','Затемнение картинки (0–1)','n',.55]]};
-const COSK={fr:'Рамка',dc:'Украшение',bg:'Подложка'},COSD={speed:3,glow:'#8ab4ff',colors:['#4fc3ff','#b07cff','#ff5fd2','#ffd24a']};
-let COSIMG=null;
-function cosImgs(){if(COSIMG)return Promise.resolve(COSIMG);return fetch('https://api.github.com/repos/'+REPO+'/contents/'+COS_DIR).then(r=>r.json()).then(j=>{COSIMG=Array.isArray(j)?j.filter(f=>f.type=='file'&&/\.(png|webp|gif|jpe?g|svg)$/i.test(f.name)).map(f=>COS_DIR+'/'+f.name):[];return COSIMG}).catch(()=>[])}
+const COSK={fr:'Рамка',dc:'Украшение',bg:'Подложка',av:'Аватар'},COSD={speed:3,glow:'#8ab4ff',colors:['#4fc3ff','#b07cff','#ff5fd2','#ffd24a']};
+let COSIMG={};
+function cosImgs(dir){dir=dir||COS_DIR;if(COSIMG[dir])return Promise.resolve(COSIMG[dir]);return fetch('https://api.github.com/repos/'+REPO+'/contents/'+dir).then(r=>r.json()).then(j=>{COSIMG[dir]=Array.isArray(j)?j.filter(f=>f.type=='file'&&/\.(png|webp|gif|jpe?g|svg)$/i.test(f.name)).map(f=>dir+'/'+f.name):[];return COSIMG[dir]}).catch(()=>[])}
 function adCos(host){
- host.innerHTML='<p>Создание рамок, украшений и подложек. Картинки лежат в папке <b>'+COS_DIR+'</b> репозитория (загрузите файл на GitHub и нажмите «↻»).</p><div id="acl"></div><div class="dt" id="ace"></div><div class="dt" id="acg"></div><small id="adm"></small>';
- const msg=$('#adm'),call=b=>api('/api/admin/cos',b).then(j=>{if(j&&j.error)throw j;return j}),fail=e=>{msg.textContent='Ошибка: '+(({bad_id:'неверное имя (a–z, 0–9, _; не «bp»)',no_name:'укажите название',no_player:'игрок не найден (нужен ник из «Украшения и ник» или номер аккаунта)',bad_item:'украшение не найдено'})[e&&e.error]||(e&&e.error)||'нет связи')};
+ host.innerHTML='<p>Создание рамок, украшений, подложек и аватаров. Картинки лежат в папках <b>'+COS_DIR+'</b> (рамки, украшения, подложки) и <b>img/avatar</b> (аватары) репозитория: загрузите файл на GitHub и нажмите «↻».</p><div id="acl"></div><div class="dt" id="ace"></div><div class="dt" id="acg"></div><small id="adm"></small>';
+ const msg=$('#adm'),call=b=>api('/api/admin/cos',b).then(j=>{if(j&&j.error)throw j;return j}),fail=e=>{msg.textContent='Ошибка: '+(({bad_id:'неверное имя (a–z, 0–9, _; не «bp»)',no_name:'укажите название',no_img:'выберите картинку из img/avatar',no_player:'игрок не найден (нужен ник из «Украшения и ник» или номер аккаунта)',bad_item:'украшение не найдено'})[e&&e.error]||(e&&e.error)||'нет связи')};
  let defs={},builtin={};
  const all=()=>Object.assign({},builtin,Object.fromEntries(Object.keys(defs).map(k=>[k,defs[k].n])));
  const loadAll=()=>call({}).then(j=>{defs=j.defs||{};builtin=j.builtin||{};drawList();form(null);give()}).catch(fail);
@@ -1035,18 +1036,18 @@ function adCos(host){
     '<label>Вид</label>'+(id?'<b>'+COSK[k]+'</b>':'<select id="af-k" style="'+INP+'">'+Object.keys(COSK).map(x=>'<option value="'+x+'"'+(x==k?' selected':'')+'>'+COSK[x]+'</option>').join('')+'</select>')+
     '<label>Код (a–z, 0–9, _)</label>'+(id?'<b>'+st.slug+'</b>':'<input id="af-s" value="'+st.slug+'" maxlength="16" style="'+INP+'">')+
     '<label>Название для игрока</label><input id="af-n" value="'+st.name.replace(/"/g,'&quot;')+'" maxlength="40" style="'+INP+'">'+
-    '<label>Цвета</label><div id="af-c" style="display:flex;gap:4px;flex-wrap:wrap;align-items:center"></div>'+
+    (k=='av'?'':'<label>Цвета</label><div id="af-c" style="display:flex;gap:4px;flex-wrap:wrap;align-items:center"></div>'+
     '<label>Свечение</label><input id="af-g" type="color" value="'+(st.d.glow||'#8ab4ff')+'" style="height:30px;width:60px">'+
-    '<label>Скорость, с (меньше — быстрее)</label><input id="af-sp" type="number" step="any" value="'+(st.d.speed==null?'':st.d.speed)+'" style="'+INP+'">'+
+    '<label>Скорость, с (меньше — быстрее)</label><input id="af-sp" type="number" step="any" value="'+(st.d.speed==null?'':st.d.speed)+'" style="'+INP+'">')+
     F.map(f=>f[2]=='b'?'<label>'+f[1]+'</label><input data-f="'+f[0]+'" type="checkbox"'+((st.d[f[0]]===undefined?f[3]:st.d[f[0]])?' checked':'')+'>':f[2]=='i'?'<label>'+f[1]+'</label><div><select data-f="'+f[0]+'" style="'+INP+'"><option value="">— нет —</option></select><button id="af-r" style="margin-top:4px">↻</button><input id="af-img" placeholder="или путь вручную" value="'+(st.d.img||'')+'" style="'+INP+';margin-top:4px"></div>':'<label>'+f[1]+'</label><input data-f="'+f[0]+'" type="number" step="any" value="'+(st.d[f[0]]===undefined?f[3]:st.d[f[0]])+'" style="'+INP+'">').join('')+
     '</div><div class="oa" style="margin-top:10px"><button id="af-ok">Сохранить</button>'+(id?'<button id="af-no">Отмена</button>':'')+'</div>';
    const pv=()=>{st.d=collect();const P=$('#acp');P.innerHTML='';try{P.appendChild(PFX.preview(st.kind,st.d,72));if(st.kind=='bg')P.firstChild.style.maxWidth='320px'}catch(e){}};
-   const collect=()=>{const d={colors:st.d.colors.slice(),glow:$('#af-g').value,speed:$('#af-sp').value===''?undefined:Number($('#af-sp').value)};E.querySelectorAll('[data-f]').forEach(i=>{const k=i.dataset.f;if(i.type=='checkbox')d[k]=i.checked;else if(i.tagName=='SELECT')d[k]=$('#af-img').value.trim();else if(i.value!=='')d[k]=Number(i.value)});return d};
-   const cs=$('#af-c');const drawC=()=>{cs.innerHTML=st.d.colors.map((c,i)=>'<input type="color" data-c="'+i+'" value="'+c+'" style="width:34px;height:30px;padding:0">').join('')+(st.d.colors.length<6?'<button id="af-ca">+</button>':'')+(st.d.colors.length>1?'<button id="af-cd">−</button>':'');
+   const collect=()=>{const d={colors:st.d.colors.slice(),glow:$('#af-g')?$('#af-g').value:undefined,speed:$('#af-sp')&&$('#af-sp').value!==''?Number($('#af-sp').value):undefined};E.querySelectorAll('[data-f]').forEach(i=>{const k=i.dataset.f;if(i.type=='checkbox')d[k]=i.checked;else if(i.tagName=='SELECT')d[k]=$('#af-img').value.trim();else if(i.value!=='')d[k]=Number(i.value)});return d};
+   const cs=$('#af-c');const drawC=()=>{if(!cs)return;cs.innerHTML=st.d.colors.map((c,i)=>'<input type="color" data-c="'+i+'" value="'+c+'" style="width:34px;height:30px;padding:0">').join('')+(st.d.colors.length<6?'<button id="af-ca">+</button>':'')+(st.d.colors.length>1?'<button id="af-cd">−</button>':'');
     cs.querySelectorAll('[data-c]').forEach(i=>i.oninput=()=>{st.d.colors[+i.dataset.c]=i.value;pv()});
     if($('#af-ca'))$('#af-ca').onclick=()=>{st.d.colors.push('#ffffff');drawC();pv()};if($('#af-cd'))$('#af-cd').onclick=()=>{st.d.colors.pop();drawC();pv()}};drawC();
-   const sel=E.querySelector('select[data-f=img]'),fillImgs=()=>cosImgs().then(L=>{sel.innerHTML='<option value="">— нет —</option>'+L.map(p=>'<option value="'+p+'">'+p.slice(COS_DIR.length+1)+'</option>').join('');sel.value=L.includes($('#af-img').value)?$('#af-img').value:''});
-   if(sel){fillImgs();sel.onchange=()=>{$('#af-img').value=sel.value;pv()};$('#af-img').oninput=pv;$('#af-r').onclick=()=>{COSIMG=null;fillImgs()}}
+   const sel=E.querySelector('select[data-f=img]'),fillImgs=()=>cosImgs(cosDir(st.kind)).then(L=>{sel.innerHTML='<option value="">— нет —</option>'+L.map(p=>'<option value="'+p+'">'+p.slice(cosDir(st.kind).length+1)+'</option>').join('');sel.value=L.includes($('#af-img').value)?$('#af-img').value:''});
+   if(sel){fillImgs();sel.onchange=()=>{$('#af-img').value=sel.value;pv()};$('#af-img').oninput=pv;$('#af-r').onclick=()=>{COSIMG={};fillImgs()}}
    E.querySelectorAll('input,select').forEach(i=>{if(i.id!='af-r'&&i.id!='af-img'&&!(i.tagName=='SELECT'&&i.dataset.f=='img'))i.oninput=i.onchange=()=>{if(i.id=='af-k'){st.name=$('#af-n').value;st.slug=$('#af-s').value;st.kind=i.value;st.d=Object.assign({},COSD,{colors:st.d.colors});build();return}pv()}});
    pv();
    $('#af-ok').onclick=()=>{st.d=collect();const slug=id?st.slug:$('#af-s').value.trim().toLowerCase();$('#af-ok').disabled=true;call({save:{kind:st.kind,slug,name:$('#af-n').value,data:st.d}}).then(()=>{msg.textContent='✅ Сохранено. Игроки увидят после обновления страницы.';return loadAll()}).catch(e=>{fail(e);$('#af-ok').disabled=false})};
