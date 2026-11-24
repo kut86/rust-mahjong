@@ -73,6 +73,11 @@ a.btn{display:inline-block;background:#1b2838;color:#fff;text-decoration:none;bo
 .lb tr.bn .bnm{font-weight:700;font-size:1.02rem;line-height:1.2;text-shadow:0 1px 3px #000,0 0 10px rgba(0,0,0,.85)}
 .lb tr.bn .bsv{margin-top:2px;font-size:.8rem;font-weight:500;color:#e6e0d0;text-shadow:0 1px 3px #000,0 0 8px rgba(0,0,0,.8)}
 .lb tr.bn.pfx-pl td.rk{text-shadow:0 1px 3px #000}
+.plrl{margin:14px 0 2px;padding-top:12px;border-top:1px solid var(--line);text-align:center}
+.plrl h4{margin:0 0 8px;font-size:.72rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.plrl .rls{display:flex;flex-wrap:wrap;justify-content:center;gap:8px}
+.rl{--c:#99aab5;display:inline-flex;align-items:center;gap:7px;padding:5px 13px 5px 9px;border-radius:999px;font-size:.84rem;font-weight:600;color:#fff;background:linear-gradient(135deg,#2a2d31,#1b1d20);background:linear-gradient(135deg,color-mix(in srgb,var(--c) 40%,#1b1d20),color-mix(in srgb,var(--c) 12%,#1b1d20));border:1px solid var(--c);border:1px solid color-mix(in srgb,var(--c) 70%,transparent);box-shadow:0 0 12px rgba(0,0,0,.4);box-shadow:0 0 12px color-mix(in srgb,var(--c) 38%,transparent),inset 0 1px 0 rgba(255,255,255,.14);text-shadow:0 1px 2px rgba(0,0,0,.7)}
+.rl i{font-style:normal;line-height:1}.rl i.d{width:9px;height:9px;border-radius:50%;background:var(--c);box-shadow:0 0 7px var(--c)}
 .plst{margin:4px 0 0;text-align:left;font-size:.9rem}
 .plst div{display:flex;justify-content:space-between;gap:10px;border-top:1px solid var(--line);padding:6px 2px}
 .plst b{font-weight:600}.plst span{color:var(--muted)}
@@ -169,6 +174,7 @@ a.btn{display:inline-block;background:#1b2838;color:#fff;text-decoration:none;bo
   <h3 id="pln" style="margin:0 0 6px"></h3>
   <div class="pfid" id="plidw" style="display:none"><span>ID игрока</span><code id="plid"></code><button id="plidc" type="button">Копировать</button></div>
   <div id="plst" class="plst"></div>
+  <div id="plrl" class="plrl" style="display:none"></div>
   <p id="plmsg" style="min-height:1.2em;color:var(--rustHi);font-size:.9rem;margin:6px 0"></p>
   <div class="row2"><a id="plsteam" class="btnl" target="_blank" rel="noopener" style="display:none">Страница в Steam</a><button id="plcl">Закрыть</button></div>
 </div></div>
@@ -367,7 +373,7 @@ $('lbpick').className='gpick';$('lbback').onclick=showPick;
 // ====== Карточка игрока ======
 function openPlayer(p){
   var id=typeof p==='string'?p:p.id;if(!id)return;
-  $('plov').classList.add('show');$('plpv').innerHTML='';$('pln').textContent=(p&&p.n)||'…';$('plst').innerHTML='';$('plmsg').textContent='Загрузка…';$('plidw').style.display='none';$('plsteam').style.display='none';
+  $('plov').classList.add('show');$('plpv').innerHTML='';$('pln').textContent=(p&&p.n)||'…';$('plst').innerHTML='';$('plrl').style.display='none';$('plmsg').textContent='Загрузка…';$('plidw').style.display='none';$('plsteam').style.display='none';
   api('/api/player?id='+encodeURIComponent(id)).then(function(j){
     $('plmsg').textContent='';$('pln').textContent=j.n;
     var cp=$('plpv'),ct=document.createElement('table'),cr=document.createElement('tr'),cd=document.createElement('td');ct.style.cssText='width:100%;height:100%;border-collapse:collapse';cd.style.cssText='text-align:center;padding:0;border:0';
@@ -387,6 +393,12 @@ function openPlayer(p){
     if(j.sp)add('Маджонг: лучшее время',fmtMs(j.sp.ms));
     if(j.cos)add('Украшений',j.cos);
     $('plst').innerHTML=L.join('')||'<p class="cmt">Пока нет результатов.</p>';
+    var rb=$('plrl');rb.innerHTML='';rb.style.display='none';
+    if(j.roles&&j.roles.length){
+      var h=document.createElement('h4');h.textContent='Роли';var w=document.createElement('div');w.className='rls';
+      j.roles.forEach(function(r){var e=document.createElement('span');e.className='rl';e.style.setProperty('--c',/^#[0-9a-f]{6}$/i.test(r.c)?r.c:'#99aab5');
+        var ic=document.createElement('i');if(r.i)ic.textContent=r.i;else ic.className='d';e.appendChild(ic);e.appendChild(document.createTextNode(r.n));w.appendChild(e)});
+      rb.appendChild(h);rb.appendChild(w);rb.style.display=''}
     if(j.id){$('plidw').style.display='';$('plid').textContent=j.id;$('plidc').textContent='Копировать';$('plidc').onclick=function(){copyText(j.id,$('plidc'))}}
     if(j.steam){var a=$('plsteam');a.href='https://steamcommunity.com/profiles/'+id;a.style.display=''}
   }).catch(function(e){$('plmsg').textContent=(e&&e.error==='not_found')?'Игрок не найден.':'Не удалось загрузить профиль.'});
