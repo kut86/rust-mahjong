@@ -203,8 +203,10 @@ const TY={s:{cl:'l',hpk:1,dmk:1,spk:.8,ark:1,pnk:1,wtk:1,cd:1.2,c:'#d9a32e',r:.4
  Z:{cl:'m',hpk:.8,dmk:2.2,spk:.4,ark:.9,pnk:1.5,wtk:1,cd:4,c:'#c8ccd8',r:.6,pts:350,vk:2,bl:2.6},
  R:{cl:'m',hpk:.9,dmk:0,spk:.55,ark:.7,pnk:0,wtk:1,cd:3,c:'#3fb06a',r:.55,pts:250},
  B:{cl:'m',hpk:8,dmk:.7,spk:.4,ark:1.1,pnk:1.1,wtk:5,cd:1,c:'#8c1f1f',r:1.15,pts:1000}};
+const TY0=JSON.parse(JSON.stringify(TY)); // заводские множители типов врагов (правки админки накладываются сверху)
 const HK=5,HD=9,ETIER_WAVES=10,WAVE_MAX=24; // врагу нужно HK попаданий равного игрока; игроку HD попаданий равного врага; ступень врага растёт раз в ETIER_WAVES волн (максимум X); врагов за волну не больше WAVE_MAX
 const UNLOCK={s:1,Q:4,n:7,M:10,h:15,Z:20,R:25},WTS={s:4,Q:2,n:4,M:1.5,h:2,Z:1,R:1}; // с какой волны появляется тип и его доля в волне
+const UNLOCK0={...UNLOCK},WTS0={...WTS};
 const EIC={s:'⚡',n:'⚙',h:'🛡',Q:'🔥',M:'💣',Z:'🎯',R:'✚',B:'👑'};
 const BZ_TIME=5,BZ_RATE=.35; // 💥 шквал: сколько секунд и во сколько раз чаще стреляет (0.35 = втрое чаще)
 const BN=['Штурмовик','Каратель','Командир'],SC={x:25,s:20,d:15},WA={pel:1,spr:.06,v:1,life:1.3,d:.7},TR=[{k:'ar',n:'Броня',i:'🛡'},{k:'fi',n:'Урон',i:'🔥'},{k:'nc',n:'Некромант',i:'☠'}],WP={std:{n:'Пушка',i:'🔫',c:1,d:1,pel:1,spr:.03,v:1,life:1.3,p:0},sn:{n:'Снайпер',i:'🎯',c:2.2,d:3.5,pel:1,spr:.008,v:1.5,life:1.7,p:150},sh:{n:'Дробовик',i:'💥',c:1.6,d:.7,pel:5,spr:.2,v:.85,life:.45,p:250},rp:{n:'Скорострел',i:'⚙',c:.45,d:.5,pel:1,spr:.09,v:1.1,life:1.1,p:350}};
@@ -247,7 +249,11 @@ let BOTR={},BOTD={}; // ТТХ врагов (класс+ступень → те 
 function tsApply(map){TSO=map||{};TANKS.forEach((t,i)=>{Object.assign(t,TANKS0[i]);const o=TSO[t.id];t.ed=!!o;if(o)for(const k in o)t[k]=o[k]});
  BOTR={};BOTD={};for(const c of['l','m','h'])for(let n=1;n<=10;n++){const b=TANKS0.find(q=>q.c==c&&q.t==n&&q.v!='B')||TANKS0[0],o=TSO['bt:'+c+n],
   d={hp:Math.round(b.dm*HK*100)/100,dm:Math.round(b.hp/HD*100)/100,sp:b.sp,tt:b.tt,cd:b.cd,rk:0,ab:b.ab,pn:b.pn,wt:b.wt}; // заводские: здоровье врага = HK попаданий равного игрока, урон = 1/HD здоровья игрока
-  BOTD[c+n]=d;BOTR[c+n]=Object.assign({},d,o||{},{ed:!!o,d})}}
+  BOTD[c+n]=d;BOTR[c+n]=Object.assign({},d,o||{},{ed:!!o,d})}
+ tyApply()}
+function tyApply(){ // типы врагов и мировой босс: заводские значения + правки админки (ty:<тип>)
+ for(const k in TY0){for(const f in TY[k])delete TY[k][f];Object.assign(TY[k],TY0[k]);const o=TSO['ty:'+k];UNLOCK[k]=UNLOCK0[k];WTS[k]=WTS0[k];if(!o)continue;for(const f in o){if(f=='un')UNLOCK[k]=o[f];else if(f=='w')WTS[k]=o[f];else TY[k][f]=o[f]}}
+ try{wbApplyX()}catch(e){}}
 tsApply({});
 function tsLoad(){return fetch(API+'/api/tstats').then(r=>r.json()).then(j=>{tsApply(j.stats);if(typeof ovStat=='function')try{ovStat()}catch(e){}}).catch(()=>{})}
 const capOf=t=>Math.round(AMMOT/t.cd);
@@ -489,7 +495,7 @@ const refT=(c,t)=>BOTR[c+t]||BOTR.l1; // танк игрока того же к�
 function mk(t){const Y=TY[t],r=Y.r*S;const[px,py]=spawnPos(r);const et=etier(wave),f=refT(Y.cl,et),bv=((wave/5|0)-1)%3,H_=Math.max(1,Math.ceil(f.hp*Y.hpk)),ab=f.ab*Y.ark;eload(t,et);if(t=='B')bload(bv);
  return{type:t,tier:et,hp:H_,mh:H_,bv,sp:+(f.sp*Y.spk).toFixed(2),c:t=='B'?['#8c1f1f','#a0501a','#1f5a8c'][bv]:Y.c,r:Y.r,pts:Math.round(Y.pts*(1+.5*(et-1))),cdMax:Y.cd*(f.cd/f.d.cd),ak:f.d.tt/f.tt,rk:f.rk,x:px,y:py,a:PI/2,t:PI/2,cd:R(1,2),ph:R(6),w:0,rc:0,fl:0,tr:0,ar:[ab,ab*ASIDE,ab*AREAR],pen:f.pn*Y.pnk,dmg:f.dm*Y.dmk,wt:f.wt*Y.wtk,vk:Y.vk||1,blife:Y.bl||1.3,aimT:0}}
 // состав волны: какие типы врагов открыты к этой волне; снайперов не больше 1 (с 40-й волны 2), ремонтников не больше 2
-function compose(){const n=Math.min(3+wave*2,WAVE_MAX),av=Object.keys(UNLOCK).filter(k=>wave>=UNLOCK[k]),cnt={},list=[],cap=k=>k=='Z'?(wave<40?1:2):k=='R'?2:99;
+function compose(){const n=Math.min(3+wave*2,WAVE_MAX),av=Object.keys(UNLOCK).filter(k=>wave>=UNLOCK[k]),cnt={},list=[],cap=k=>k=='Z'?(wave<40?(TY.Z.cap==null?1:TY.Z.cap):(TY.Z.cap2==null?2:TY.Z.cap2)):k=='R'?(TY.R.cap==null?2:TY.R.cap):(TY[k]&&TY[k].cap!=null?TY[k].cap:99);
  for(let i=0;i<n;i++){let tot=0;const w=av.map(k=>{const v=(cnt[k]||0)>=cap(k)?0:WTS[k]*(wave-UNLOCK[k]<5?1.6:1);tot+=v;return v});let r=Math.random()*tot,k=av[0];for(let j=0;j<av.length;j++){if((r-=w[j])<=0){k=av[j];break}}cnt[k]=(cnt[k]||0)+1;list.push(k)}
  return list}
 function give(n){const t=Math.min(n,TKc.cap-rtot(RK));if(t<=0)return;RK.ap+=t;dtxt(p.x,p.y-p.r*S*2,'+'+t+' снарядов','#f2c14e')} // с врагов падают только базовые, и только в свободное место боекомплекта
@@ -562,9 +568,9 @@ function update(dt){camUpd();
   moveT(e,Math.cos(ang)*mv,Math.sin(ang)*mv,dt);e.a=la(e.a,mv<0?ang+PI:ang,dt*6);
   if(!(ty=='Z'&&e.aimT>0&&e.aimT<=.4))e.t=la(e.t,Math.atan2(dy,dx),dt*(ty=='h'?2:ty=='Z'?2.2:3.5));e.cd-=dt;
   if(ty=='Z'){ // снайпер: красная линия 1,2 с (первые 0,8 с следит, последние 0,4 с замирает), потом быстрый выстрел
-   if(e.aimT>0){e.aimT-=dt;if(e.aimT<=0){shoot(e,false,0);e.cd=e.cdMax*R(.9,1.2)}}else if(e.cd<=0&&d<28*S)e.aimT=1.2*(e.ak||1)}
-  else if(ty=='R'){e.hc=(e.hc==null?2:e.hc)-dt;if(e.hc<=0){e.hc=3;healNear(e)}}
-  else{if(e.br>0){e.bc-=dt;if(e.bc<=0){shoot(e,false,.04);e.br--;e.bc=.13}}if(e.cd<=0&&d<(ty=='M'?20:14)*S&&inV(e,S*.6)){efire(e);e.cd=e.cdMax*R(.8,1.3)*(ty=='B'&&e.hp<e.mh/2?.6:1)}}
+   if(e.aimT>0){e.aimT-=dt;if(e.aimT<=0){shoot(e,false,0);e.cd=e.cdMax*R(.9,1.2)}}else if(e.cd<=0&&d<(TY.Z.rg||28)*S)e.aimT=(TY.Z.at||1.2)*(e.ak||1)}
+  else if(ty=='R'){e.hc=(e.hc==null?2:e.hc)-dt;if(e.hc<=0){e.hc=TY.R.hi||3;healNear(e)}}
+  else{if(e.br>0){e.bc-=dt;if(e.bc<=0){shoot(e,false,.04);e.br--;e.bc=.13}}if(e.cd<=0&&d<(ty=='M'?20:14)*S&&inV(e,S*.6)){efire(e);e.cd=e.cdMax*R(.8,1.3)*(ty=='B'&&e.hp<e.mh*(TY.B.ph||.5)?(TY.B.br||.6):1)}}
   for(const o of en)if(o!==e){const ex=e.x-o.x,ey=e.y-o.y,dd=Math.hypot(ex,ey),m=(e.r+o.r)*S;if(dd<m&&dd>.01){e.x+=ex/dd*(m-dd)*.5;e.y+=ey/dd*(m-dd)*.5}}
   const pr=(e.r+p.r)*S;if(d<pr&&d>.01){e.x-=dx/d*(pr-d);e.y-=dy/d*(pr-d);if(e.ramT<=0&&p.spd>S*1.5)ram(e)}}
  for(const b of bl){b.x+=b.vx*dt;b.y+=b.vy*dt;b.life-=dt;
@@ -662,18 +668,18 @@ function buildMap(l){ob=[];paintGround();bl=[];mn=[];wk=[];const B=(a,b,w,h,s)=>
 $('#shop').onclick=()=>{gdr=null;gcl=TK().c;gtk=null;gmsg='';gsk=0;gshop=0;garage()}
 selW=MW()+1;wselR();addEventListener('pagehide',()=>{svs();cloudFlush(true)});addEventListener('visibilitychange',()=>{if(document.hidden){svs();cloudFlush(true)}});;$('#co').textContent=sv.co;
 function efire(e){const t0=e.t,ty=e.type;
- if(ty=='M'){mn.push({x:e.x,y:e.y,l:25,a:.8,d:e.dmg*2.5});if(mn.length>12)mn.shift();return}
- if(ty=='Q'){e.br=3;e.bc=0;return}
- if(ty=='B'){const ph=e.hp<e.mh/2;e.k=(e.k||0)+1;
+ if(ty=='M'){mn.push({x:e.x,y:e.y,l:TY.M.ml||25,a:.8,d:e.dmg*(TY.M.mdm||2.5)});if(mn.length>(TY.M.mc||12))mn.shift();return}
+ if(ty=='Q'){e.br=TY.Q.bn||3;e.bc=0;return}
+ if(ty=='B'){const ph=e.hp<e.mh*(TY.B.ph||.5);e.k=(e.k||0)+1;
   if(e.bv==1&&e.k%2){const n=ph?16:12;for(let i=0;i<n;i++){e.t=i*2*PI/n+e.k;shoot(e,false,0,i>0)}}
-  else{const n=ph?2:1;for(let i=-n;i<=n;i++){e.t=t0+i*.25;shoot(e,false,.03,i!=0)}if(e.bv==2&&e.k%3==0)for(let i=0;i<2;i++){if(en.filter(x=>x.sm&&!x.dead).length>=BOSS_MIN)break;const m=mk('s');m.sm=1;m.x=e.x+R(-S,S);m.y=e.y+R(S,2*S);en.push(m)}}
+  else{const n=ph?2:1;for(let i=-n;i<=n;i++){e.t=t0+i*.25;shoot(e,false,.03,i!=0)}if(e.bv==2&&e.k%3==0)for(let i=0;i<(TY.B.sn==null?2:TY.B.sn);i++){if(en.filter(x=>x.sm&&!x.dead).length>=(TY.B.sm||BOSS_MIN))break;const m=mk('s');m.sm=1;m.x=e.x+R(-S,S);m.y=e.y+R(S,2*S);en.push(m)}}
   e.t=t0;return}
  shoot(e,false,.1)}
 // ремонтник: идёт к самому раненому союзнику, держится подальше от игрока и лечит
 function repMove(e,d,dx,dy){let best=null,bs=-1e9;for(const o of en){if(o===e||o.dead||o.type=='R')continue;const sc=(o.hp<o.mh*.9?1000:0)-Math.hypot(o.x-e.x,o.y-e.y)/S;if(sc>bs){bs=sc;best=o}}
  if(d<7*S)return[Math.atan2(-dy,-dx),1];if(!best)return[Math.atan2(-dy,-dx),.5];
  const ex=best.x-e.x,ey=best.y-e.y,ed=Math.hypot(ex,ey);return ed<S*2.5?[Math.atan2(ey,ex),0]:[Math.atan2(ey,ex),ed>S*5?1:.4]}
-function healNear(e){let best=null,bk=1;for(const o of en){if(o===e||o.dead||o.hlT>0||o.hp>=o.mh*.9||Math.hypot(o.x-e.x,o.y-e.y)>6*S)continue;const k=o.hp/o.mh;if(k<bk){bk=k;best=o}}
+function healNear(e){let best=null,bk=1;for(const o of en){if(o===e||o.dead||o.hlT>0||o.hp>=o.mh*.9||Math.hypot(o.x-e.x,o.y-e.y)>(TY.R.hr||6)*S)continue;const k=o.hp/o.mh;if(k<bk){bk=k;best=o}}
  if(!best)return;const v=Math.round(best.mh*(best.type=='B'?.05:.15));best.hp=Math.min(best.mh,best.hp+v);best.hlT=4;hb.push({a:e,b:best,l:.5});dtxt(best.x,best.y-best.r*S*1.5-S*1.25,'+'+v,'#6fe08a')}
 function superShot(){const sk=pickShell();if(!sk)return;RK[sk]--;const SH=SHELL[sk],r=p.r*S,mx=p.x+Math.cos(p.t)*r*1.4,my=p.y+Math.sin(p.t)*r*1.4;bl.push({x:mx,y:my,vx:Math.cos(p.t)*26*S,vy:Math.sin(p.t)*26*S,own:true,life:1.2,dm:10*p.dm*SH.dm,pr:1,big:1,pl:1,he:sk=='he',pn:TKc.pn*2*SH.pn});muzzle(mx,my,p.t,true);P(mx,my,0,0,.2,S*3,'g','255,240,160');shake=9;p.rc=r*.6}
 let gcl='l',gtk=null,gmsg='',gsk=0,gshop=0;
@@ -817,8 +823,9 @@ function evOpen(id){const e=EVS.find(v=>v.id==id);if(!e)return;const w=$('#evw')
 
 /* ===== Бой с мировым боссом ===== */
 let wb=null,wbPend=null,wbBoss=null;
-let WB_AR=1;const WB_HE=.6; // броня босса как у тяжа 10 ст.; фугасы по нему бьют вполсилы (×0.6)
-const WB_DUR=90,WB_CD=10,WB_CD2=7.5,WB_WARN=1.5,WB_R=7,WB_RP=4.5,WB_RI=3.6,WB_RO=9.5,WB_HIT=.3; // секунд боя; пауза между разрядами (во второй половине боя — меньше); предупреждение; радиус круга; кольцо от-до (в клетках); урон разряда — доля брони
+let WB_AR=1,WB_HE=.6; // броня босса как у тяжа 10 ст.; фугасы по нему бьют вполсилы (×0.6)
+let WB_DUR=90,WB_CD=10,WB_CD2=7.5,WB_WARN=1.5,WB_R=7,WB_RP=4.5,WB_RI=3.6,WB_RO=9.5,WB_HIT=.3;const WBD={ar:1,he:.6,hit:.3,cd1:10,cd2:7.5};
+let WBX={};function wbApplyX(){WBX=TSO['ty:W']||{};WB_AR=WBX.ar==null?WBD.ar:WBX.ar;WB_HE=WBX.he==null?WBD.he:WBX.he;WB_HIT=WBX.hit==null?WBD.hit:WBX.hit;WB_CD=WBX.cd1==null?WBD.cd1:WBX.cd1;WB_CD2=WBX.cd2==null?WBD.cd2:WBX.cd2}wbApplyX(); // секунд боя; пауза между разрядами (во второй половине боя — меньше); предупреждение; радиус круга; кольцо от-до (в клетках); урон разряда — доля брони
 const wbMsg=(m,c)=>{const e=$('#t2');e.textContent=m;e.style.color=c||'#f2c14e'};
 const waitFly=()=>new Promise(r=>{let n=0;const t=setInterval(()=>{if(!cloudFly||++n>60){clearInterval(t);r()}},80)});
 async function syncNow(){await waitFly();cloudFlush();await new Promise(r=>setTimeout(r,80));await waitFly()}
@@ -842,7 +849,7 @@ function wbBtns(){updSb()}
 const wbMsgIn=m=>{try{banner(m)}catch(e){}};
 function wbSetup(){wbBtns();const cx=GW/2,cy=GH/2;wave=1;p.x=cx-S*8;p.y=cy;p.a=0;p.t=0;RK=Object.assign({},RK);
  ob=ob.filter(o=>{const m=Math.max(o.w,o.h)/2;return Math.hypot(o.x+o.w/2-cx,o.y+o.h/2-cy)>S*6+m&&Math.hypot(o.x+o.w/2-p.x,o.y+o.h/2-p.y)>S*3+m});
- const ab=refT('h',10).ab*WB_AR,b={type:'W',tier:10,hp:1e9,mh:0,hp0:1e9,bv:0,sp:1.1,c:'#7b4fc2',r:1.7,pts:0,cdMax:2,x:cx+S*2,y:cy,a:PI,t:PI,cd:2,ph:0,w:0,rc:0,fl:0,tr:0,heRes:WB_HE,ar:[ab,ab*ASIDE,ab*AREAR],pen:1e6,dmg:p.mhp*.06,wt:400,vk:1,blife:1.7,aimT:0};
+ const ab=refT('h',10).ab*WB_AR,b={type:'W',tier:10,hp:1e9,mh:0,hp0:1e9,bv:0,sp:WBX.sp||1.1,c:'#7b4fc2',r:1.7,pts:0,cdMax:WBX.cdm||2,x:cx+S*2,y:cy,a:PI,t:PI,cd:2,ph:0,w:0,rc:0,fl:0,tr:0,heRes:WB_HE,ar:[ab,ab*ASIDE,ab*AREAR],pen:1e6,dmg:p.mhp*(WBX.dm==null?.06:WBX.dm),wt:400,vk:1,blife:1.7,aimT:0};
  en=[b];wbBoss=b;queue=[];$('#wv').textContent='👹';$('#wbh').classList.add('on');banner('👹 '+(wb.ev.title||'Мировой босс'));$('#wbn').textContent='👹 '+(wb.ev.title||'Мировой босс');wbHud()}
 function wbClamp(){if(!wbBoss)return;for(const e of[p,wbBoss]){const r=e.r*S;e.x=C(e.x,r,GW-r);e.y=C(e.y,r,GH-r)}}
 const wbCh=()=>wb?C((wb.t-wb.last)/wb.iv,0,1):0;
@@ -1000,9 +1007,9 @@ const ADF=[['n','Название','text'],['hp','Здоровье'],['sp','Ск
 let ADMIN=false;
 function adLoad(){ADMIN=false;const b=$('#adb');if(b)b.style.display='none';let on=false;try{on=localStorage.getItem('rm-adm')=='1'}catch(e){}if(!tok||!on)return Promise.resolve();return api('/api/admin/me',{}).then(j=>{ADMIN=!!(j&&j.admin);if(b)b.style.display=ADMIN?'':'none'}).catch(()=>{})}
 function adOpen(tab){if(!ADMIN)return;tab=tab||'t';
- const w=invWin('<h2>⚙ Админ-панель</h2><div class="oa" style="margin-bottom:8px"><button id="adt1"'+(tab=='t'?' style="outline:2px solid #f2c14e"':'')+'>Танки</button><button id="adt5"'+(tab=='b'?' style="outline:2px solid #f2c14e"':'')+'>Боты</button><button id="adt2"'+(tab=='e'?' style="outline:2px solid #f2c14e"':'')+'>События</button><button id="adt3"'+(tab=='c'?' style="outline:2px solid #f2c14e"':'')+'>Цены</button><button id="adt4"'+(tab=='d'?' style="outline:2px solid #f2c14e"':'')+'>Украшения</button></div><div id="adc"></div>');
- $('#adt1').onclick=()=>adOpen('t');$('#adt2').onclick=()=>adOpen('e');$('#adt3').onclick=()=>adOpen('c');$('#adt4').onclick=()=>adOpen('d');$('#adt5').onclick=()=>adOpen('b');
- if(tab=='e')adEvents($('#adc'));else if(tab=='c')adCfg($('#adc'));else if(tab=='d')adCos($('#adc'));else if(tab=='b')adBots($('#adc'));else adTanks($('#adc'))}
+ const w=invWin('<h2>⚙ Админ-панель</h2><div class="oa" style="margin-bottom:8px"><button id="adt1"'+(tab=='t'?' style="outline:2px solid #f2c14e"':'')+'>Танки</button><button id="adt5"'+(tab=='b'?' style="outline:2px solid #f2c14e"':'')+'>Боты</button><button id="adt6"'+(tab=='y'?' style="outline:2px solid #f2c14e"':'')+'>Типы врагов</button><button id="adt2"'+(tab=='e'?' style="outline:2px solid #f2c14e"':'')+'>События</button><button id="adt3"'+(tab=='c'?' style="outline:2px solid #f2c14e"':'')+'>Цены</button><button id="adt4"'+(tab=='d'?' style="outline:2px solid #f2c14e"':'')+'>Украшения</button></div><div id="adc"></div>');
+ $('#adt1').onclick=()=>adOpen('t');$('#adt2').onclick=()=>adOpen('e');$('#adt3').onclick=()=>adOpen('c');$('#adt4').onclick=()=>adOpen('d');$('#adt5').onclick=()=>adOpen('b');$('#adt6').onclick=()=>adOpen('y');
+ if(tab=='e')adEvents($('#adc'));else if(tab=='c')adCfg($('#adc'));else if(tab=='d')adCos($('#adc'));else if(tab=='b')adBots($('#adc'));else if(tab=='y')adTypes($('#adc'));else adTanks($('#adc'))}
 // ТТХ ботов: те же характеристики, что у танка игрока, по классу и ступени. Не зависят от танков игрока
 const ADB=[['hp','Здоровье'],['sp','Скорость'],['tt','Поворот башни'],['dm','Урон за выстрел'],['cd','Перезарядка, с'],['rk','Рикошет, %'],['ab','Броня'],['pn','Пробитие'],['wt','Вес']];
 function adBots(host){
@@ -1015,6 +1022,29 @@ function adBots(host){
  const send=body=>{$('#abs').disabled=$('#abr').disabled=true;return api('/api/admin/tank',body).then(j=>{tsApply(j.stats);const v=sel.value;sel.innerHTML=optHtml();sel.value=v;fill();msg.textContent='✅ Сохранено. Игрокам нужно обновить страницу.';$('#abs').disabled=$('#abr').disabled=false}).catch(e=>{msg.textContent='Ошибка: '+(e&&(e.key?e.error+' ('+e.key+')':e.error)||'нет связи');$('#abs').disabled=$('#abr').disabled=false})};
  $('#abs').onclick=()=>{const id=sel.value,d=BOTD[id],set={};box.querySelectorAll('input').forEach(i=>{const k=i.dataset.k,v=i.value===''?'':Number(i.value);set[k]=(v===''||v==d[k])?'':v});send({id:'bt:'+id,set})};
  $('#abr').onclick=()=>send({id:'bt:'+sel.value,reset:true})}
+// Типы врагов и боссы: множители, появление и параметры способностей. Заводские значения — как в коде игры
+const TYN={s:'⚡ Лёгкий быстрый',Q:'🔥 Очередник',n:'⚙ Средний',M:'💣 Минёр',h:'🛡 Тяжёлый',Z:'🎯 Снайпер',R:'✚ Ремонтник',B:'👑 Босс волны',W:'⚡ Мировой босс'};
+function tyDefs(k){
+ if(k=='W')return[['ar','Броня ×',WBD.ar],['he','Сопротивление фугасам ×',WBD.he],['hit','Урон разряда (доля ХП игрока)',WBD.hit],['cd1','Пауза между разрядами, с (1-я половина боя)',WBD.cd1],['cd2','Пауза между разрядами, с (2-я половина)',WBD.cd2],['dm','Урон выстрела (доля ХП игрока)',.06],['sp','Скорость',1.1],['cdm','Перезарядка выстрела, с',2]];
+ const t=TY0[k],L=[['hpk','Здоровье ×',t.hpk],['dmk','Урон ×',t.dmk],['spk','Скорость ×',t.spk],['ark','Броня ×',t.ark],['pnk','Пробитие ×',t.pnk],['wtk','Вес ×',t.wtk],['cd','Перезарядка, с',t.cd],['pts','Очки за убийство',t.pts]];
+ if(k!='B'){L.push(['un','Появляется с волны',UNLOCK0[k]]);L.push(['w','Доля в волне (вес)',WTS0[k]])}
+ if(k=='M')L.push(['mdm','Урон мины (× урон бота)',2.5],['ml','Жизнь мины, с',25],['mc','Мин одновременно',12]);
+ if(k=='Z')L.push(['vk','Скорость снаряда ×',t.vk],['at','Время прицеливания, с',1.2],['rg','Дальность, клеток',28],['cap','Одновременно (до 40-й волны)',1],['cap2','Одновременно (с 40-й волны)',2]);
+ if(k=='R')L.push(['hi','Лечит раз в, с',3],['hr','Дальность лечения, клеток',6],['cap','Одновременно',2]);
+ if(k=='Q')L.push(['bn','Выстрелов в очереди',3]);
+ if(k=='B')L.push(['ph','Ярость при здоровье ниже (доля)',.5],['br','Перезарядка в ярости ×',.6],['sn','Призывает за раз (3-й босс)',2],['sm','Макс. призванных одновременно',BOSS_MIN]);
+ return L}
+function adTypes(host){
+ const ks=Object.keys(TYN);
+ host.innerHTML='<p>Типы врагов и боссы. Множители применяются к ТТХ ботов (вкладка «Боты»), «Доля в волне» — как часто тип встречается. Заводские значения подписаны под полем, пустое поле возвращает заводское. Применяется у всех игроков после обновления страницы.</p><div class="dt"><div class="dh"><div><b>Типы врагов</b></div></div><select id="aty" style="width:100%;padding:8px;border-radius:8px;margin:6px 0"></select><div id="atf" style="display:grid;grid-template-columns:1fr 110px;gap:6px 10px;align-items:center;text-align:left"></div><div class="oa" style="margin-top:10px"><button id="ats">Сохранить</button><button id="atr">Сбросить к стандарту</button></div><small id="atm"></small></div>';
+ const sel=$('#aty'),box=$('#atf'),msg=$('#atm');
+ const opts=()=>{sel.innerHTML=ks.map(k=>'<option value="'+k+'">'+TYN[k]+(TSO['ty:'+k]?' ✎':'')+'</option>').join('')};opts();
+ const cur=k=>{const o=TSO['ty:'+k]||{};return f=>o[f]};
+ const fill=()=>{const k=sel.value,c=cur(k);box.innerHTML=tyDefs(k).map(f=>{const v=c(f[0]);return '<label>'+f[1]+'<small style="display:block;opacity:.6">станд.: '+f[2]+'</small></label><input data-k="'+f[0]+'" type="number" step="any" value="'+(v==null?f[2]:v)+'" style="padding:7px;border-radius:8px;border:1px solid #3a4a6a;background:#0e1a33;color:inherit;width:100%;box-sizing:border-box">'}).join('');msg.textContent=''};
+ sel.onchange=fill;fill();
+ const send=body=>{$('#ats').disabled=$('#atr').disabled=true;return api('/api/admin/tank',body).then(j=>{tsApply(j.stats);const v=sel.value;opts();sel.value=v;fill();msg.textContent='✅ Сохранено. Игрокам нужно обновить страницу.';$('#ats').disabled=$('#atr').disabled=false}).catch(e=>{msg.textContent='Ошибка: '+(e&&(e.key?e.error+' ('+e.key+')':e.error)||'нет связи');$('#ats').disabled=$('#atr').disabled=false})};
+ $('#ats').onclick=()=>{const k=sel.value,d={};tyDefs(k).forEach(f=>d[f[0]]=f[2]);const set={};box.querySelectorAll('input').forEach(i=>{const f=i.dataset.k,v=i.value===''?'':Number(i.value);set[f]=(v===''||v==d[f])?'':v});send({id:'ty:'+k,set})};
+ $('#atr').onclick=()=>send({id:'ty:'+sel.value,reset:true})}
 function adTanks(host){
  const opts=TANKS.map(t=>'<option value="'+t.id+'">'+CN[t.c]+' '+t.t+' · '+t.n+(t.ed?' ✎':'')+'</option>').join('');
  host.innerHTML='<p>Характеристики танков. Правки сохраняются на сервере и действуют у всех игроков (после обновления страницы). ✎ — танк изменён.</p><div class="dt"><div class="dh"><div><b>ТТХ танка</b></div></div><select id="adt" style="width:100%;padding:8px;border-radius:8px;margin:6px 0">'+opts+'</select><div id="adf" style="display:grid;grid-template-columns:1fr 110px;gap:6px 10px;align-items:center;text-align:left"></div><div class="oa" style="margin-top:10px"><button id="ads">Сохранить</button><button id="adr">Сбросить к стандарту</button></div><small id="adm"></small></div>';
