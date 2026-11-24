@@ -71,6 +71,7 @@ a.btn{display:inline-block;background:#1b2838;color:#fff;text-decoration:none;bo
 .lb tr.bn td.bc{text-align:center;height:112px}
 .lb tr.bn .bav{display:flex;justify-content:center;margin:6px 0 6px}.lb tr.bn .bav .pfx{margin:0}
 .lb tr.bn .bnm{font-weight:700;font-size:1.02rem;line-height:1.2;text-shadow:0 1px 3px #000,0 0 10px rgba(0,0,0,.85)}
+.lb tr.bn .bsv{margin-top:2px;font-size:.8rem;font-weight:500;color:#e6e0d0;text-shadow:0 1px 3px #000,0 0 8px rgba(0,0,0,.8)}
 .lb tr.bn.pfx-pl td.rk{text-shadow:0 1px 3px #000}
 .plst{margin:4px 0 0;text-align:left;font-size:.9rem}
 .plst div{display:flex;justify-content:space-between;gap:10px;border-top:1px solid var(--line);padding:6px 2px}
@@ -345,10 +346,10 @@ function renderAuth(){
 // ====== Рейтинг: все таблицы в одном окне ======
 function fmtMs(ms){var s=Math.round(ms/1000),h=Math.floor(s/3600),m=Math.floor(s%3600/60),r=s%60;return (h?h+':'+('0'+m).slice(-2):m)+':'+('0'+r).slice(-2)}
 var MODES=[
-  {id:'mj', g:'mj',tab:'Прохождения',url:'/api/leaderboard',   h:'Прошёл', d:'Сколько раз игрок прошёл маджонг целиком',               v:function(p){return p.c}},
-  {id:'mjs',g:'mj',tab:'Скорость',   url:'/api/speed',         h:'Время',  d:'Лучшее время прохождения всех уровней маджонга подряд',  v:function(p){return fmtMs(p.ms)}},
-  {id:'tkw',g:'tk',tab:'Волны',      url:'/api/tanks?by=wave', h:'',d:'Максимальная пройденная волна. ЛТ — лёгкие, СТ — средние, ТТ — тяжёлые. Обновляется раз в 5 минут',cards:true},
-  {id:'tkb',g:'tk',tab:'Боссы',      url:'/api/tanks?by=boss', h:'Боссов', d:'Сколько боссов убито в танчиках за всё время. Обновляется раз в 5 минут',        v:function(p){return p.b}}
+  {id:'mj', g:'mj',tab:'Прохождения',url:'/api/leaderboard',   h:'Прошёл', d:'Сколько раз игрок прошёл маджонг целиком',               v:function(p){return p.c},cards:true,vl:'Прохождений: '},
+  {id:'mjs',g:'mj',tab:'Скорость',   url:'/api/speed',         h:'Время',  d:'Лучшее время прохождения всех уровней маджонга подряд',  v:function(p){return fmtMs(p.ms)},cards:true,vl:'Лучшее время: '},
+  {id:'tkw',g:'tk',tab:'Волны',      url:'/api/tanks?by=wave', h:'',d:'Обновляется раз в 5 минут',cards:true},
+  {id:'tkb',g:'tk',tab:'Боссы',      url:'/api/tanks?by=boss', h:'Боссов', d:'Обновляется раз в 5 минут',        v:function(p){return p.b}}
 ];
 var lbMode='mj';
 var GAMES=[{id:'mj',name:'Маджонг',icon:'🀄',sub:'Прохождения · скорость'},{id:'tk',name:'Танчики',icon:'🛡️',sub:'Волны · боссы'}];
@@ -397,7 +398,7 @@ function copyText(t,b){
   if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(t).then(ok,old);else old();
 }
 function avAppend(host,p,sz){if(window.PFX&&PFX.has(p.f)){host.appendChild(PFX.el(p.a,p.n,p.f,sz||24));return}if(p.a&&p.a.indexOf('https://')===0){var im=document.createElement('img');im.className='av';im.src=p.a;im.alt='';host.appendChild(im)}}
-function cardRows(p,i,body){ // строка рейтинга Танчиков: аватар по центру, ник под ним, подложка на всю строку; результаты — в карточке игрока
+function cardRows(p,i,body,M){ // строка рейтинга Танчиков: аватар по центру, ник под ним, подложка на всю строку; результаты — в карточке игрока
   var isMe=me&&p.id===me.sid,r=document.createElement('tr');r.className='bn'+(isMe?' me':'');body.appendChild(r);
   var rk=document.createElement('td');rk.className='rk';rk.textContent=i+1;r.appendChild(rk);
   var td=document.createElement('td');td.className='bc';
@@ -405,6 +406,7 @@ function cardRows(p,i,body){ // строка рейтинга Танчиков: 
   if(window.PFX)av.appendChild(PFX.el(p.a,p.n,p.f||['','',''],54));else if(p.a&&p.a.indexOf('https://')===0){var im=document.createElement('img');im.className='av';im.src=p.a;im.alt='';av.appendChild(im)}
   td.appendChild(av);
   var nm=document.createElement('div');nm.className='bnm';nm.textContent=p.n;td.appendChild(nm);
+  if(M&&M.v){var sv=document.createElement('div');sv.className='bsv';sv.textContent=(M.vl||'')+M.v(p);td.appendChild(sv)}
   r.appendChild(td);r.style.cursor='pointer';r.onclick=function(){openPlayer(p)};
   if(window.PFX&&p.f&&p.f[2])PFX.row(r,p.f,1);
 }
@@ -417,7 +419,7 @@ function loadLb(id){
     if(lbMode!==id)return;
     msg.textContent=j.players.length?'':'Пока нет результатов.';
     j.players.forEach(function(p,i){
-      if(M.cards){var tb=document.createElement('tbody');tb.className='lbcard';body.parentNode.appendChild(tb);cardRows(p,i,tb);return}
+      if(M.cards){var tb=document.createElement('tbody');tb.className='lbcard';body.parentNode.appendChild(tb);cardRows(p,i,tb,M);return}
       var tr=document.createElement('tr');if(me&&p.id===me.sid)tr.className='me';
       var c1=document.createElement('td');c1.textContent=i+1;
       var c2=document.createElement('td');
