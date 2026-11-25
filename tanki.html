@@ -245,11 +245,14 @@ const AP_FREE_TIER=1,REPAIR_COST=0,MINAM=.5,HE_SPL=1.2,HE_MIN=.15; // броне
 const TANKS=TD.map(a=>({id:a[0]+a[1]+a[2].toLowerCase(),c:a[0],t:a[1],v:a[2],n:a[3],hp:a[4]*10,sp:a[5],tt:a[6],dm:Math.round(a[7]*100)/10,cd:a[8],rk:a[9],r:{l:.5,m:.55,h:.65}[a[0]]+.01*(a[1]-1),wt:{l:8+1.5*(a[1]-1),m:22+2.5*(a[1]-1),h:40+4*(a[1]-1)}[a[0]],ab:Math.round(lerp(ARM[a[0]][0],ARM[a[0]][1],a[1])),pn:Math.round(lerp(PEN[a[0]][0],PEN[a[0]][1],a[1])),cal:Math.round(lerp(CAL[a[0]][0],CAL[a[0]][1],a[1]))}));
 const TANKS0=TANKS.map(t=>({...t}));
 let TSO={}; // правки админа: id → {hp,sp,tt,dm,cd,rk,ab,pn,cal,wt,n}
-let BOTR={},BOTD={}; // ТТХ врагов (класс+ступень → те же поля, что у танка игрока). BOTD — заводские значения, BOTR — с правками «Боты» (id bt:<класс><ступень>)
+let BOTR={},BOTD={},BOSSR={},BOSSD={}; // ТТХ врагов (класс+ступень → те же поля, что у танка игрока). BOTD — заводские значения, BOTR — с правками «Боты» (id bt:<класс><ступень>)
 function tsApply(map){TSO=map||{};TANKS.forEach((t,i)=>{Object.assign(t,TANKS0[i]);const o=TSO[t.id];t.ed=!!o;if(o)for(const k in o)t[k]=o[k]});
  BOTR={};BOTD={};for(const c of['l','m','h'])for(let n=1;n<=10;n++){const b=TANKS0.find(q=>q.c==c&&q.t==n&&q.v!='B')||TANKS0[0],o=TSO['bt:'+c+n],
   d={hp:Math.round(b.dm*HK*100)/100,dm:Math.round(b.hp/HD*100)/100,sp:b.sp,tt:b.tt,cd:b.cd,rk:0,ab:b.ab,pn:b.pn,wt:b.wt}; // заводские: здоровье врага = HK попаданий равного игрока, урон = 1/HD здоровья игрока
   BOTD[c+n]=d;BOTR[c+n]=Object.assign({},d,o||{},{ed:!!o,d})}
+ BOSSD={};BOSSR={};for(let n=1;n<=10;n++){const m=BOTD['m'+n],B=TY0.B,o=TSO['bb:'+n], // босс волны: своя таблица по ступеням; заводские значения = строка СТ × прежние множители босса, бой не меняется
+  d={hp:Math.round(m.hp*B.hpk*100)/100,dm:Math.round(m.dm*B.dmk*100)/100,sp:Math.round(m.sp*B.spk*100)/100,tt:m.tt,cd:m.cd,rk:0,ab:Math.round(m.ab*B.ark*100)/100,pn:Math.round(m.pn*B.pnk*100)/100,wt:Math.round(m.wt*B.wtk*100)/100};
+  BOSSD[n]=d;BOSSR[n]=Object.assign({},d,o||{},{ed:!!o,d})}
  tyApply()}
 function tyApply(){ // типы врагов и мировой босс: заводские значения + правки админки (ty:<тип>)
  for(const k in TY0){for(const f in TY[k])delete TY[k][f];Object.assign(TY[k],TY0[k]);const o=TSO['ty:'+k];UNLOCK[k]=UNLOCK0[k];WTS[k]=WTS0[k];if(!o)continue;for(const f in o){if(f=='un')UNLOCK[k]=o[f];else if(f=='w')WTS[k]=o[f];else TY[k][f]=o[f]}}
@@ -491,9 +494,10 @@ function spawnPos(r){const mg=S*1.5;
 function hitZone(ang,vx,vy){const d=Math.abs(ad(Math.atan2(vy,vx),ang+PI));return d<PI/4?{z:0,al:d}:d>PI*.75?{z:2,al:PI-d}:{z:1,al:Math.abs(PI/2-d)}}
 const pens=(pn,ar,h)=>pn*(1+R(-PENVAR,PENVAR))>=ar[h.z]/Math.cos(h.al); // пробитие ±25% против брони зоны / cos угла
 const etier=w=>Math.max(1,Math.min(10,1+Math.floor((w-1)/ETIER_WAVES)+CLS_OFF[TK().c]));
-const refT=(c,t)=>BOTR[c+t]||BOTR.l1; // танк игрока того же класса и ступени — эталон для врага
-function mk(t){const Y=TY[t],r=Y.r*S;const[px,py]=spawnPos(r);const et=etier(wave),f=refT(Y.cl,et),bv=((wave/5|0)-1)%3,H_=Math.max(1,Math.ceil(f.hp*Y.hpk)),ab=f.ab*Y.ark;eload(t,et);if(t=='B')bload(bv);
- return{type:t,tier:et,hp:H_,mh:H_,bv,sp:+(f.sp*Y.spk).toFixed(2),c:t=='B'?['#8c1f1f','#a0501a','#1f5a8c'][bv]:Y.c,r:Y.r,pts:Math.round(Y.pts*(1+.5*(et-1))),cdMax:Y.cd*(f.cd/f.d.cd),ak:f.d.tt/f.tt,rk:f.rk,x:px,y:py,a:PI/2,t:PI/2,cd:R(1,2),ph:R(6),w:0,rc:0,fl:0,tr:0,ar:[ab,ab*ASIDE,ab*AREAR],pen:f.pn*Y.pnk,dmg:f.dm*Y.dmk,wt:f.wt*Y.wtk,vk:Y.vk||1,blife:Y.bl||1.3,aimT:0}}
+const refT=(c,t)=>BOTR[c+t]||BOTR.l1,bossRow=t=>BOSSR[t]||BOSSR[1]; // танк игрока того же класса и ступени — эталон для врага
+const ONE={hpk:1,dmk:1,spk:1,ark:1,pnk:1,wtk:1};
+function mk(t){const Y=TY[t],r=Y.r*S;const[px,py]=spawnPos(r);const et=etier(wave),f=t=='B'?bossRow(et):refT(Y.cl,et),M=t=='B'?ONE:Y,bv=((wave/5|0)-1)%3,H_=Math.max(1,Math.ceil(f.hp*M.hpk)),ab=f.ab*M.ark;eload(t,et);if(t=='B')bload(bv);
+ return{type:t,tier:et,hp:H_,mh:H_,bv,sp:+(f.sp*M.spk).toFixed(2),c:t=='B'?['#8c1f1f','#a0501a','#1f5a8c'][bv]:Y.c,r:Y.r,pts:Math.round(Y.pts*(1+.5*(et-1))),cdMax:Y.cd*(f.cd/f.d.cd),ak:f.d.tt/f.tt,rk:f.rk,x:px,y:py,a:PI/2,t:PI/2,cd:R(1,2),ph:R(6),w:0,rc:0,fl:0,tr:0,ar:[ab,ab*ASIDE,ab*AREAR],pen:f.pn*M.pnk,dmg:f.dm*M.dmk,wt:f.wt*M.wtk,vk:Y.vk||1,blife:Y.bl||1.3,aimT:0}}
 // состав волны: какие типы врагов открыты к этой волне; снайперов не больше 1 (с 40-й волны 2), ремонтников не больше 2
 function compose(){const n=Math.min(3+wave*2,WAVE_MAX),av=Object.keys(UNLOCK).filter(k=>wave>=UNLOCK[k]),cnt={},list=[],cap=k=>k=='Z'?(wave<40?(TY.Z.cap==null?1:TY.Z.cap):(TY.Z.cap2==null?2:TY.Z.cap2)):k=='R'?(TY.R.cap==null?2:TY.R.cap):(TY[k]&&TY[k].cap!=null?TY[k].cap:99);
  for(let i=0;i<n;i++){let tot=0;const w=av.map(k=>{const v=(cnt[k]||0)>=cap(k)?0:WTS[k]*(wave-UNLOCK[k]<5?1.6:1);tot+=v;return v});let r=Math.random()*tot,k=av[0];for(let j=0;j<av.length;j++){if((r-=w[j])<=0){k=av[j];break}}cnt[k]=(cnt[k]||0)+1;list.push(k)}
@@ -1026,7 +1030,7 @@ function adBots(host){
 const TYN={s:'⚡ Лёгкий быстрый',Q:'🔥 Очередник',n:'⚙ Средний',M:'💣 Минёр',h:'🛡 Тяжёлый',Z:'🎯 Снайпер',R:'✚ Ремонтник',B:'👑 Босс волны',W:'⚡ Мировой босс'};
 function tyDefs(k){
  if(k=='W')return[['ar','Броня ×',WBD.ar],['he','Сопротивление фугасам ×',WBD.he],['hit','Урон разряда (доля ХП игрока)',WBD.hit],['cd1','Пауза между разрядами, с (1-я половина боя)',WBD.cd1],['cd2','Пауза между разрядами, с (2-я половина)',WBD.cd2],['dm','Урон выстрела (доля ХП игрока)',.06],['sp','Скорость',1.1],['cdm','Перезарядка выстрела, с',2]];
- const t=TY0[k],L=[['hpk','Здоровье ×',t.hpk],['dmk','Урон ×',t.dmk],['spk','Скорость ×',t.spk],['ark','Броня ×',t.ark],['pnk','Пробитие ×',t.pnk],['wtk','Вес ×',t.wtk],['cd','Перезарядка, с',t.cd],['pts','Очки за убийство',t.pts]];
+ const t=TY0[k],L=k=='B'?[['cd','Пауза между залпами, с',t.cd],['pts','Очки за убийство',t.pts]]:[['hpk','Здоровье ×',t.hpk],['dmk','Урон ×',t.dmk],['spk','Скорость ×',t.spk],['ark','Броня ×',t.ark],['pnk','Пробитие ×',t.pnk],['wtk','Вес ×',t.wtk],['cd','Перезарядка, с',t.cd],['pts','Очки за убийство',t.pts]];
  if(k!='B'){L.push(['un','Появляется с волны',UNLOCK0[k]]);L.push(['w','Доля в волне (вес)',WTS0[k]])}
  if(k=='M')L.push(['mdm','Урон мины (× урон бота)',2.5],['ml','Жизнь мины, с',25],['mc','Мин одновременно',12]);
  if(k=='Z')L.push(['vk','Скорость снаряда ×',t.vk],['at','Время прицеливания, с',1.2],['rg','Дальность, клеток',28],['cap','Одновременно (до 40-й волны)',1],['cap2','Одновременно (с 40-й волны)',2]);
@@ -1034,17 +1038,28 @@ function tyDefs(k){
  if(k=='Q')L.push(['bn','Выстрелов в очереди',3]);
  if(k=='B')L.push(['ph','Ярость при здоровье ниже (доля)',.5],['br','Перезарядка в ярости ×',.6],['sn','Призывает за раз (3-й босс)',2],['sm','Макс. призванных одновременно',BOSS_MIN]);
  return L}
+const ADBB=[['hp','Здоровье'],['dm','Урон за выстрел'],['sp','Скорость'],['ab','Броня'],['pn','Пробитие'],['wt','Вес'],['rk','Рикошет, %']];
 function adTypes(host){
- const ks=Object.keys(TYN);
- host.innerHTML='<p>Типы врагов и боссы. Множители применяются к ТТХ ботов (вкладка «Боты»), «Доля в волне» — как часто тип встречается. Заводские значения подписаны под полем, пустое поле возвращает заводское. Применяется у всех игроков после обновления страницы.</p><div class="dt"><div class="dh"><div><b>Типы врагов</b></div></div><select id="aty" style="width:100%;padding:8px;border-radius:8px;margin:6px 0"></select><div id="atf" style="display:grid;grid-template-columns:1fr 110px;gap:6px 10px;align-items:center;text-align:left"></div><div class="oa" style="margin-top:10px"><button id="ats">Сохранить</button><button id="atr">Сбросить к стандарту</button></div><small id="atm"></small></div>';
- const sel=$('#aty'),box=$('#atf'),msg=$('#atm');
- const opts=()=>{sel.innerHTML=ks.map(k=>'<option value="'+k+'">'+TYN[k]+(TSO['ty:'+k]?' ✎':'')+'</option>').join('')};opts();
+ const ks=Object.keys(TYN),INP='padding:7px;border-radius:8px;border:1px solid #3a4a6a;background:#0e1a33;color:inherit;width:100%;box-sizing:border-box';
+ host.innerHTML='<p>Типы врагов и боссы. Множители применяются к ТТХ ботов (вкладка «Боты»), «Доля в волне» — как часто тип встречается. Заводские значения подписаны под полем, пустое поле возвращает заводское. Применяется у всех игроков после обновления страницы.</p><div class="dt"><div class="dh"><div><b>Типы врагов</b></div></div><select id="aty" style="width:100%;padding:8px;border-radius:8px;margin:6px 0"></select><div id="atb"></div><div id="atf" style="display:grid;grid-template-columns:1fr 110px;gap:6px 10px;align-items:center;text-align:left"></div><div class="oa" style="margin-top:10px"><button id="ats">Сохранить</button><button id="atr">Сбросить к стандарту</button></div><small id="atm"></small></div>';
+ const sel=$('#aty'),box=$('#atf'),bb=$('#atb'),msg=$('#atm');
+ const opts=()=>{sel.innerHTML=ks.map(k=>'<option value="'+k+'">'+TYN[k]+(TSO['ty:'+k]||(k=='B'&&Object.keys(TSO).some(x=>x.startsWith('bb:')))?' ✎':'')+'</option>').join('')};opts();
  const cur=k=>{const o=TSO['ty:'+k]||{};return f=>o[f]};
- const fill=()=>{const k=sel.value,c=cur(k);box.innerHTML=tyDefs(k).map(f=>{const v=c(f[0]);return '<label>'+f[1]+'<small style="display:block;opacity:.6">станд.: '+f[2]+'</small></label><input data-k="'+f[0]+'" type="number" step="any" value="'+(v==null?f[2]:v)+'" style="padding:7px;border-radius:8px;border:1px solid #3a4a6a;background:#0e1a33;color:inherit;width:100%;box-sizing:border-box">'}).join('');msg.textContent=''};
+ const tierOpts=()=>Array.from({length:10},(_,i)=>'<option value="'+(i+1)+'">Ступень '+(i+1)+(BOSSR[i+1].ed?' ✎':'')+'</option>').join('');
+ const bbFill=()=>{const n=+$('#atbt').value,b=BOSSR[n],d=BOSSD[n];$('#atbf').innerHTML=ADBB.map(f=>'<label>'+f[1]+'<small style="display:block;opacity:.6">станд.: '+d[f[0]]+'</small></label><input data-b="'+f[0]+'" type="number" step="any" value="'+b[f[0]]+'" style="'+INP+'">').join('')};
+ const fill=()=>{const k=sel.value,c=cur(k);
+  bb.innerHTML=k=='B'?'<div style="margin:4px 0 8px"><b>Базовые ТТХ босса волны</b><br><small style="opacity:.75">Свои значения по ступеням, не зависят от строки СТ на вкладке «Боты». Ступень босса зависит от волны и класса танка игрока. Заводские значения такие же, как были.</small><select id="atbt" style="width:100%;padding:8px;border-radius:8px;margin:6px 0">'+tierOpts()+'</select><div id="atbf" style="display:grid;grid-template-columns:1fr 110px;gap:6px 10px;align-items:center;text-align:left"></div><div style="margin:10px 0 2px"><b>Способности и появление</b></div></div>':'';
+  if(k=='B'){bbFill();$('#atbt').onchange=bbFill}
+  box.innerHTML=tyDefs(k).map(f=>{const v=c(f[0]);return '<label>'+f[1]+'<small style="display:block;opacity:.6">станд.: '+f[2]+'</small></label><input data-k="'+f[0]+'" type="number" step="any" value="'+(v==null?f[2]:v)+'" style="'+INP+'">'}).join('');msg.textContent=''};
  sel.onchange=fill;fill();
- const send=body=>{$('#ats').disabled=$('#atr').disabled=true;return api('/api/admin/tank',body).then(j=>{tsApply(j.stats);const v=sel.value;opts();sel.value=v;fill();msg.textContent='✅ Сохранено. Игрокам нужно обновить страницу.';$('#ats').disabled=$('#atr').disabled=false}).catch(e=>{msg.textContent='Ошибка: '+(e&&(e.key?e.error+' ('+e.key+')':e.error)||'нет связи');$('#ats').disabled=$('#atr').disabled=false})};
- $('#ats').onclick=()=>{const k=sel.value,d={};tyDefs(k).forEach(f=>d[f[0]]=f[2]);const set={};box.querySelectorAll('input').forEach(i=>{const f=i.dataset.k,v=i.value===''?'':Number(i.value);set[f]=(v===''||v==d[f])?'':v});send({id:'ty:'+k,set})};
- $('#atr').onclick=()=>send({id:'ty:'+sel.value,reset:true})}
+ const post=body=>api('/api/admin/tank',body);
+ const done=j=>{tsApply(j.stats);const v=sel.value,tv=$('#atbt')&&$('#atbt').value;opts();sel.value=v;fill();if(tv&&$('#atbt')){$('#atbt').value=tv;bbFill()}msg.textContent='✅ Сохранено. Игрокам нужно обновить страницу.';$('#ats').disabled=$('#atr').disabled=false};
+ const fail=e=>{msg.textContent='Ошибка: '+(e&&(e.key?e.error+' ('+e.key+')':e.error)||'нет связи');$('#ats').disabled=$('#atr').disabled=false};
+ $('#ats').onclick=()=>{const k=sel.value,d={};tyDefs(k).forEach(f=>d[f[0]]=f[2]);const set={};box.querySelectorAll('input').forEach(i=>{const f=i.dataset.k,v=i.value===''?'':Number(i.value);set[f]=(v===''||v==d[f])?'':v});
+  $('#ats').disabled=$('#atr').disabled=true;let pr=post({id:'ty:'+k,set});
+  if(k=='B'){const n=+$('#atbt').value,bd=BOSSD[n],bs={};$('#atbf').querySelectorAll('input').forEach(i=>{const f=i.dataset.b,v=i.value===''?'':Number(i.value);bs[f]=(v===''||v==bd[f])?'':v});pr=pr.then(()=>post({id:'bb:'+n,set:bs}))}
+  pr.then(done).catch(fail)};
+ $('#atr').onclick=()=>{const k=sel.value;$('#ats').disabled=$('#atr').disabled=true;let pr=post({id:'ty:'+k,reset:true});if(k=='B')pr=pr.then(()=>post({id:'bb:'+$('#atbt').value,reset:true}));pr.then(done).catch(fail)}}
 function adTanks(host){
  const opts=TANKS.map(t=>'<option value="'+t.id+'">'+CN[t.c]+' '+t.t+' · '+t.n+(t.ed?' ✎':'')+'</option>').join('');
  host.innerHTML='<p>Характеристики танков. Правки сохраняются на сервере и действуют у всех игроков (после обновления страницы). ✎ — танк изменён.</p><div class="dt"><div class="dh"><div><b>ТТХ танка</b></div></div><select id="adt" style="width:100%;padding:8px;border-radius:8px;margin:6px 0">'+opts+'</select><div id="adf" style="display:grid;grid-template-columns:1fr 110px;gap:6px 10px;align-items:center;text-align:left"></div><div class="oa" style="margin-top:10px"><button id="ads">Сохранить</button><button id="adr">Сбросить к стандарту</button></div><small id="adm"></small></div>';
