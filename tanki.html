@@ -246,7 +246,8 @@ const TANKS=TD.map(a=>({id:a[0]+a[1]+a[2].toLowerCase(),c:a[0],t:a[1],v:a[2],n:a
 const TANKS0=TANKS.map(t=>({...t}));
 let TSO={}; // правки админа: id → {hp,sp,tt,dm,cd,rk,ab,pn,cal,wt,n}
 let BOTR={},BOTD={},BOSSR={},BOSSD={}; // ТТХ врагов (класс+ступень → те же поля, что у танка игрока). BOTD — заводские значения, BOTR — с правками «Боты» (id bt:<класс><ступень>)
-function tsApply(map){TSO=map||{};TANKS.forEach((t,i)=>{Object.assign(t,TANKS0[i]);const o=TSO[t.id];t.ed=!!o;if(o)for(const k in o)t[k]=o[k]});
+const OVK=['ox','og'];for(const m of'gtek')for(const L of'23')OVK.push('x'+m+L,'c'+m+L); // цены: правки админа (ox,og — открытие; x/c+модуль+уровень — модули)
+function tsApply(map){TSO=map||{};TANKS.forEach((t,i)=>{for(const k of OVK)delete t[k];Object.assign(t,TANKS0[i]);const o=TSO[t.id];t.ed=!!o;if(o)for(const k in o)t[k]=o[k]});
  BOTR={};BOTD={};for(const c of['l','m','h'])for(let n=1;n<=10;n++){const b=TANKS0.find(q=>q.c==c&&q.t==n&&q.v!='B')||TANKS0[0],o=TSO['bt:'+c+n],
   d={hp:Math.round(b.dm*HK*100)/100,dm:Math.round(b.hp/HD*100)/100,sp:b.sp,tt:b.tt,cd:b.cd,rk:0,ab:b.ab,pn:b.pn,wt:b.wt}; // заводские: здоровье врага = HK попаданий равного игрока, урон = 1/HD здоровья игрока
   BOTD[c+n]=d;BOTR[c+n]=Object.assign({},d,o||{},{ed:!!o,d})}
@@ -292,7 +293,7 @@ mpApply();
 const modLv=(id,m)=>(sv.mod[id]&&sv.mod[id][m])||1;                              // изучено
 const eqLv=(id,m)=>{const e=sv.eq[id]&&sv.eq[id][m];return e?Math.min(e,modLv(id,m)):modLv(id,m)}; // установлено
 const maxed=id=>MD.every(([m])=>modLv(id,m)>=3);
-const MXP=(t,L)=>Math.round(XPC(t.t+1)*(L==2?.10:.20)),MGD=(t,L)=>Math.round(MXP(t,L)/1.5); // цена модуля: доля цены следующего танка
+const MXP0=(t,L)=>Math.round(XPC(t.t+1)*(L==2?.10:.20)),MGD0=(t,L)=>Math.round(MXP0(t,L)/1.5),MXP=(t,L,m)=>{const o=t['x'+m+L];return o!==undefined?o:MXP0(t,L)},MGD=(t,L,m)=>{const o=t['c'+m+L];return o!==undefined?o:MGD0(t,L)}; // цена модуля: доля цены следующего танка
 /* ----- навыки: открываются, когда у танка изучены все модули; в бою работает один выбранный; до 5 рангов ----- */
 const SKD=[['f','Скорострельность','⚙'],['d','Защита','🛡'],['n','Некромант','☠'],['v','Вампиризм','🩸']];
 const NECP=r=>3+1.5*(r-1);
@@ -328,13 +329,13 @@ let TKc=eff(TK());
 const hasWork=t=>!maxed(t.id)||SKD.some(([k])=>skR(t.id,k)<5)||TANKS.some(s=>s.c==t.c&&s.t==t.t+1&&!own(s.id));
 function addXP(n){const t=TK();if(hasWork(t))sv.xp[t.id]=(sv.xp[t.id]||0)+n;else sv.fx+=n}
 // что нужно, чтобы открыть танк t. Следующий танк открывается, когда у предыдущего прокачаны все модули
-function openInfo(t){if(t.t==1)return{lock:false,xp:0,gd:FIRST[t.c],have:0,src:null};
+function openInfo(t){if(t.t==1)return{lock:false,xp:0,gd:t.og!==undefined?t.og:FIRST[t.c],have:0,src:null};
  const op=preds(t).filter(s=>own(s.id));if(!op.length)return{lock:true,why:'сначала откройте «'+preds(t).map(s=>s.n).join(' / ')+'»'};
  const ps=op.filter(s=>maxed(s.id));if(!ps.length)return{lock:true,why:'прокачайте все модули «'+op[0].n+'»'};
  let b=ps[0];for(const s of ps)if((sv.xp[s.id]||0)>(sv.xp[b.id]||0))b=s;
- return{lock:false,xp:XPC(t.t),gd:GDC(t.t),have:sv.xp[b.id]||0,src:b.id}}
+ return{lock:false,xp:t.ox!==undefined?t.ox:XPC(t.t),gd:t.og!==undefined?t.og:GDC(t.t),have:sv.xp[b.id]||0,src:b.id}}
 function tankClick(id){const t=TK(id);if(own(id)){sv.tank=id;return}const o=openInfo(t);if(o.lock||sv.co<o.gd||o.have<o.xp)return;sv.co-=o.gd;if(o.src)sv.xp[o.src]-=o.xp;sv.tk.push(id);sv.am[id]={ap:Math.floor(capOf(t)/2),pc:0,he:0}}
-function research(t,m){const L=modLv(t.id,m)+1;if(!own(t.id))return'Сначала откройте танк';if(L>3)return'';const x=MXP(t,L),g=MGD(t,L);if((sv.xp[t.id]||0)<x)return'Не хватает опыта на этом танке';if(sv.co<g)return'Не хватает монет';sv.xp[t.id]-=x;sv.co-=g;(sv.mod[t.id]=sv.mod[t.id]||{})[m]=L;(sv.eq[t.id]=sv.eq[t.id]||{})[m]=L;return''} // купленный модуль сразу устанавливается
+function research(t,m){const L=modLv(t.id,m)+1;if(!own(t.id))return'Сначала откройте танк';if(L>3)return'';const x=MXP(t,L,m),g=MGD(t,L,m);if((sv.xp[t.id]||0)<x)return'Не хватает опыта на этом танке';if(sv.co<g)return'Не хватает монет';sv.xp[t.id]-=x;sv.co-=g;(sv.mod[t.id]=sv.mod[t.id]||{})[m]=L;(sv.eq[t.id]=sv.eq[t.id]||{})[m]=L;return''} // купленный модуль сразу устанавливается
 function install(t,m,L){if(own(t.id)&&L>=1&&L<=modLv(t.id,m))(sv.eq[t.id]=sv.eq[t.id]||{})[m]=L}
 function skUp(t,k){const r=skR(t.id,k)+1;if(!own(t.id)||!maxed(t.id))return'Навыки открываются после прокачки всех модулей';if(r>5)return'';const x=SXP(t,r),g=SGD(t,r);if((sv.xp[t.id]||0)<x)return'Не хватает опыта на этом танке';if(sv.co<g)return'Не хватает монет';sv.xp[t.id]-=x;sv.co-=g;const o=sv.sk[t.id]=sv.sk[t.id]||{on:''};o[k]=r;if(!o.on)o.on=k;return''}
 function skSel(t,k){if(own(t.id)&&maxed(t.id)&&skR(t.id,k)>0)(sv.sk[t.id]=sv.sk[t.id]||{on:''}).on=k}
@@ -722,7 +723,7 @@ function cardHTML(t){const mine=own(t.id),e=eff(t),o=openInfo(t),on=sv.tank==t.i
  const sk=e.sk?SKD.find(a=>a[0]==e.sk)[1]+' '+skR(t.id,e.sk)+'/5':'—';
  const left=`<div class='tc'><span class='tn' style='font-size:20px'>${t.n}</span><span class='tg'>${CL[t.c]} · ступень ${RM[t.t-1]}${t.v?' · развилка':''}</span><div class='ts' style='text-align:left;margin:8px 0'>ХП <b>${e.hp}</b> · масса <b>${f1(e.wt)} т</b><br>Броня <b>${e.ar.join('/')}</b> мм<br>Скорость <b>${f1(e.sp)}</b><br>Орудие <b>${e.cal}</b> мм · пробитие <b>${e.pn}</b> мм<br>Урон <b>${f1(e.dm)}</b> · ${f1(1/e.cd)} выст/с<br>Урон в секунду <b>${f1(e.dm/e.cd)}</b><br>Крит в борт <b>${f1(e.cr)}%</b> (×${PCRIT_MUL})<br>Поворот башни <b>${e.tt}</b> · корпуса <b>${f1(e.ht)}</b><br>Рикошет <b>${f1(e.rk)}%</b><br>Навык: <b>${sk}</b><br>Боезапас: <b>${e.cap}</b><br>Опыт на танке: <b>${xp}</b></div>${act}${mine&&sv.brk[t.id]?`<span class='st no' style='margin-top:6px'>🔧 Танк разбит — в бой нельзя</span><button data-rp='1'>Ремонт<br><span class='st ${sv.co>=repCost(t)?'ok':'no'}'>${repCost(t)} 🪙</span></button>`:''}</div>`;
  const rows=MD.map(([m,nm])=>{const cur=modLv(t.id,m),eq=eqLv(t.id,m);let h=`<div class='mr'><span class='mt'>${nm}</span>`;
-  for(let L=1;L<=3;L++){const done=L<=cur,inst=mine&&L==eq,av=mine&&L==cur+1;const x=MXP(t,L),g=MGD(t,L);
+  for(let L=1;L<=3;L++){const done=L<=cur,inst=mine&&L==eq,av=mine&&L==cur+1;const x=MXP(t,L,m),g=MGD(t,L,m);
    if(L>1)h+=`<span class='ar'>→</span>`;
    const attr=gedit&&ADMIN?(L>1?`data-em='${m}:${L}' style='outline:2px dashed #e8a73a'`:'disabled'):av?`data-m='${m}'`:done&&!inst&&mine?`data-v='${m}:${L}'`:'disabled';
    h+=`<button class='mo ${inst?'dn':done?'rs':av?'av':'lk'}' ${attr}><span class='tg'>Ур. ${L}${L==1?' · сток':''}</span><span class='ts'>${modTxt(t,m,L).join('<br>')}</span><span class='st ${inst?'ok':done?'':av&&xp>=x&&sv.co>=g?'ok':av?'no':''}'>${inst?'✓ Установлено':done?'Установить':av?x+' оп · '+g+' 🪙':'🔒'}</span></button>`}
@@ -1018,21 +1019,25 @@ let ADMIN=false;
 function adLoad(){ADMIN=false;const b=$('#adb');if(b)b.style.display='none';let on=false;try{on=localStorage.getItem('rm-adm')=='1'}catch(e){}if(!tok||!on)return Promise.resolve();return api('/api/admin/me',{}).then(j=>{ADMIN=!!(j&&j.admin);if(b)b.style.display=ADMIN?'':'none'}).catch(()=>{})}
 // Правка прямо в гараже (только админ): ТТХ танка и множители блоков
 const GEMF={g:[['dm','Урон ×'],['cd','Перезарядка ×'],['cr','Крит, +%'],['pn','Пробитие ×']],t:[['tt','Поворот башни ×'],['hp','ХП ×'],['ar','Броня ×']],e:[['sp','Скорость ×'],['hp','ХП ×']],k:[['htm','Поворот корпуса ×'],['rk','Рикошет, +%'],['sp','Скорость ×']]};
-function geWin(title,fields,vals,defs,hint,pre){
+function geWin(title,fields,vals,defs,hint,pre,fullReset){
  return new Promise(res=>{const o=document.createElement('div');o.style.cssText='position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;padding:12px';
   o.innerHTML='<style>#gew+*+div button{background:#e8a73a;color:#1a1000;border:0;border-radius:10px;padding:9px 14px;font-weight:700;font-size:14px}#gew+*+div button:disabled{opacity:.5}</style><div style="background:#12264a;border:2px solid #e8a73a;border-radius:16px;padding:14px;max-width:420px;width:100%;max-height:92vh;overflow:auto;color:#dbe6ff"><h3 style="margin:0 0 6px">'+title+'</h3><div class="tg" style="margin-bottom:8px">'+hint+'</div><div id="gew" style="display:grid;grid-template-columns:1fr 110px;gap:6px 10px;align-items:center;text-align:left">'+fields.map(f=>'<label>'+f[1]+'<small style="display:block;opacity:.6">станд.: '+defs[f[0]]+'</small></label><input data-k="'+f[0]+'" type="'+(f[2]||'number')+'" step="any" value="'+String(vals[f[0]]).replace(/"/g,'&quot;')+'" style="'+INP+'">').join('')+'</div><div id="gep" class="ts" style="margin:8px 0;max-width:none;text-align:left"></div><div class="cd" style="justify-content:flex-start;gap:6px"><button id="ges">Сохранить</button><button id="ger">Сбросить</button><button id="gec">Отмена</button></div><small id="gem"></small></div>';
   document.body.appendChild(o);const q=s=>o.querySelector(s),vs=()=>{const x={};o.querySelectorAll('input').forEach(i=>{x[i.dataset.k]=i.type=='number'?(i.value===''?'':Number(i.value)):i.value.trim()});return x};
   const show=()=>{if(pre)q('#gep').innerHTML=pre(vs())};o.querySelectorAll('input').forEach(i=>i.oninput=show);show();
   const done=v=>{o.remove();res(v)};q('#gec').onclick=()=>done(null);
-  const send=b=>{q('#ges').disabled=q('#ger').disabled=true;q('#gem').textContent='Сохраняю…';api('/api/admin/tank',b).then(j=>{tsApply(j.stats);done(1)}).catch(e=>{q('#gem').textContent='Ошибка: '+(e&&(e.key?e.error+' ('+e.key+')':e.error)||'нет связи');q('#ges').disabled=q('#ger').disabled=false})};
-  q('#ges').onclick=()=>{const v=vs(),set={};for(const f of fields){const k=f[0];set[k]=(v[k]===''||v[k]==defs[k])?'':v[k]}send({id:o.dataset.id,set})};
-  q('#ger').onclick=()=>send({id:o.dataset.id,reset:true});o.dataset.id=fields.id||''})}
-async function geTank(t){const d=TANKS0[TANKS.indexOf(t)],F=ADF,fl=F.slice();fl.id=t.id;
- const r=await geWin('✎ '+t.n+' · ТТХ',fl,t,d,'Базовые характеристики танка. Блоки модулей умножают эти цифры. Действует у всех игроков после обновления страницы.',null);if(r)garage()}
+  const run=bodies=>{q('#ges').disabled=q('#ger').disabled=true;q('#gem').textContent='Сохраняю…';let last=null,p=Promise.resolve();for(const b of bodies)p=p.then(()=>api('/api/admin/tank',b).then(j=>{last=j}));p.then(()=>{if(last)tsApply(last.stats);done(1)}).catch(e=>{q('#gem').textContent='Ошибка: '+(e&&(e.key?e.error+' ('+e.key+')':e.error)||'нет связи');q('#ges').disabled=q('#ger').disabled=false})};
+  const groups=fn=>{const g={};for(const f of fields){const tg=f[3]||fields.id;(g[tg]=g[tg]||{})[f[0]]=fn(f[0])}return g};
+  q('#ges').onclick=()=>{const v=vs(),g=groups(k=>(v[k]===''||v[k]==defs[k])?'':v[k]);run(Object.keys(g).map(id=>({id,set:g[id]})))};
+  q('#ger').onclick=()=>{const g=groups(()=>'');run(Object.keys(g).map(id=>id.startsWith('mp:')||fullReset?{id,reset:true}:{id,set:g[id]}))}})}
+async function geTank(t){const d=Object.assign({},TANKS0[TANKS.indexOf(t)]),fl=ADF.slice(),val=Object.assign({},t);fl.id=t.id;
+ d.og=t.t==1?FIRST[t.c]:GDC(t.t);val.og=t.og!==undefined?t.og:d.og;fl.push(['og','Открытие: монеты']);
+ if(t.t>1){d.ox=XPC(t.t);val.ox=t.ox!==undefined?t.ox:d.ox;fl.push(['ox','Открытие: опыт (на предыдущем танке)'])}
+ const r=await geWin('✎ '+t.n+' · ТТХ и цена',fl,val,d,'Базовые характеристики и цена открытия танка. Блоки модулей умножают цифры танка. Действует у всех игроков после обновления страницы.',null,true);if(r)garage()}
 async function geBlock(t,m,L){const fl=GEMF[m].slice();fl.id='mp:'+m+L;const d=MODP0[m][L-1],cur=MODP[m][L-1],base=Object.assign({},...fl.map(f=>({[f[0]]:d[f[0]]===undefined?(f[0]=='cr'||f[0]=='rk'?0:1):d[f[0]]}))),val=Object.assign({},...fl.map(f=>({[f[0]]:cur[f[0]]===undefined?base[f[0]]:cur[f[0]]})));
+ const xk='x'+m+L,ck='c'+m+L;fl.push([xk,'Цена: опыт (этот танк)',null,t.id],[ck,'Цена: монеты (этот танк)',null,t.id]);base[xk]=MXP0(t,L);base[ck]=MGD0(t,L);val[xk]=MXP(t,L,m);val[ck]=MGD(t,L,m);
  const nm=MD.find(x=>x[0]==m)[1],save=Object.assign({},cur);
- const pre=v=>{const o=MODP[m][L-1];for(const f of fl)o[f[0]]=v[f[0]]===''?base[f[0]]:v[f[0]];return '<b>Так будет у «'+t.n+'»:</b><br>'+modTxt(t,m,L).join(' · ')};
- const r=await geWin('✎ '+nm+' · Ур. '+L,fl,val,base,'Множители общие для всех танков: меняется этот блок у каждого. Для «+%» значения прибавляются, для «×» — умножаются на цифры танка.',pre);
+ const pre=v=>{const o=MODP[m][L-1];for(const f of fl)if(!f[3])o[f[0]]=v[f[0]]===''?base[f[0]]:v[f[0]];return '<b>Так будет у «'+t.n+'»:</b><br>'+modTxt(t,m,L).join(' · ')};
+ const r=await geWin('✎ '+nm+' · Ур. '+L,fl,val,base,'Множители общие для всех танков: меняется этот блок у каждого. Для «+%» значения прибавляются, для «×» — умножаются на цифры танка. Цена задаётся только для этого танка.',pre);
  if(!r){const o=MODP[m][L-1];for(const k in o)delete o[k];Object.assign(o,save)}else garage()}
 function adOpen(tab){if(!ADMIN)return;tab=tab||'t';
  const w=invWin('<h2>⚙ Админ-панель</h2><style>#evw #adtabs{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}#evw #adtabs button{flex:0 0 auto;margin:0;padding:8px 12px;font-size:14px;background:var(--acc);color:var(--btx);border:0;border-radius:10px;font-weight:700}#evw .hp button{background:var(--acc);color:var(--btx);border:0;border-radius:8px;font-weight:700}#evw .dt.acr{flex-wrap:wrap;display:flex;flex-direction:row;align-items:center;justify-content:space-between;gap:8px;min-height:0;padding:8px 10px;margin:6px 0;text-align:left}#evw .acr>div:first-child{min-width:0;flex:1}#evw .acr b{display:block;font-size:15px;color:#fff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}#evw .acr span{display:block;font-size:12px;opacity:.7}#evw .acr .ab{display:flex;flex-direction:row;gap:6px;flex:0 0 auto}#evw .acr .ab button{margin:0;padding:7px 11px;font-size:13px;background:var(--acc);color:var(--btx);border:0;border-radius:10px;font-weight:700}</style><div id="adtabs"><button id="adt1"'+(tab=='t'?' style="outline:2px solid #f2c14e"':'')+'>Танки</button><button id="adt5"'+(tab=='b'?' style="outline:2px solid #f2c14e"':'')+'>Боты</button><button id="adt6"'+(tab=='y'?' style="outline:2px solid #f2c14e"':'')+'>Типы врагов</button><button id="adt2"'+(tab=='e'?' style="outline:2px solid #f2c14e"':'')+'>События</button><button id="adt3"'+(tab=='c'?' style="outline:2px solid #f2c14e"':'')+'>Цены</button><button id="adt4"'+(tab=='d'?' style="outline:2px solid #f2c14e"':'')+'>Украшения</button><button id="adt8"'+(tab=='r'?' style="outline:2px solid #f2c14e"':'')+'>Роли</button><button id="adt7"'+(tab=='g'?' style="outline:2px solid #f2c14e"':'')+'>Выдача</button></div><div id="adc"></div>');
