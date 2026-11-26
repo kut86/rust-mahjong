@@ -246,7 +246,7 @@ const TANKS=TD.map(a=>({id:a[0]+a[1]+a[2].toLowerCase(),c:a[0],t:a[1],v:a[2],n:a
 const TANKS0=TANKS.map(t=>({...t}));
 let TSO={}; // правки админа: id → {hp,sp,tt,dm,cd,rk,ab,pn,cal,wt,n}
 let BOTR={},BOTD={},BOSSR={},BOSSD={}; // ТТХ врагов (класс+ступень → те же поля, что у танка игрока). BOTD — заводские значения, BOTR — с правками «Боты» (id bt:<класс><ступень>)
-const OVK=['ox','og','ac'];for(const k of['ap','pc','he'])OVK.push('s'+k+'_dm','s'+k+'_pn','s'+k+'_pp');for(const m of'gtek')for(const L of'23')OVK.push('x'+m+L,'c'+m+L); // цены: правки админа (ox,og — открытие; x/c+модуль+уровень — модули)
+const OVK=['ox','og','ac','gc1','gc2','gc3'];for(const k of['ap','pc','he'])OVK.push('s'+k+'_dm','s'+k+'_pn','s'+k+'_pp');for(const m of'gtek')for(const L of'23')OVK.push('x'+m+L,'c'+m+L); // цены: правки админа (ox,og — открытие; x/c+модуль+уровень — модули)
 function tsApply(map){TSO=map||{};TANKS.forEach((t,i)=>{for(const k of OVK)delete t[k];Object.assign(t,TANKS0[i]);const o=TSO[t.id];t.ed=!!o;if(o)for(const k in o)t[k]=o[k]});
  BOTR={};BOTD={};for(const c of['l','m','h'])for(let n=1;n<=10;n++){const b=TANKS0.find(q=>q.c==c&&q.t==n&&q.v!='B')||TANKS0[0],o=TSO['bt:'+c+n],
   d={hp:Math.round(b.dm*HK*100)/100,dm:Math.round(b.hp/HD*100)/100,sp:b.sp,tt:b.tt,cd:b.cd,rk:0,ab:b.ab,pn:b.pn,wt:b.wt}; // заводские: здоровье врага = HK попаданий равного игрока, урон = 1/HD здоровья игрока
@@ -261,6 +261,9 @@ function tyApply(){ // типы врагов и мировой босс: зав�
 tsApply({});
 function tsLoad(){return fetch(API+'/api/tstats').then(r=>r.json()).then(j=>{tsApply(j.stats);if(typeof ovStat=='function')try{ovStat()}catch(e){}}).catch(()=>{})}
 const capOf=t=>t.ac!==undefined?Math.round(t.ac):Math.round(AMMOT/t.cd); // правка админа ac — вместимость боекомплекта этого танка
+// калибр орудия: подпись у каждого уровня орудия (gc1–gc3 в правках танка); пробитие и урон растут с калибром относительно стокового орудия; снаряды и склад — по подписи калибра
+const PEXP=1,DEXP=2,calMm=s=>{const x=parseFloat(String(s).replace(',','.'));return Number.isFinite(x)&&x>0?x:0},gcL=(t,L)=>{const v=t['gc'+L];return v!==undefined&&v!==''?String(v):''};
+function calOf(t,L){L=L||eqLv(t.id,'g');const l1=gcL(t,1)||t.cal+' мм',label=L>1&&gcL(t,L)||l1,mm=calMm(label)||t.cal,m1=calMm(l1)||t.cal;return{label,mm,k:mm/m1}}
 const SHL=(t,k)=>{const r=Object.assign({},SHELL[k]);for(const f of['pn','dm']){const v=t['s'+k+'_'+f];if(v!==undefined)r[f]=v}return r}; // снаряд с правками этого танка
 const crB=t=>({l:10,m:8,h:5}[t.c]+.5*(t.t-1)); // базовый шанс крита по борту: у лёгких выше, у тяжёлых ниже
 const FIRST={l:0,m:2000,h:5000};  // цена первого танка класса в монетах (лёгкий даётся бесплатно)
@@ -271,7 +274,8 @@ const PCRIT_MUL=2,BCRIT_CH=15,BCRIT_MUL=1.5; // крит: множитель у�
 const RAM_DMG=10,RAM_BACK=25,RAM_CAP=60;      // таран: урон врагу на полной скорости, ответный урон игроку и его потолок
 const defSv=()=>({v:3,rev:0,mw:{l:0,m:0,h:0},kl:{l:0,m:0,h:0},lt:{},am:{},st:{},brk:{},co:0,tank:'l1',tk:['l1'],xp:{},fx:0,mod:{},eq:{},sk:{},sks:{}});
 let sv=defSv();try{const o=JSON.parse(localStorage.getItem('tk')||'{}');if(o.v>=2)Object.assign(sv,o);else{sv.co=+o.co||0}}catch(e){}
-function normSv(){sv.st=sv.st&&typeof sv.st=='object'?sv.st:{};sv.tk=(sv.tk||[]).filter(id=>TANKS.some(t=>t.id==id));if(!sv.tk.includes('l1'))sv.tk.unshift('l1');if(!sv.tk.includes(sv.tank))sv.tank='l1';sv.xp=sv.xp||{};sv.fx=+sv.fx||0;sv.mod=sv.mod||{};sv.eq=sv.eq||{};sv.sk=sv.sk||{};sv.sks=sv.sks||{};if(typeof sv.am=='number'&&Number.isFinite(sv.am))sv.lg=sv.am;if(!sv.am||typeof sv.am!='object')sv.am={};sv.brk=sv.brk&&typeof sv.brk=='object'?sv.brk:{};if(typeof sv.mw!='object'||!sv.mw){const old=Math.max(0,Math.floor(+sv.mw||0)),c0=(TANKS.find(t=>t.id==sv.tank)||{c:'l'}).c;sv.mw={l:0,m:0,h:0};sv.mw[c0]=old} // старый общий рекорд переходит классу выбранного танка
+function normSv(){sv.st=sv.st&&typeof sv.st=='object'?sv.st:{};for(const key of Object.keys(sv.st)){const tt=TANKS.find(x=>x.id==key);if(!tt)continue;const lb=gcL(tt,1)||tt.cal+' мм',S=stkL(lb),o=sv.st[key];if(o&&typeof o=='object')for(const k of SHK)S[k]+=Math.max(0,Math.floor(+o[k]||0));delete sv.st[key]} // старый склад по танкам → общий по калибру
+sv.tk=(sv.tk||[]).filter(id=>TANKS.some(t=>t.id==id));if(!sv.tk.includes('l1'))sv.tk.unshift('l1');if(!sv.tk.includes(sv.tank))sv.tank='l1';sv.xp=sv.xp||{};sv.fx=+sv.fx||0;sv.mod=sv.mod||{};sv.eq=sv.eq||{};sv.sk=sv.sk||{};sv.sks=sv.sks||{};if(typeof sv.am=='number'&&Number.isFinite(sv.am))sv.lg=sv.am;if(!sv.am||typeof sv.am!='object')sv.am={};sv.brk=sv.brk&&typeof sv.brk=='object'?sv.brk:{};if(typeof sv.mw!='object'||!sv.mw){const old=Math.max(0,Math.floor(+sv.mw||0)),c0=(TANKS.find(t=>t.id==sv.tank)||{c:'l'}).c;sv.mw={l:0,m:0,h:0};sv.mw[c0]=old} // старый общий рекорд переходит классу выбранного танка
 sv.kl=sv.kl&&typeof sv.kl=='object'?sv.kl:{};sv.lt=sv.lt&&typeof sv.lt=='object'?sv.lt:{};for(const c of['l','m','h']){sv.mw[c]=Math.max(0,Math.floor(+sv.mw[c]||0));sv.kl[c]=Math.max(0,Math.floor(+sv.kl[c]||0))}}normSv();
 /* Монеты ведутся как журнал: любое изменение sv.co копится в qPend (сумма ещё не отправленных операций), а сервер складывает их сам.
    Так устаревшая вкладка или повторная отправка не могут перезаписать баланс. coSilent — выставить баланс без записи операции (после ответа сервера). */
@@ -304,22 +308,27 @@ const NECP=r=>3+1.5*(r-1);
 const SKT={f:r=>`Перезарядка −${3*r}%`,d:r=>`Входящий урон −${3*r}%`,n:r=>`Союзник из убитого врага: ${NECP(r)}%`,v:r=>`Лечение ${1.5*r}% от нанесённого урона`};
 const skR=(id,k)=>((sv.sk[id]||{})[k])||0,SXP=(t,r)=>Math.round(XPC(t.t+1)*(.2+.1*r)),SGD=(t,r)=>Math.round(SXP(t,r)/1.5);
 // итоговые характеристики танка с учётом УСТАНОВЛЕННЫХ модулей и выбранного навыка
-function eff(t){const P=m=>MP(t,m,eqLv(t.id,m)),g=P('g'),tu=P('t'),en=P('e'),tr=P('k'),k=sv.sk[t.id]||{},on=maxed(t.id)?k.on:'',r=on?(k[on]||0):0;
+function eff(t){const cl=calOf(t),P=m=>MP(t,m,eqLv(t.id,m)),g=P('g'),tu=P('t'),en=P('e'),tr=P('k'),k=sv.sk[t.id]||{},on=maxed(t.id)?k.on:'',r=on?(k[on]||0):0;
  const hp=Math.round(t.hp*(tu.hp||1)*(en.hp||1)),sp=+(t.sp*(en.sp||1)*(tr.sp||1)).toFixed(2);
- return Object.assign({},t,{hp,sp,tt:+(t.tt*(tu.tt||1)).toFixed(1),dm:+(t.dm*(g.dm||1)).toFixed(1),cd:+(t.cd*(g.cd||1)*(on=='f'?1-.03*r:1)).toFixed(4),rk:+(t.rk+(tr.rk||0)).toFixed(1),cr:+(crB(t)+(g.cr||0)).toFixed(1),ht:Math.min(14,(5+sp*.8)*(tr.htm||1)),inm:on=='d'?1-.03*r:1,nec:on=='n'&&r?NECP(r)/100:0,vamp:on=='v'?.015*r:0,sk:on&&r?on:'',ar:(f=>[f,Math.round(f*ASIDE),Math.round(f*AREAR)])(Math.round(t.ab*(tu.ar||1))),pn:Math.round(t.pn*(g.pn||1)),cap:capOf(t)})}
-const shp0=(t,k)=>k=='ap'&&t.t<=AP_FREE_TIER?0:Math.round(SHELL[k].pr*t.cal/20*10)/10,shp=(t,k)=>t['s'+k+'_pp']!==undefined?t['s'+k+'_pp']:shp0(t,k); // цена за 100 шт.
+ return Object.assign({},t,{hp,sp,tt:+(t.tt*(tu.tt||1)).toFixed(1),dm:+(t.dm*(g.dm||1)*Math.pow(cl.k,DEXP)).toFixed(1),cd:+(t.cd*(g.cd||1)*(on=='f'?1-.03*r:1)).toFixed(4),rk:+(t.rk+(tr.rk||0)).toFixed(1),cr:+(crB(t)+(g.cr||0)).toFixed(1),ht:Math.min(14,(5+sp*.8)*(tr.htm||1)),inm:on=='d'?1-.03*r:1,nec:on=='n'&&r?NECP(r)/100:0,vamp:on=='v'?.015*r:0,sk:on&&r?on:'',ar:(f=>[f,Math.round(f*ASIDE),Math.round(f*AREAR)])(Math.round(t.ab*(tu.ar||1))),pn:Math.round(t.pn*(g.pn||1)*Math.pow(cl.k,PEXP)),cap:capOf(t),calL:cl.label})}
+const shp0=(t,k)=>k=='ap'&&t.t<=AP_FREE_TIER?0:Math.round(SHELL[k].pr*calOf(t).mm/20*10)/10,shp=(t,k)=>t['s'+k+'_pp']!==undefined?t['s'+k+'_pp']:shp0(t,k); // цена за 100 шт.
 const rtot=r=>r.ap+r.pc+r.he;
 // боекомплект танка: у каждого танка свой; бронебойные/подкалиберные/фугасы в сумме не больше вместимости
-function rack(id){id=id||sv.tank;const t=TK(id),cap=capOf(t);let r=sv.am[id];
- if(!r)r=sv.am[id]={ap:id=='l1'?(Number.isFinite(sv.lg)?Math.min(sv.lg,cap):cap):Math.floor(cap/2),pc:0,he:0};
+function rack(id){id=id||sv.tank;const t=TK(id),cap=capOf(t),lb=calOf(t).label;let r=sv.am[id];
+ if(!r)r=sv.am[id]={ap:id=='l1'?(Number.isFinite(sv.lg)?Math.min(sv.lg,cap):cap):Math.floor(cap/2),pc:0,he:0,cl:lb};
+ if(r.cl===undefined)r.cl=lb;
+ else if(r.cl!==lb){const S=stkL(r.cl),mm=calMm(r.cl)||t.cal; // орудие другого калибра: снаряды прежнего калибра уходят на склад, платные возвращаются целиком
+  for(const k of SHK){const paid=!(k=='ap'&&t.t<=AP_FREE_TIER)&&SHELL[k].pr*mm/20>0;if(paid&&r[k]>0)S[k]+=Math.floor(r[k])}
+  r=sv.am[id]={ap:shp(t,'ap')==0?Math.floor(cap/2):0,pc:0,he:0,cl:lb}}
  for(const k of SHK)r[k]=Math.max(0,Math.floor(+r[k]||0));
  {const av=SHKT(t);for(const k of SHK)if(!av.includes(k)&&r[k]>0){r.ap+=r[k];r[k]=0}}
  if(rtot(r)>cap){const x=cap/rtot(r);for(const k of SHK)r[k]=Math.floor(r[k]*x)}return r}
 /* Склад: купленные снаряды (только платные типы), лежат у конкретного танка, не больше вместимости на каждый тип */
-function stk(id){sv.st=sv.st&&typeof sv.st=='object'?sv.st:{};const t=TK(id),cap=capOf(t),av=SHKT(t);let r=sv.st[id];if(!r)r=sv.st[id]={ap:0,pc:0,he:0};for(const k of SHK){r[k]=av.includes(k)&&shp(t,k)>0?Math.min(cap,Math.max(0,Math.floor(+r[k]||0))):0}return r}
+function stkL(lb){sv.st=sv.st&&typeof sv.st=='object'?sv.st:{};let r=sv.st[lb];if(!r||typeof r!='object')r=sv.st[lb]={ap:0,pc:0,he:0};for(const k of SHK)r[k]=Math.max(0,Math.floor(+r[k]||0));return r} // склад общий для всех танков с одинаковой подписью калибра
+function stk(id){return stkL(calOf(TK(id)).label)}
 // что произойдёт при заправке до d: сначала берём со склада, остальное докупаем; лишнее из боекомплекта уходит на склад
 function planAm(t,d){const r=rack(t.id),S=stk(t.id),o={},cap=capOf(t);let cost=0;for(const k of SHK){const need=d[k]-r[k],pd=shp(t,k)>0;if(need>0){const use=pd?Math.min(S[k],need):0,buy=need-use;o[k]={use,buy,ret:0};cost+=Math.ceil(buy*shp(t,k)/100)}else o[k]={use:0,buy:0,ret:pd?-need:0}}return{cost,o}}
-function applyAm(t,d){const pl=planAm(t,d),S=stk(t.id),cap=capOf(t);sv.co-=pl.cost;for(const k of SHK){S[k]=Math.max(0,S[k]-pl.o[k].use+pl.o[k].ret);if(shp(t,k)>0)S[k]=Math.min(S[k],cap-d[k])}sv.am[t.id]={ap:d.ap,pc:d.pc,he:d.he};return pl.cost}
+function applyAm(t,d){const pl=planAm(t,d),S=stk(t.id),cap=capOf(t);sv.co-=pl.cost;for(const k of SHK){S[k]=Math.max(0,S[k]-pl.o[k].use+pl.o[k].ret);}sv.am[t.id]={ap:d.ap,pc:d.pc,he:d.he,cl:calOf(t).label};return pl.cost}
 const needAm=t=>Math.ceil(capOf(t)*MINAM);
 const repCost=t=>REPAIR_COST*t.t;
 function wtabR(){const t=$('#wtabs');if(!t)return;t.innerHTML='';for(const c of['l','m','h']){const mine=sv.tk.map(id=>TK(id)).filter(x=>x.c==c).sort((a,b)=>b.t-a.t),b=document.createElement('button');b.textContent=CN[c]+' · '+sv.mw[c];b.disabled=!mine.length;if(c==TK().c)b.className='on';
@@ -706,13 +715,13 @@ function treeHTML(c){const ts=TANKS.filter(s=>s.c==c),pos=t=>({x:12+(t.t-1)*CW,y
   return `<button class='nd ${cls}' data-k='${t.id}' style='left:${p.x}px;top:${p.y}px'><span class='tn'>${t.n}</span><span class='tg'>${RM[t.t-1]}${t.v?' · развилка':''}</span><span class='tg'>${st}</span></button>`}).join('');
  return `<div class='tr'><div style='position:relative;width:${W}px;height:${Hh}px'><svg width='${W}' height='${Hh}' style='position:absolute;left:0;top:0' stroke='#6b735a' stroke-width='2' fill='none'>${lines}</svg>${nodes}</div></div>`}
 function modTxt(t,m,L){const P=MP(t,m,L),h=v=>Math.round(t.hp*v);
- if(m=='g')return[`Урон ${f1(t.dm*(P.dm||1))}`,`Перез. ${(t.cd*(P.cd||1)).toFixed(3)} с`,`Крит ${f1(crB(t)+(P.cr||0))}%`,`Пробитие ${Math.round(t.pn*(P.pn||1))} мм`];
+ if(m=='g')return[`Урон ${f1(t.dm*(P.dm||1)*Math.pow(calOf(t,L).k,DEXP))}`,`Перез. ${(t.cd*(P.cd||1)).toFixed(3)} с`,`Крит ${f1(crB(t)+(P.cr||0))}%`,`Пробитие ${Math.round(t.pn*(P.pn||1)*Math.pow(calOf(t,L).k,PEXP))} мм`,`Калибр ${calOf(t,L).label}`];
  if(m=='t')return[`Башня ${f1(t.tt*(P.tt||1))}`,`ХП ${h(P.hp||1)}`,`Броня ${Math.round(t.ab*(P.ar||1))} мм`];
  if(m=='e')return[`Скорость ${f1(t.sp*(P.sp||1))}`,`ХП ${h(P.hp||1)}`];
  return[`Корпус ${f1(Math.min(14,(5+t.sp*.8)*(P.htm||1)))}`,`Рикошет ${f1(t.rk+(P.rk||0))}%`,`Скорость ${f1(t.sp*(P.sp||1))}`]}
 function ammoHTML(t){const cap=capOf(t),e=eff(t),r=rack(t.id);if(!gdr||gdrId!=t.id){gdr={ap:r.ap,pc:r.pc,he:r.he};gdrId=t.id}
  const av=SHKT(t),rows=SHK.map(k=>{const q=SHL(t,k),pr=shp(t,k);if(!av.includes(k))return `<div class='rw' style='opacity:.5'><div><b>${q.s}</b> <span class='tg'>${q.n}</span><br><span class='ts'>🔒 доступен со ступени ${k=='pc'?'II':'V'}</span></div></div>`;return `<div class='rw'><div><b>${q.s}</b> <span class='tg'>${q.n}</span><br><span class='ts'>пробитие <b>${Math.round(e.pn*q.pn)}</b> · урон <b>${f1(e.dm*q.dm)}</b><br>${pr?pr+' 🪙 за 100 · на складе <b>'+stk(t.id)[k]+'</b>':'бесплатно'}</span></div><input type='range' min='0' max='${cap}' step='1' data-sl='${k}'><b data-sv='${k}'></b></div>`}).join('');
- return `<div class='amb'><div class='mt' style='width:auto'>Боекомплект <span class='tg'>· у каждого танка свой${av.length>1?' · все типы вместе до '+cap:' · до '+cap}</span></div>${rows}<div class='bar' data-bar><div></div></div><div class='ts' data-tot style='max-width:none'></div><div class='cd' style='justify-content:flex-start'><button data-ab='buy'></button><button data-ab='ration' style='display:none'>Паёк штаба<span class='st'>бесплатно</span></button><button data-ab='rst'>Отмена</button></div><span class='tg'>При уменьшении ползунка монеты не возвращаются. Что купили, остаётся на складе (в инвентаре): со склада грузится бесплатно, платите только за недостающее. Ползунок упирается в свободное место, другие типы сами не уменьшаются.</span></div>`}
+ return `<div class='amb'><div class='mt' style='width:auto'>Боекомплект <span class='tg'>· калибр ${calOf(t).label} · у каждого танка свой${av.length>1?' · все типы вместе до '+cap:' · до '+cap}</span></div>${rows}<div class='bar' data-bar><div></div></div><div class='ts' data-tot style='max-width:none'></div><div class='cd' style='justify-content:flex-start'><button data-ab='buy'></button><button data-ab='ration' style='display:none'>Паёк штаба<span class='st'>бесплатно</span></button><button data-ab='rst'>Отмена</button></div><span class='tg'>При уменьшении ползунка монеты не возвращаются. Что купили, остаётся на складе (в инвентаре): со склада грузится бесплатно, платите только за недостающее. Ползунок упирается в свободное место, другие типы сами не уменьшаются.</span></div>`}
 function ammoUpd(u,t){const cap=capOf(t),r=rack(t.id),d=gdr,T=rtot(d);let cost=0;
   for(const k of SHK){const sl=u.querySelector(`[data-sl='${k}']`);if(sl){sl.value=d[k];u.querySelector(`[data-sv='${k}']`).textContent=d[k]}}cost=planAm(t,d).cost;
  const bar=u.querySelector('[data-bar]');bar.firstChild.style.width=Math.min(100,T/cap*100)+'%';bar.classList.toggle('bad',T<needAm(t));
@@ -958,13 +967,13 @@ function invDet(k,prev){const i=ITEMS.find(x=>x.k==k),I=INV||{},n=I[k]||0;let ac
  return '<div class="dh"><span class="di" style="--rc:'+RC[k]+'">'+icon(k)+'</span><div><b>'+i.n+'<em>× '+n+'</em></b><span>'+i.d+'</span></div></div><small>Как использовать: '+i.h+'</small><small>Где работает: '+i.w+'</small>'+act+(k=='key'||k=='chest'||k=='gem'?'<button class="mini buy" data-sh="'+(k=='gem'?'pay':'shop')+'" style="display:block;margin:10px 0 0 auto;align-self:auto">'+(k=='gem'?'Пополнить':'Купить')+'</button>':'<span class="ns">не продаётся</span>')}
 
 const SHN={ap:'ББ',pc:'БП',he:'ОФ'};
-function shellRows(){const rows=[];for(const t of TANKS){if(!sv.st||!sv.st[t.id])continue;const S=stk(t.id);for(const k of SHK)if(S[k]>0)rows.push({t,k,n:S[k]})}rows.sort((a,b)=>b.t.t-a.t.t||(a.t.n<b.t.n?-1:1));return rows}
-function sellOpen(id,k){const t=TK(id),S=stk(id),w=$('#evw'),pr=shp(t,k),max=S[k];if(!max||!pr){invOpen();return}
+function shellRows(){const rows=[];for(const lb of Object.keys(sv.st||{})){if(TANKS.some(x=>x.id==lb))continue;const S=stkL(lb);for(const k of SHK)if(S[k]>0)rows.push({lb,k,n:S[k]})}rows.sort((a,b)=>calMm(b.lb)-calMm(a.lb)||(a.lb<b.lb?-1:1));return rows}
+function sellOpen(lb,k){const S=stkL(lb),w=$('#evw'),pr=Math.round(SHELL[k].pr*(calMm(lb)||20)/20*10)/10,max=S[k];if(!max||!pr){invOpen();return}
  const z=document.createElement('div');z.className='cz sl';
- z.innerHTML='<div class="sbx"><h3>Продать снаряды</h3><div class="sh2"><span class="di" style="--rc:'+RC[k]+'">'+icon(k)+'</span><div><b>'+SHELL[k].n+'</b><br><small>'+t.n+' · ступень '+RM[t.t-1]+'</small></div></div><p>Цена продажи — 50% от закупочной ('+f1(pr/2)+' 🪙 за 100 шт.)</p><input type="range" min="1" max="'+max+'" value="'+max+'" step="1"><div class="sq"><b id="sqn"></b> шт. → <b id="sqc"></b> 🪙</div><div class="oa"><button id="sqok">Продать</button><button id="sqx">Отмена</button></div></div>';
+ z.innerHTML='<div class="sbx"><h3>Продать снаряды</h3><div class="sh2"><span class="di" style="--rc:'+RC[k]+'">'+icon(k)+'</span><div><b>'+SHELL[k].n+'</b><br><small>калибр '+lb.replace(/</g,'&lt;')+'</small></div></div><p>Цена продажи — 50% от закупочной ('+f1(pr/2)+' 🪙 за 100 шт.)</p><input type="range" min="1" max="'+max+'" value="'+max+'" step="1"><div class="sq"><b id="sqn"></b> шт. → <b id="sqc"></b> 🪙</div><div class="oa"><button id="sqok">Продать</button><button id="sqx">Отмена</button></div></div>';
  w.appendChild(z);const r=z.querySelector('input'),upd=()=>{const q=+r.value;$('#sqn').textContent=q;$('#sqc').textContent=Math.floor(q*pr/200)};r.oninput=upd;upd();
  $('#sqx').onclick=()=>z.remove();
- $('#sqok').onclick=()=>{const q=Math.min(+r.value,stk(id)[k]);if(q<1)return;const got=Math.floor(q*pr/200);stk(id)[k]-=q;sv.co+=got;svs();$('#co').textContent=sv.co;if(typeof cloudFlush=='function')cloudFlush();z.remove();invOpen();ppShow('Продано',q+' шт. · '+SHN[k]+' · '+t.n+'\n+'+got+' 🪙',[['Ок']])}}
+ $('#sqok').onclick=()=>{const q=Math.min(+r.value,stkL(lb)[k]);if(q<1)return;const got=Math.floor(q*pr/200);stkL(lb)[k]-=q;sv.co+=got;svs();$('#co').textContent=sv.co;if(typeof cloudFlush=='function')cloudFlush();z.remove();invOpen();ppShow('Продано',q+' шт. · '+SHN[k]+' · '+lb+'\n+'+got+' 🪙',[['Ок']])}}
 function lootSum(L){const g=L.reduce((a,l)=>a+(l.gold||0),0),it={};L.forEach(l=>{if(l.item)it[l.item]=(it[l.item]||0)+1});return{g,it}}
 function chestAnim(L,done){const w=$('#evw'),z=document.createElement('div'),T=[];let end=false;z.className='cz';
  z.innerHTML='<div class="cst"><div class="ch"><svg viewBox="0 0 64 64">'+SVG.chest+'</svg><i class="gl"></i></div><div class="cl"></div><div class="cr"></div></div><button class="cx">Пропустить</button>';w.appendChild(z);
@@ -980,7 +989,7 @@ function chestAnim(L,done){const w=$('#evw'),z=document.createElement('div'),T=[
  else{let t=950;L.forEach(l=>{T.push(setTimeout(()=>{const d=document.createElement('div');d.innerHTML=card(l);d.firstChild.classList.add('fly');cl.appendChild(d.firstChild)},t));t+=260});T.push(setTimeout(fin,t+700))}}
 const evErr={no_key:'Нет ключа.',no_chest:'Нет сундука.',already_claimed:'Сегодня уже получали.',no_gems:'Не хватает кристаллов.',unauthorized:'Войдите в аккаунт.'};
 function shellHTML(){const rows=shellRows();if(!rows.length)return '<h3 class="sh">Снаряды</h3><p class="em">Здесь появятся снаряды, которые вы купили в гараже и не взяли в бой.</p>';
- return '<h3 class="sh">Снаряды</h3><div class="sr">'+rows.map(r=>'<div class="sw"><span class="di" style="--rc:'+RC[r.k]+'">'+icon(r.k)+'</span><div class="it"><b>'+SHELL[r.k].n+'<em>× '+r.n+'</em></b><small>'+r.t.n+' · ступень '+RM[r.t.t-1]+'</small></div><button class="sb" data-id="'+r.t.id+'" data-k="'+r.k+'">Продать</button></div>').join('')+'</div>'}
+ return '<h3 class="sh">Снаряды</h3><div class="sr">'+rows.map(r=>'<div class="sw"><span class="di" style="--rc:'+RC[r.k]+'">'+icon(r.k)+'</span><div class="it"><b>'+SHELL[r.k].n+'<em>× '+r.n+'</em></b><small>калибр '+r.lb.replace(/</g,'&lt;')+'</small></div><button class="sb" data-id="'+r.lb.replace(/"/g,'&quot;')+'" data-k="'+r.k+'">Продать</button></div>').join('')+'</div>'}
 function invWin(html){const w=$('#evw');w.style.setProperty('--ec','#f2c14e');w.style.setProperty('--eg','242,193,78');w.innerHTML='<div class="bx">'+html+'<div class="bt"><button class="x" id="evx">Закрыть</button></div></div>';w.classList.add('on');$('#evx').onclick=()=>w.classList.remove('on');w.onclick=ev=>{if(ev.target===w)w.classList.remove('on')};return w}
 function needLogin(t){invWin('<h2>'+t+'</h2><p>Предметы и кристаллы хранятся в облаке. Войдите в аккаунт (Steam, Google или Discord).</p>')}
 function invOpen(){if(!tok)return needLogin('🎒 Инвентарь');
@@ -1035,14 +1044,16 @@ function geWin(title,fields,vals,defs,hint,pre,fullReset){
   q('#ges').onclick=()=>{const v=vs(),g=groups(k=>(v[k]===''||v[k]==defs[k])?'':v[k]);run(Object.keys(g).map(id=>({id,set:g[id]})))};
   q('#ger').onclick=()=>{const g=groups(()=>'');run(Object.keys(g).map(id=>id.startsWith('mp:')||fullReset?{id,reset:true}:{id,set:g[id]}))}})}
 async function geTank(t){const d=Object.assign({},TANKS0[TANKS.indexOf(t)]),fl=ADF.slice(),val=Object.assign({},t);fl.id=t.id;
+ d.gc1=t.cal+' мм';val.gc1=gcL(t,1)||d.gc1;fl.push(['gc1','Калибр орудия, Ур. 1 (подпись: «76 мм», «76 мм Ф-34»)','text']);
  d.og=t.t==1?FIRST[t.c]:GDC(t.t);val.og=t.og!==undefined?t.og:d.og;fl.push(['og','Открытие: монеты']);
  if(t.t>1){d.ox=XPC(t.t);val.ox=t.ox!==undefined?t.ox:d.ox;fl.push(['ox','Открытие: опыт (на предыдущем танке)'])}
  const r=await geWin('✎ '+t.n+' · ТТХ и цена',fl,val,d,'Базовые характеристики и цена открытия танка. Блоки модулей умножают цифры танка. Действует у всех игроков после обновления страницы.',null,true);if(r)garage()}
 async function geBlock(t,m,L){const fl=GEMF[m].map(f=>[m+L+'_'+f[0],f[1],null,t.id]);fl.id=t.id;const G=MODP[m][L-1],dflt=f=>G[f]!==undefined?G[f]:(f=='cr'||f=='rk'?0:1),P=MP(t,m,L),
  base={},val={};for(const f of MPF[m]){const k=m+L+'_'+f;base[k]=dflt(f);val[k]=P[f]!==undefined?P[f]:dflt(f)}
  const xk='x'+m+L,ck='c'+m+L;fl.push([xk,'Цена: опыт',null,t.id],[ck,'Цена: монеты',null,t.id]);base[xk]=MXP0(t,L);base[ck]=MGD0(t,L);val[xk]=MXP(t,L,m);val[ck]=MGD(t,L,m);
+ if(m=='g'){const gk='gc'+L,d1=gcL(t,1)||t.cal+' мм';fl.push([gk,'Калибр орудия (подпись; такой же у другого танка — снаряды общие)','text',t.id]);base[gk]=d1;val[gk]=gcL(t,L)||d1}
  const nm=MD.find(x=>x[0]==m)[1],keys=fl.map(f=>f[0]),save={};for(const k of keys)save[k]=t[k];
- const pre=v=>{for(const f of MPF[m]){const k=m+L+'_'+f;if(v[k]===''||v[k]==base[k])delete t[k];else t[k]=v[k]}return '<b>Так будет у «'+t.n+'»:</b><br>'+modTxt(t,m,L).join(' · ')};
+ const pre=v=>{for(const f of MPF[m]){const k=m+L+'_'+f;if(v[k]===''||v[k]==base[k])delete t[k];else t[k]=v[k]}if(m=='g'){const gk='gc'+L;if(!v[gk]||v[gk]==base[gk])delete t[gk];else t[gk]=v[gk]}return '<b>Так будет у «'+t.n+'»:</b><br>'+modTxt(t,m,L).join(' · ')};
  const r=await geWin('✎ '+nm+' · Ур. '+L+' · '+t.n,fl,val,base,'Множители и цена этого блока только для танка «'+t.n+'»: другие танки не меняются. «×» умножает цифры танка, «+%» прибавляется. Чередуя Ур. 2 и Ур. 3, можно задавать любую прогрессию.',pre);
  if(!r){for(const k of keys){if(save[k]===undefined)delete t[k];else t[k]=save[k]}}else garage()}
 async function geAmmo(t){const fl=[['ac','Вместимость боекомплекта, шт.',null,t.id]],base={ac:Math.round(AMMOT/t.cd)},val={ac:capOf(t)},keys=['ac'];
