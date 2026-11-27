@@ -137,7 +137,7 @@ a.btn{display:inline-block;background:#1b2838;color:#fff;text-decoration:none;bo
   <div class="lnk"><div><b>Discord</b><small id="pfd"></small></div><span id="pfdb"></span></div>
   <div id="pfrole" style="display:none;margin:6px 0 0;padding:8px 10px;border:1px solid var(--line,#33373b);border-radius:8px;font-size:.85rem;color:var(--muted)"></div>
   <p id="pfmsg"></p>
-  <div class="row2"><button id="pfcm">✨ Украшения и ник</button></div>
+  <div class="row2"><button id="pfcm">✨ Украшения и ник</button><button class="alt" id="pfsp">✉ Поддержка</button></div>
   <div class="row2"><button class="alt" id="pflo">Выйти</button><button id="pfcl">Закрыть</button></div>
 </div></div>
 <div class="ov" id="cmov"><div class="box pf">
@@ -204,7 +204,7 @@ function api(path,body){
   if(body){o.headers['Content-Type']='application/json';o.body=JSON.stringify(body)}
   return fetch(API+path,o).then(function(r){
     if(r.status===401)logout();
-    return r.json().then(function(j){if(!r.ok)throw j;return j});
+    return r.json().then(function(j){if(r.status===403&&j&&j.error==='banned')window.SUP&&SUP.ban(j.until,j.reason,api,logout);else if(j&&j.ban&&window.SUP)SUP.ban(j.ban.until,j.ban.reason,api,logout);if(!r.ok)throw j;return j});
   });
 }
 function logout(){tok=null;me=null;try{localStorage.removeItem('rm-token')}catch(e){}renderAuth();$('pfov').classList.remove('show')}
@@ -450,7 +450,7 @@ $('lbclose').onclick=function(){$('lbov').classList.remove('show')};
 var _h=location.hash,_lk=/[#&]linked=(steam|discord)/.test(_h),_lkw=(_h.match(/[#&]linked=([a-z]+)/)||[])[1],_er=(_h.match(/[#&]error=([a-z_]+)/)||[])[1];
 loadSession();renderAuth();
 $('pfcl').onclick=function(){$('pfov').classList.remove('show')};$('lgcl').onclick=function(){$('lgov').classList.remove('show')};
-if(tok)api('/api/me').then(rememberMethods).catch(function(){});$('pflo').onclick=function(){
+if(tok)api('/api/me').then(rememberMethods).catch(function(){});$('pfsp').onclick=function(){SUP.open(api,logout)};$('pflo').onclick=function(){
   if(!confirm('Выйти из аккаунта?\nПрогресс сохранён в облаке, а на этом устройстве будет очищен. При следующем входе он вернётся.'))return;
   try{['tk','tk-q','tk-bak','tk-own'].forEach(function(k){localStorage.removeItem(k)})}catch(e){}
   logout();

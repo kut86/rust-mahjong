@@ -222,3 +222,65 @@
   window.PFX = { AVATARS: AVATARS, FRAMES: FRAMES, DECOS: DECOS, PLATES: PLATES, define: define, preview: preview, el: el, row: row, has: function (f) { return !!(f && (f[0] || f[1])); },
     name: function (id) { var t = id && id.slice(0, 3), k = id && id.slice(3); return t === 'fr:' ? (FRAMES[k] || {}).n || id : t === 'dc:' ? (DECOS[k] || {}).n || id : t === 'bg:' ? (PLATES[k] || {}).n || id : t === 'av:' ? (AVATARS[k] || {}).n || id : id; } };
 })();
+
+/* ===== Поддержка и экран бана (общий для index.html и tanki.html) =====
+ * SUP.open(api, logout)  — форма обращения в поддержку (тема + до 300 символов, одно обращение, пока админ не прочитает).
+ * SUP.ban(until, reason, api, logout) — экран бана: закрывает сайт, остаётся только связь с поддержкой. */
+(function () {
+  var W = window, cur = null;
+  function el(t, css, txt) { var e = document.createElement(t); if (css) e.style.cssText = css; if (txt != null) e.textContent = txt; return e; }
+  function fmt(t) { var d = new Date(t); return d.toLocaleDateString('ru-RU') + ' ' + d.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' }); }
+  function close() { if (cur) { cur.remove(); cur = null; } }
+  function open(api, logout, ban) {
+    if (cur) cur.remove();
+    var ov = el('div', 'position:fixed;inset:0;background:' + (ban ? 'rgba(10,10,12,.97)' : 'rgba(0,0,0,.7)') + ';display:flex;align-items:center;justify-content:center;z-index:100000;padding:16px;overflow:auto;font-family:"Trebuchet MS",Verdana,sans-serif');
+    var box = el('div', 'background:#23272a;color:#e9e4d8;border:1px solid #3a4044;border-top:5px solid ' + (ban ? '#c0392b' : '#c2511f') + ';border-radius:12px;padding:20px;max-width:440px;width:100%;text-align:left;box-sizing:border-box;-webkit-user-select:text;user-select:text');
+    ov.appendChild(box); document.body.appendChild(ov); cur = ov;
+    var inp = 'width:100%;box-sizing:border-box;background:#16181a;color:#e9e4d8;border:1px solid #3a4044;border-radius:8px;padding:9px;font:inherit;font-size:15px';
+    var btn = 'font:inherit;background:#c2511f;color:#fff;border:0;border-radius:8px;padding:9px 16px;cursor:pointer';
+    function draw(st) {
+      box.innerHTML = '';
+      if (ban) {
+        box.appendChild(el('h2', 'margin:0 0 8px;color:#ff7a66;font-size:22px', '⛔ Доступ закрыт'));
+        box.appendChild(el('p', 'margin:0 0 6px;color:#c9c9c9;line-height:1.4', ban.until ? 'Блокировка до ' + fmt(ban.until) + '.' : 'Блокировка бессрочная.'));
+        if (ban.reason) box.appendChild(el('p', 'margin:0 0 6px;color:#c9c9c9;line-height:1.4', 'Причина: ' + ban.reason));
+        box.appendChild(el('p', 'margin:0 0 12px;color:#9aa3a8;line-height:1.4;font-size:14px', 'Сейчас вам доступна только связь с технической поддержкой.'));
+      } else box.appendChild(el('h2', 'margin:0 0 10px;font-size:22px', '✉ Техподдержка'));
+      var last = st && st.last;
+      if (last) {
+        var s = el('div', 'background:#1b1e20;border:1px solid #3a4044;border-radius:8px;padding:9px 11px;margin-bottom:12px;font-size:14px;line-height:1.4');
+        s.appendChild(el('div', 'opacity:.7;font-size:13px', 'Ваше обращение · ' + fmt(last.t) + (st.subjects && st.subjects[last.subj] ? ' · ' + st.subjects[last.subj] : '')));
+        s.appendChild(el('div', 'margin:4px 0;word-break:break-word', last.msg));
+        s.appendChild(el('div', 'font-weight:700;color:' + (last.st ? '#6fe08a' : '#f2c14e'), last.st ? '✓ Прочитано администрацией ' + (last.rt ? fmt(last.rt) : '') : '⏳ Ждёт, пока администрация прочитает'));
+        box.appendChild(s);
+      }
+      var msg = el('div', 'min-height:1.3em;margin:8px 0;color:#e8743a;font-size:14px');
+      if (!last || last.st) {
+        var sel = el('select', inp + ';margin-bottom:8px'), subs = (st && st.subjects) || {};
+        Object.keys(subs).forEach(function (k) { var o = el('option', '', subs[k]); o.value = k; sel.appendChild(o); });
+        var ta = el('textarea', inp + ';height:110px;resize:vertical'), max = (st && st.max) || 300, cnt = el('div', 'text-align:right;font-size:12px;opacity:.7;margin-top:2px', '0 / ' + max);
+        ta.placeholder = 'Опишите вопрос или проблему'; ta.maxLength = max;
+        ta.oninput = function () { cnt.textContent = [...ta.value].length + ' / ' + max; };
+        var go = el('button', btn, 'Отправить');
+        go.onclick = function () {
+          var v = ta.value.trim(); if (!v) { msg.textContent = 'Напишите сообщение.'; return; }
+          go.disabled = true; msg.textContent = '';
+          api('/api/support', { subj: sel.value, msg: v }).then(function (j) { draw(j); }).catch(function (e) {
+            go.disabled = false;
+            msg.textContent = ({ open_exists: 'Прошлое обращение ещё не прочитано.', too_long: 'Слишком длинное сообщение.', empty: 'Напишите сообщение.', unauthorized: 'Нужно войти в аккаунт.' })[e && e.error] || 'Не получилось отправить, попробуйте позже.';
+          });
+        };
+        box.appendChild(sel); box.appendChild(ta); box.appendChild(cnt); box.appendChild(msg);
+        var row = el('div', 'display:flex;gap:10px;justify-content:space-between;margin-top:6px'); row.appendChild(go); box.appendChild(row);
+        if (!ban) { var c = el('button', btn.replace('#c2511f', '#3a4044'), 'Закрыть'); c.onclick = close; row.appendChild(c); }
+      } else {
+        box.appendChild(el('p', 'margin:0 0 6px;color:#9aa3a8;font-size:14px', 'Новое обращение можно отправить, когда администрация прочитает это.'));
+        if (!ban) { var c2 = el('button', btn.replace('#c2511f', '#3a4044'), 'Закрыть'); c2.onclick = close; box.appendChild(c2); }
+      }
+      if (ban && logout) { var lo = el('button', btn.replace('#c2511f', '#3a4044') + ';margin-top:12px', 'Выйти из аккаунта'); lo.onclick = function () { close(); logout(); }; box.appendChild(lo); }
+    }
+    draw(null);
+    api('/api/support', { get: 1 }).then(draw).catch(function () { box.appendChild(el('p', 'color:#e8743a', 'Нет связи с сервером.')); });
+  }
+  W.SUP = { open: function (api, logout) { open(api, logout, null); }, ban: function (until, reason, api, logout) { if (cur && cur.dataset.ban) return; open(api, logout, { until: until, reason: reason }); if (cur) cur.dataset.ban = '1'; } };
+})();
