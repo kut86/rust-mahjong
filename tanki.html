@@ -1107,7 +1107,7 @@ const ADBB=[['hp','Здоровье'],['dm','Урон за выстрел'],['sp
 let SKLP=null;
 function skinList(){ // все папки img/tanks/, где лежат корпус и башня (одним запросом к GitHub)
  if(SKLP)return SKLP;
- return SKLP=fetch('https://api.github.com/repos/'+REPO+'/git/trees/HEAD?recursive=1').then(r=>r.json()).then(j=>{if(!Array.isArray(j.tree))throw 0;const have={};j.tree.forEach(f=>{const m=/^img\/tanks\/(.+)\/(hull|tur)\.png$/.exec(f.path);if(m)(have[m[1]]=have[m[1]]||{})[m[2]]=1});return Object.keys(have).filter(d=>have[d].hull&&have[d].tur).sort()}).catch(()=>{SKLP=null;return null})}
+ return SKLP=fetch('https://api.github.com/repos/'+REPO+'/git/trees/HEAD?recursive=1').then(r=>r.json()).then(j=>{if(!Array.isArray(j.tree))throw 0;const have={};j.tree.forEach(f=>{const m=/^img\/tanks\/(.+)\/(hull|tur)\.png$/.exec(f.path);if(m)(have[m[1]]=have[m[1]]||{})[m[2]]=1});return Object.keys(have).filter(d=>have[d].hull&&have[d].tur&&!/^enemy\/[a-z](\/|$)/.test(d)).sort((a,b)=>a.localeCompare(b,'en',{numeric:true}))}).catch(()=>{SKLP=null;return null})}
 function adSkins(host,k){
  if(!host)return;
  if(!ENM[k]){host.innerHTML='';host.style.display='none';return}
@@ -1116,7 +1116,11 @@ function adSkins(host,k){
  skinList().then(L=>{
   const b=$('#ask-b');if(!b)return;
   if(!L){b.innerHTML='<span style="color:#ffb36b">Не получилось получить список папок с GitHub (возможно, лимит запросов). Попробуйте позже.</span>';return}
-  const cur=(TSO['bs:'+k]||{}),opt=(v)=>'<option value="">по умолчанию</option>'+L.map(d=>'<option value="'+d+'"'+(d===v?' selected':'')+'>'+d+'</option>').join('')+(v&&!L.includes(v)?'<option value="'+v+'" selected>'+v+' (файлов не нашли)</option>':'');
+  const NM={light:'Лёгкий',medium:'Средний',heavy:'Тяжёлый',shooter:'Очередник',miner:'Минёр',sniper:'Снайпер',repair:'Ремонтник'};
+  const grp=d=>{let m=/^enemy\/([a-z]{2,})(?:\/(.+))?$/.exec(d);if(m)return['Враги · '+(NM[m[1]]||m[1]),m[2]?(/^t\d+$/.test(m[2])?'ступень '+m[2].slice(1):m[2]):'общая папка (все ступени)'];if(/^boss\//.test(d))return['Боссы',d.slice(5)];m=/^(light|medium|heavy)\/(.+)$/.exec(d);if(m)return['Танки игрока · '+NM[m[1]],m[2]];return['Прочее',d]};
+  const G={};L.forEach(d=>{const g=grp(d);(G[g[0]]=G[g[0]]||[]).push([d,g[1]])});
+  const gk=Object.keys(G).sort((a,b)=>{const w=s=>s.startsWith('Враги')?0:s=='Боссы'?1:s.startsWith('Танки')?2:3;const o=s=>{const i=Object.values(NM).findIndex(n=>s.endsWith(' · '+n));return i<0?99:i};return w(a)-w(b)||o(a)-o(b)});
+  const cur=(TSO['bs:'+k]||{}),opt=(v)=>'<option value="">по умолчанию</option>'+gk.map(g=>'<optgroup label="'+g+'">'+G[g].map(x=>'<option value="'+x[0]+'"'+(x[0]===v?' selected':'')+'>'+x[1]+'</option>').join('')+'</optgroup>').join('')+(v&&!L.includes(v)?'<option value="'+v+'" selected>'+v+' (файлов не нашли)</option>':'');
   const th=(v)=>v?'<img src="'+TIMG+v+'/hull.png" style="height:34px;vertical-align:middle"><img src="'+TIMG+v+'/tur.png" style="height:34px;vertical-align:middle;margin-left:2px">':'';
   b.innerHTML=Array.from({length:10},(_,i)=>'<div style="display:grid;grid-template-columns:52px 1fr auto;gap:6px;align-items:center;margin:4px 0"><span>Ст. '+(i+1)+'</span><select data-st="'+(i+1)+'" style="'+INP+'">'+opt(cur['t'+(i+1)]||'')+'</select><span data-pv="'+(i+1)+'" style="min-width:76px;text-align:right">'+th(cur['t'+(i+1)]||'')+'</span></div>').join('')+'<div class="oa" style="margin-top:8px"><button id="ask-s">Сохранить скины</button><button id="ask-r">Сбросить скины</button></div><small id="ask-m"></small>';
   b.querySelectorAll('[data-st]').forEach(s=>s.onchange=()=>{b.querySelector('[data-pv="'+s.dataset.st+'"]').innerHTML=th(s.value)});
