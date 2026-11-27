@@ -376,10 +376,10 @@ try{const t=localStorage.getItem('rm-token');if(t){const q=JSON.parse(b64d(t.spl
 function api(path,body,opt){const o={method:body?'POST':'GET',headers:{}};if(opt&&opt.ka)o.keepalive=true;if(tok)o.headers.Authorization='Bearer '+tok;if(body){o.headers['Content-Type']='application/json';o.body=JSON.stringify(body)}
  return fetch(API+path,o).then(r=>{if(r.status===401)logout();return r.json().then(j=>{if(r.status===403&&j&&j.error==='banned')SUP.ban(j.until,j.reason,api,logout);else if(j&&j.ban&&(path=='/api/me'||path=='/api/support'))SUP.ban(j.ban.until,j.ban.reason,api,logout);if(!r.ok)throw j;return j})})}
 function logout(){tok=me=runTok=null;try{localStorage.removeItem('rm-token')}catch(e){}renderAuth()}
-function renderAuth(){const a=$('#au');a.innerHTML='';
+let SUPR=0;function renderAuth(){const a=$('#au');a.innerHTML='';
  if(me){if(me.a&&me.a.indexOf('https://')===0){const im=document.createElement('img');im.src=me.a;im.alt='';a.appendChild(im)}
   const n=document.createElement('span');n.textContent=me.n+' · рекорды идут в рейтинг';a.appendChild(n);const cs=document.createElement('span');cs.className='cs sm';cs.textContent=cloudSt;a.appendChild(cs);
-  const o=document.createElement('a');o.href='index.html#profile';o.className='sm';o.textContent='Профиль';a.appendChild(o);const sp=document.createElement('a');sp.href='#';sp.className='sm';sp.style.marginLeft='10px';sp.textContent='✉ Поддержка';sp.onclick=e=>{e.preventDefault();SUP.open(api,logout)};a.appendChild(sp)}
+  const o=document.createElement('a');o.href='index.html#profile';o.className='sm';o.textContent='Профиль';a.appendChild(o);const sp=document.createElement('a');sp.href='#';sp.className='sm';sp.style.marginLeft='10px';sp.textContent='✉ Поддержка'+(SUPR?' ('+SUPR+')':'');sp.onclick=e=>{e.preventDefault();SUP.open(api,logout)};a.appendChild(sp)}
  else{const l=document.createElement('a');l.className='lk';l.textContent='Войти для рейтинга';l.href='index.html#login';l.onclick=()=>{try{sessionStorage.setItem('rm-back','tanki.html|'+Date.now())}catch(e){}};a.appendChild(l)}}
 /* сезон прогресса: если владелец сменил TANK_PROGRESS_SEASON на сервере, сохранённый прогресс сбрасывается при заходе */
 function checkSeason(){return fetch(API+'/api/seasons').then(r=>r.json()).then(j=>{const cur=String(j.tank);let old=null;try{old=localStorage.getItem('tk-season')}catch(e){}
@@ -1196,7 +1196,7 @@ const tkName=id=>{const x=TANKS.find(q=>q.id==id);return x?x.n+' ('+id+')':id};
 function adSup(host,view,who){
  const E=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])),INP='padding:7px;border-radius:8px;border:1px solid #3a4a6a;background:#0e1a33;color:inherit;width:100%;box-sizing:border-box';
  const call=b=>api('/api/admin/sup',b).then(j=>{if(j&&j.error)throw j;return j});
- const ER={no_player:'игрок не найден',ambiguous:'под этим именем несколько игроков — укажите номер аккаунта',is_admin:'администратора банить нельзя',no_confirm:'нет подтверждения',no_backup:'копия не найдена'};
+ const ER={no_player:'игрок не найден',ambiguous:'под этим именем несколько игроков — укажите номер аккаунта',is_admin:'администратора банить нельзя',no_confirm:'нет подтверждения',no_backup:'копия не найдена',closed:'обращение уже закрыто',empty:'напишите ответ',too_long:'слишком длинный ответ',open_exists:'у игрока уже есть открытое обращение',no_ticket:'обращение не найдено'};
  const fail=e=>{const m=$('#sp-m');if(m)m.textContent='Ошибка: '+(ER[e&&e.error]||(e&&e.error)||'нет связи')};
  view=view||'t';
  host.innerHTML='<style>#evw #sp-c button,#evw #sp-vt,#evw #sp-vp{background:var(--acc);color:var(--btx);border:0;border-radius:8px;padding:7px 11px;font-weight:700;margin:0;font-size:14px}#evw #sp-c .dt{min-height:0;display:block}</style><div style="display:flex;gap:6px;margin-bottom:8px"><button id="sp-vt" style="flex:1">✉ Обращения'+(SUPN?' ('+SUPN+')':'')+'</button><button id="sp-vp" style="flex:1">🔨 Игрок и наказания</button></div><div id="sp-m" style="min-height:1.2em;color:#ffb36b;text-align:left"></div><div id="sp-c"></div>';
@@ -1204,15 +1204,23 @@ function adSup(host,view,who){
  $('#sp-vt').onclick=()=>adSup(host,'t');$('#sp-vp').onclick=()=>adSup(host,'p');
  const c=$('#sp-c');
  if(view=='t'){
-  const all=host.dataset.all=='1';
-  c.innerHTML='<label style="display:block;text-align:left;margin:4px 0 8px"><input type="checkbox" id="sp-a"'+(all?' checked':'')+'> показывать и прочитанные</label><div id="sp-l"></div><p style="font-size:12px;opacity:.6;text-align:left">Время — по '+ADM_TZ.split('/')[1]+'.</p>';
-  $('#sp-a').onchange=()=>{host.dataset.all=$('#sp-a').checked?'1':'0';adSup(host,'t')};
-  call({list:1,all:all?1:0}).then(j=>{supBadge(j.new);$('#sp-vt').textContent='✉ Обращения'+(j.new?' ('+j.new+')':'');
-   $('#sp-l').innerHTML=j.list.length?j.list.map(r=>{const x=r.ctx||{},ln=[x.steam?'Steam '+E(x.steam):'',x.google?'Google ✓':'',x.discord?'Discord '+E(x.discord):''].filter(Boolean).join(' · ')||'нет привязок';
-    return '<div class="dt" style="text-align:left;padding:9px 10px;margin:6px 0;'+(r.st?'opacity:.65':'border-color:#f2c14e')+'"><div style="font-size:12px;opacity:.75">№'+r.id+' · '+fmtA(r.t)+(r.st?' · прочитано '+fmtA(r.rt):' · <b style="color:#f2c14e">новое</b>')+(r.ban?' · <b style="color:#ff7a66">в бане</b>':'')+'</div><b style="display:block;margin:3px 0">'+E(r.nick||x.n||r.acc)+' · '+E(({bug:'Ошибка в игре',report:'Жалоба на игрока',reward:'Награда или оплата',question:'Вопрос',other:'Другое'})[r.subj]||r.subj)+'</b><div style="word-break:break-word;margin-bottom:5px">'+E(r.msg)+'</div><div style="font-size:12px;opacity:.7;margin-bottom:6px">Аккаунт '+E(r.acc)+' · '+ln+'</div><div style="display:flex;gap:6px;flex-wrap:wrap">'+(r.st?'':'<button data-rd="'+r.id+'">Прочитано</button>')+'<button data-pl="'+E(r.acc)+'">🔨 Игрок</button><button data-dl="'+r.id+'">Удалить</button></div></div>'}).join(''):'<p style="opacity:.7">Обращений нет.</p>';
-   $('#sp-l').querySelectorAll('[data-rd]').forEach(b=>b.onclick=()=>call({read:+b.dataset.rd}).then(()=>adSup(host,'t')).catch(fail));
-   $('#sp-l').querySelectorAll('[data-dl]').forEach(b=>b.onclick=()=>{if(confirm('Удалить обращение №'+b.dataset.dl+'?'))call({del:+b.dataset.dl}).then(()=>adSup(host,'t')).catch(fail)});
-   $('#sp-l').querySelectorAll('[data-pl]').forEach(b=>b.onclick=()=>adSup(host,'p',b.dataset.pl))}).catch(fail);
+  const ar=host.dataset.ar=='1',ST={0:['новое','#f2c14e'],1:['прочитано','#9ad'],2:['ждём игрока','#6fe08a'],3:['решено ✅','#6fe08a']},SJ={bug:'Ошибка в игре',report:'Жалоба на игрока',reward:'Награда или оплата',question:'Вопрос',other:'Другое'};
+  c.innerHTML='<div style="display:flex;gap:6px;margin-bottom:8px"><button id="sp-o" style="flex:1">Открытые</button><button id="sp-r" style="flex:1">Архив</button></div><div id="sp-l"></div><p style="font-size:12px;opacity:.6;text-align:left">Время — по '+ADM_TZ.split('/')[1]+'. Ответ видит игрок; он может ответить в ответ, пока обращение не закрыто. Закрытые уходят в архив, игрок видит их там, но продолжить не может.</p>';
+  $('#sp-o').style.outline=ar?'':'2px solid #f2c14e';$('#sp-r').style.outline=ar?'2px solid #f2c14e':'';
+  $('#sp-o').onclick=()=>{host.dataset.ar='0';adSup(host,'t')};$('#sp-r').onclick=()=>{host.dataset.ar='1';adSup(host,'t')};
+  call({list:1,arch:ar?1:0}).then(j=>{supBadge(j.new);$('#sp-vt').textContent='✉ Обращения'+(j.new?' ('+j.new+')':'');
+   $('#sp-l').innerHTML=j.list.length?j.list.map(r=>{const x=r.ctx||{},ln=[x.steam?'Steam '+E(x.steam):'',x.google?'Google ✓':'',x.discord?'Discord '+E(x.discord):''].filter(Boolean).join(' · ')||'нет привязок',s=ST[r.st]||ST[1];
+    const th=r.msgs.map(m=>'<div style="margin:5px 0;padding:6px 9px;border-radius:8px;background:'+(m.w=='a'?'#1f3a2a':'#0e1a33')+';border:1px solid '+(m.w=='a'?'#2f6a47':'#2a3a5a')+'"><div style="font-size:11px;opacity:.7">'+(m.w=='a'?'Администрация':E(r.nick||'Игрок'))+' · '+fmtA(m.t)+'</div><div style="word-break:break-word;white-space:pre-wrap">'+E(m.m)+'</div></div>').join('');
+    return '<div class="dt" style="text-align:left;padding:9px 10px;margin:6px 0;'+(r.st==3?'opacity:.8':r.st==0?'border-color:#f2c14e':'')+'"><div style="font-size:12px;opacity:.75">№'+r.id+' · '+fmtA(r.t)+' · <b style="color:'+s[1]+'">'+s[0]+'</b>'+(r.ct?' · '+fmtA(r.ct):'')+(r.ban?' · <b style="color:#ff7a66">в бане</b>':'')+'</div><b style="display:block;margin:3px 0">'+E(r.nick||x.n||r.acc)+' · '+E(SJ[r.subj]||r.subj)+'</b>'+th+'<div style="font-size:12px;opacity:.7;margin:5px 0">Аккаунт '+E(r.acc)+' · '+ln+'</div>'
+     +(r.st<3?'<textarea data-t="'+r.id+'" maxlength="500" placeholder="Ответ игроку (до 500 символов)" style="'+INP+';height:64px;margin-bottom:6px"></textarea>':'')
+     +'<div style="display:flex;gap:6px;flex-wrap:wrap">'+(r.st<3?'<button data-ry="'+r.id+'">Ответить</button><button data-cl="'+r.id+'">Закрыть ✅ решено</button>'+(r.st==0?'<button data-rd="'+r.id+'">Прочитано</button>':''):'<button data-ro="'+r.id+'">Вернуть в работу</button>')+'<button data-pl="'+E(r.acc)+'">🔨 Игрок</button><button data-dl="'+r.id+'">Удалить</button></div></div>'}).join(''):'<p style="opacity:.7">'+(ar?'Архив пуст.':'Открытых обращений нет.')+'</p>';
+   const L=$('#sp-l'),txt=id=>(L.querySelector('[data-t="'+id+'"]')||{value:''}).value.trim(),redo=()=>adSup(host,'t');
+   L.querySelectorAll('[data-ry]').forEach(b=>b.onclick=()=>{const id=+b.dataset.ry,m=txt(id);if(!m){$('#sp-m').textContent='Напишите ответ.';return}call({reply:{id,msg:m}}).then(redo).catch(fail)});
+   L.querySelectorAll('[data-cl]').forEach(b=>b.onclick=()=>{const id=+b.dataset.cl;if(confirm('Закрыть обращение №'+id+' как решённое? Оно уйдёт в архив.'))call({close:{id,msg:txt(id)}}).then(redo).catch(fail)});
+   L.querySelectorAll('[data-rd]').forEach(b=>b.onclick=()=>call({read:+b.dataset.rd}).then(redo).catch(fail));
+   L.querySelectorAll('[data-ro]').forEach(b=>b.onclick=()=>call({reopen:+b.dataset.ro}).then(redo).catch(fail));
+   L.querySelectorAll('[data-dl]').forEach(b=>b.onclick=()=>{if(confirm('Удалить обращение №'+b.dataset.dl+' вместе с перепиской?'))call({del:+b.dataset.dl}).then(redo).catch(fail)});
+   L.querySelectorAll('[data-pl]').forEach(b=>b.onclick=()=>adSup(host,'p',b.dataset.pl))}).catch(fail);
   return}
  c.innerHTML='<div style="display:flex;gap:6px"><input id="sp-w" placeholder="Ник, имя в рейтинге или номер аккаунта" style="'+INP+'" value="'+E(who||'')+'"><button id="sp-f" style="flex:0 0 auto">Найти</button></div><div id="sp-i"></div><h4 style="margin:12px 0 4px;text-align:left">Активные баны</h4><div id="sp-b"></div>';
  const bans=()=>call({bans:1}).then(j=>{$('#sp-b').innerHTML=j.bans.length?j.bans.map(x=>'<div class="dt" style="text-align:left;padding:7px 10px;margin:5px 0;display:flex;justify-content:space-between;gap:8px;align-items:center"><span>'+E(x.nick||x.acc)+' · '+(x.until?'до '+fmtA(x.until):'навсегда')+(x.reason?' · '+E(x.reason):'')+'</span><button data-o="'+E(x.acc)+'">Открыть</button></div>').join(''):'<p style="opacity:.7;text-align:left">Нет.</p>';
@@ -1314,7 +1322,7 @@ $('#adb').onclick=adOpen;
 (function(){const tr=$('#evt');if(tr)tr.addEventListener('scroll',evDots,{passive:true});setInterval(()=>{if(!$('#ov').classList.contains('h')&&!$('#evw').classList.contains('on'))evLoad()},60000)})();
 function mzFit(){const z=(innerWidth>=900&&innerHeight>=600)?Math.max(1,Math.min(2.2,Math.min(innerWidth/1000,innerHeight/800))):1;document.documentElement.style.setProperty('--mz',z.toFixed(2))}
 mzFit();addEventListener('resize',mzFit);
-if(tok)api('/api/me').catch(()=>{});tsLoad();adLoad();evLoad();invLoad();dqLoad();tinit();renderAuth();ovStat();try{const m=sessionStorage.getItem('tk-msg');if(m){sessionStorage.removeItem('tk-msg');$('#t2').textContent=m;$('#t2').style.color='#f2c14e'}}catch(e){}checkSeason().then(cloudLoad,cloudLoad);
+if(tok)api('/api/me').then(j=>{SUPR=j&&j.sup|0;renderAuth()}).catch(()=>{});tsLoad();adLoad();evLoad();invLoad();dqLoad();tinit();renderAuth();ovStat();try{const m=sessionStorage.getItem('tk-msg');if(m){sessionStorage.removeItem('tk-msg');$('#t2').textContent=m;$('#t2').style.color='#f2c14e'}}catch(e){}checkSeason().then(cloudLoad,cloudLoad);
 requestAnimationFrame(loop);
 </script>
 </body>

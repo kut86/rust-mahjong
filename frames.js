@@ -224,20 +224,32 @@
 })();
 
 /* ===== Поддержка и экран бана (общий для index.html и tanki.html) =====
- * SUP.open(api, logout)  — форма обращения в поддержку (тема + до 300 символов, одно обращение, пока админ не прочитает).
+ * SUP.open(api, logout)  — обращения: текущая переписка (ответ игрока возможен после ответа администрации) и вкладка «Архив» (закрытые, только просмотр).
  * SUP.ban(until, reason, api, logout) — экран бана: закрывает сайт, остаётся только связь с поддержкой. */
 (function () {
   var W = window, cur = null;
   function el(t, css, txt) { var e = document.createElement(t); if (css) e.style.cssText = css; if (txt != null) e.textContent = txt; return e; }
   function fmt(t) { var d = new Date(t); return d.toLocaleDateString('ru-RU') + ' ' + d.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' }); }
   function close() { if (cur) { cur.remove(); cur = null; } }
+  var STT = { 0: ['⏳ Ждёт ответа администрации', '#f2c14e'], 1: ['👀 Прочитано, ждите ответа', '#f2c14e'], 2: ['💬 Есть ответ администрации', '#6fe08a'], 3: ['✅ Решено', '#6fe08a'] };
   function open(api, logout, ban) {
     if (cur) cur.remove();
     var ov = el('div', 'position:fixed;inset:0;background:' + (ban ? 'rgba(10,10,12,.97)' : 'rgba(0,0,0,.7)') + ';display:flex;align-items:center;justify-content:center;z-index:100000;padding:16px;overflow:auto;font-family:"Trebuchet MS",Verdana,sans-serif');
-    var box = el('div', 'background:#23272a;color:#e9e4d8;border:1px solid #3a4044;border-top:5px solid ' + (ban ? '#c0392b' : '#c2511f') + ';border-radius:12px;padding:20px;max-width:440px;width:100%;text-align:left;box-sizing:border-box;-webkit-user-select:text;user-select:text');
+    var box = el('div', 'background:#23272a;color:#e9e4d8;border:1px solid #3a4044;border-top:5px solid ' + (ban ? '#c0392b' : '#c2511f') + ';border-radius:12px;padding:20px;max-width:460px;width:100%;max-height:94vh;overflow:auto;text-align:left;box-sizing:border-box;-webkit-user-select:text;user-select:text');
     ov.appendChild(box); document.body.appendChild(ov); cur = ov;
     var inp = 'width:100%;box-sizing:border-box;background:#16181a;color:#e9e4d8;border:1px solid #3a4044;border-radius:8px;padding:9px;font:inherit;font-size:15px';
-    var btn = 'font:inherit;background:#c2511f;color:#fff;border:0;border-radius:8px;padding:9px 16px;cursor:pointer';
+    var btn = 'font:inherit;background:#c2511f;color:#fff;border:0;border-radius:8px;padding:9px 16px;cursor:pointer', grey = btn.replace('#c2511f', '#3a4044');
+    var tab = 'c';
+    function thread(tk) { // переписка: сообщения игрока и администрации
+      var w = el('div', 'margin:6px 0');
+      tk.msgs.forEach(function (m) {
+        var a = m.w === 'a', b = el('div', 'margin:6px 0;padding:8px 10px;border-radius:8px;background:' + (a ? '#1f3a2a' : '#1b1e20') + ';border:1px solid ' + (a ? '#2f6a47' : '#3a4044') + ';font-size:14px;line-height:1.4');
+        b.appendChild(el('div', 'opacity:.7;font-size:12px', (a ? 'Администрация' : 'Вы') + ' · ' + fmt(m.t)));
+        b.appendChild(el('div', 'margin-top:2px;word-break:break-word;white-space:pre-wrap', m.m));
+        w.appendChild(b);
+      });
+      return w;
+    }
     function draw(st) {
       box.innerHTML = '';
       if (ban) {
@@ -246,38 +258,52 @@
         if (ban.reason) box.appendChild(el('p', 'margin:0 0 6px;color:#c9c9c9;line-height:1.4', 'Причина: ' + ban.reason));
         box.appendChild(el('p', 'margin:0 0 12px;color:#9aa3a8;line-height:1.4;font-size:14px', 'Сейчас вам доступна только связь с технической поддержкой.'));
       } else box.appendChild(el('h2', 'margin:0 0 10px;font-size:22px', '✉ Техподдержка'));
-      var last = st && st.last;
-      if (last) {
-        var s = el('div', 'background:#1b1e20;border:1px solid #3a4044;border-radius:8px;padding:9px 11px;margin-bottom:12px;font-size:14px;line-height:1.4');
-        s.appendChild(el('div', 'opacity:.7;font-size:13px', 'Ваше обращение · ' + fmt(last.t) + (st.subjects && st.subjects[last.subj] ? ' · ' + st.subjects[last.subj] : '')));
-        s.appendChild(el('div', 'margin:4px 0;word-break:break-word', last.msg));
-        s.appendChild(el('div', 'font-weight:700;color:' + (last.st ? '#6fe08a' : '#f2c14e'), last.st ? '✓ Прочитано администрацией ' + (last.rt ? fmt(last.rt) : '') : '⏳ Ждёт, пока администрация прочитает'));
-        box.appendChild(s);
-      }
+      var arch = (st && st.arch) || [], row = el('div', 'display:flex;gap:6px;margin-bottom:10px');
+      [['c', 'Обращение'], ['a', 'Архив' + (arch.length ? ' (' + arch.length + ')' : '')]].forEach(function (x) {
+        var b = el('button', (tab === x[0] ? btn : grey) + ';flex:1', x[1]); b.onclick = function () { tab = x[0]; draw(st); }; row.appendChild(b);
+      });
+      box.appendChild(row);
       var msg = el('div', 'min-height:1.3em;margin:8px 0;color:#e8743a;font-size:14px');
-      if (!last || last.st) {
-        var sel = el('select', inp + ';margin-bottom:8px'), subs = (st && st.subjects) || {};
-        Object.keys(subs).forEach(function (k) { var o = el('option', '', subs[k]); o.value = k; sel.appendChild(o); });
-        var ta = el('textarea', inp + ';height:110px;resize:vertical'), max = (st && st.max) || 300, cnt = el('div', 'text-align:right;font-size:12px;opacity:.7;margin-top:2px', '0 / ' + max);
-        ta.placeholder = 'Опишите вопрос или проблему'; ta.maxLength = max;
-        ta.oninput = function () { cnt.textContent = [...ta.value].length + ' / ' + max; };
-        var go = el('button', btn, 'Отправить');
-        go.onclick = function () {
-          var v = ta.value.trim(); if (!v) { msg.textContent = 'Напишите сообщение.'; return; }
-          go.disabled = true; msg.textContent = '';
-          api('/api/support', { subj: sel.value, msg: v }).then(function (j) { draw(j); }).catch(function (e) {
-            go.disabled = false;
-            msg.textContent = ({ open_exists: 'Прошлое обращение ещё не прочитано.', too_long: 'Слишком длинное сообщение.', empty: 'Напишите сообщение.', unauthorized: 'Нужно войти в аккаунт.' })[e && e.error] || 'Не получилось отправить, попробуйте позже.';
-          });
-        };
-        box.appendChild(sel); box.appendChild(ta); box.appendChild(cnt); box.appendChild(msg);
-        var row = el('div', 'display:flex;gap:10px;justify-content:space-between;margin-top:6px'); row.appendChild(go); box.appendChild(row);
-        if (!ban) { var c = el('button', btn.replace('#c2511f', '#3a4044'), 'Закрыть'); c.onclick = close; row.appendChild(c); }
-      } else {
-        box.appendChild(el('p', 'margin:0 0 6px;color:#9aa3a8;font-size:14px', 'Новое обращение можно отправить, когда администрация прочитает это.'));
-        if (!ban) { var c2 = el('button', btn.replace('#c2511f', '#3a4044'), 'Закрыть'); c2.onclick = close; box.appendChild(c2); }
+      var ER = { open_exists: 'Сначала дождитесь решения по прошлому обращению.', too_long: 'Слишком длинное сообщение.', empty: 'Напишите сообщение.', unauthorized: 'Нужно войти в аккаунт.', wait_admin: 'Ждите ответа администрации.', no_open: 'Обращение уже закрыто.' };
+      function send(path, body, go) {
+        go.disabled = true; msg.textContent = '';
+        api('/api/support', body).then(function (j) { draw(j); }).catch(function (e) { go.disabled = false; msg.textContent = ER[e && e.error] || 'Не получилось отправить, попробуйте позже.'; });
       }
-      if (ban && logout) { var lo = el('button', btn.replace('#c2511f', '#3a4044') + ';margin-top:12px', 'Выйти из аккаунта'); lo.onclick = function () { close(); logout(); }; box.appendChild(lo); }
+      function form(ph, mk) { // поле с счётчиком и кнопкой отправки
+        var max = (st && st.max) || 300, ta = el('textarea', inp + ';height:100px;resize:vertical'), cnt = el('div', 'text-align:right;font-size:12px;opacity:.7;margin-top:2px', '0 / ' + max), go = el('button', btn + ';margin-right:8px', 'Отправить');
+        ta.placeholder = ph; ta.maxLength = max;
+        ta.oninput = function () { cnt.textContent = [...ta.value].length + ' / ' + max; };
+        go.onclick = function () { var v = ta.value.trim(); if (!v) { msg.textContent = 'Напишите сообщение.'; return; } mk(v, go); };
+        return [ta, cnt, msg, go];
+      }
+      if (tab === 'a') {
+        if (!arch.length) box.appendChild(el('p', 'color:#9aa3a8;font-size:14px', 'Закрытых обращений нет.'));
+        arch.forEach(function (tk) {
+          var d = el('details', 'margin:6px 0;border:1px solid #3a4044;border-radius:8px;padding:6px 10px;background:#1b1e20'), sm = el('summary', 'cursor:pointer;font-size:14px');
+          sm.textContent = '✅ ' + ((st.subjects || {})[tk.subj] || tk.subj) + ' · ' + fmt(tk.t);
+          d.appendChild(sm); d.appendChild(thread(tk)); d.appendChild(el('div', 'font-size:12px;color:#6fe08a;margin-bottom:4px', 'Решено ' + (tk.ct ? fmt(tk.ct) : '') + '. Архив — только просмотр.'));
+          box.appendChild(d);
+        });
+      } else {
+        var c = st && st.cur;
+        if (c) {
+          box.appendChild(el('div', 'font-size:13px;opacity:.75', '№' + c.id + ' · ' + ((st.subjects || {})[c.subj] || c.subj)));
+          box.appendChild(thread(c));
+          box.appendChild(el('div', 'font-weight:700;color:' + STT[c.st][1], STT[c.st][0]));
+          if (c.st === 2) {
+            var f = form('Ваш ответ', function (v, go) { send('/api/support', { reply: v }, go); });
+            f[0].style.marginTop = '8px'; f.forEach(function (x) { box.appendChild(x); });
+          } else box.appendChild(el('p', 'margin:8px 0;color:#9aa3a8;font-size:14px', 'Написать ещё можно, когда администрация ответит.'));
+        } else {
+          var sel = el('select', inp + ';margin-bottom:8px'), subs = (st && st.subjects) || {};
+          Object.keys(subs).forEach(function (k) { var o = el('option', '', subs[k]); o.value = k; sel.appendChild(o); });
+          box.appendChild(sel);
+          var f2 = form('Опишите вопрос или проблему', function (v, go) { send('/api/support', { subj: sel.value, msg: v }, go); });
+          f2.forEach(function (x) { box.appendChild(x); });
+        }
+      }
+      if (!ban) { var cl = el('button', grey + ';margin-top:12px', 'Закрыть'); cl.onclick = close; box.appendChild(cl); }
+      if (ban && logout) { var lo = el('button', grey + ';margin-top:12px', 'Выйти из аккаунта'); lo.onclick = function () { close(); logout(); }; box.appendChild(lo); }
     }
     draw(null);
     api('/api/support', { get: 1 }).then(draw).catch(function () { box.appendChild(el('p', 'color:#e8743a', 'Нет связи с сервером.')); });

@@ -244,6 +244,7 @@ function pfMsg(t){$('pfmsg').textContent=t||''}
 function pfLoad(){
   api('/api/me').then(function(j){
     rememberMethods(j);
+    $('pfsp').textContent='✉ Поддержка'+(j.sup?' ('+j.sup+')':'');
     $('pfs').textContent=j.steam?'Привязан':'Не привязан';
     $('pfg').textContent=j.google?'Привязан':'Не привязан';
     $('pfd').textContent=j.discord?'Привязан':'Не привязан';
