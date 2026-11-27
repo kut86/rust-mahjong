@@ -204,7 +204,7 @@ function api(path,body){
   if(body){o.headers['Content-Type']='application/json';o.body=JSON.stringify(body)}
   return fetch(API+path,o).then(function(r){
     if(r.status===401)logout();
-    return r.json().then(function(j){if(r.status===403&&j&&j.error==='banned')window.SUP&&SUP.ban(j.until,j.reason,api,logout);else if(j&&j.ban&&window.SUP)SUP.ban(j.ban.until,j.ban.reason,api,logout);if(!r.ok)throw j;return j});
+    return r.json().then(function(j){if(r.status===403&&j&&j.error==='banned')window.SUP&&SUP.ban(j.until,j.reason,api,logout);else if(j&&j.ban&&window.SUP&&(path==='/api/me'||path==='/api/support'))SUP.ban(j.ban.until,j.ban.reason,api,logout);if(!r.ok)throw j;return j});
   });
 }
 function logout(){tok=null;me=null;try{localStorage.removeItem('rm-token')}catch(e){}renderAuth();$('pfov').classList.remove('show')}

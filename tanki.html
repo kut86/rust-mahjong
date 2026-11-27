@@ -374,7 +374,7 @@ let tok=null,me=null,runTok=null,bosses=0;
 function b64d(s){s=s.replace(/-/g,'+').replace(/_/g,'/');const b=atob(s),u=new Uint8Array(b.length);for(let i=0;i<b.length;i++)u[i]=b.charCodeAt(i);return new TextDecoder().decode(u)}
 try{const t=localStorage.getItem('rm-token');if(t){const q=JSON.parse(b64d(t.split('.')[0]));if(q.k==='s'&&q.exp>Date.now()){tok=t;me=q}else localStorage.removeItem('rm-token')}}catch(e){}
 function api(path,body,opt){const o={method:body?'POST':'GET',headers:{}};if(opt&&opt.ka)o.keepalive=true;if(tok)o.headers.Authorization='Bearer '+tok;if(body){o.headers['Content-Type']='application/json';o.body=JSON.stringify(body)}
- return fetch(API+path,o).then(r=>{if(r.status===401)logout();return r.json().then(j=>{if(r.status===403&&j&&j.error==='banned')SUP.ban(j.until,j.reason,api,logout);else if(j&&j.ban)SUP.ban(j.ban.until,j.ban.reason,api,logout);if(!r.ok)throw j;return j})})}
+ return fetch(API+path,o).then(r=>{if(r.status===401)logout();return r.json().then(j=>{if(r.status===403&&j&&j.error==='banned')SUP.ban(j.until,j.reason,api,logout);else if(j&&j.ban&&(path=='/api/me'||path=='/api/support'))SUP.ban(j.ban.until,j.ban.reason,api,logout);if(!r.ok)throw j;return j})})}
 function logout(){tok=me=runTok=null;try{localStorage.removeItem('rm-token')}catch(e){}renderAuth()}
 function renderAuth(){const a=$('#au');a.innerHTML='';
  if(me){if(me.a&&me.a.indexOf('https://')===0){const im=document.createElement('img');im.src=me.a;im.alt='';a.appendChild(im)}
