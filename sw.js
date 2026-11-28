@@ -1,6 +1,6 @@
 /* Сервис-воркер: игра открывается из кеша и работает без сети (кроме рейтинга и сохранений), обновления скачиваются в фоне и применяются по кнопке.
    Строка V подставляется скриптом deploy.sh (хеш файлов сайта): новый V = новая версия. API игры сюда не попадает. */
-const V = '5040d025';
+const V = '3a797b51';
 const CORE = 'rm-core-' + V, IMG = 'rm-img';
 const FILES = ['index.html', 'tanki.html', 'mahjong.html', 'privacy.html', 'frames.js', 'manifest.json'];
 const base = self.registration.scope;
