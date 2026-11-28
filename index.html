@@ -138,6 +138,7 @@ a.btn{display:inline-block;background:#1b2838;color:#fff;text-decoration:none;bo
   <div id="pfrole" style="display:none;margin:6px 0 0;padding:8px 10px;border:1px solid var(--line,#33373b);border-radius:8px;font-size:.85rem;color:var(--muted)"></div>
   <p id="pfmsg"></p>
   <div class="row2"><button id="pfcm">✨ Украшения и ник</button><button class="alt" id="pfsp">✉ Поддержка</button></div>
+  <div class="row2"><button class="alt" id="pfup" style="grid-column:1/-1">⟳ Проверить обновления</button></div>
   <div class="row2"><button class="alt" id="pflo">Выйти</button><button id="pfcl">Закрыть</button></div>
 </div></div>
 <div class="ov" id="cmov"><div class="box pf">
@@ -451,7 +452,7 @@ $('lbclose').onclick=function(){$('lbov').classList.remove('show')};
 var _h=location.hash,_lk=/[#&]linked=(steam|discord)/.test(_h),_lkw=(_h.match(/[#&]linked=([a-z]+)/)||[])[1],_er=(_h.match(/[#&]error=([a-z_]+)/)||[])[1];
 loadSession();renderAuth();
 $('pfcl').onclick=function(){$('pfov').classList.remove('show')};$('lgcl').onclick=function(){$('lgov').classList.remove('show')};
-if(tok)api('/api/me').then(rememberMethods).catch(function(){});$('pfsp').onclick=function(){SUP.open(api,logout)};$('pflo').onclick=function(){
+if(tok)api('/api/me').then(rememberMethods).catch(function(){});$('pfsp').onclick=function(){SUP.open(api,logout)};try{UPD.init();UPD.mount($('pfup'))}catch(e){}$('pflo').onclick=function(){
   if(!confirm('Выйти из аккаунта?\nПрогресс сохранён в облаке, а на этом устройстве будет очищен. При следующем входе он вернётся.'))return;
   try{['tk','tk-q','tk-bak','tk-own'].forEach(function(k){localStorage.removeItem(k)})}catch(e){}
   logout();

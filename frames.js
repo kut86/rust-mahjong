@@ -310,3 +310,58 @@
   }
   W.SUP = { open: function (api, logout) { open(api, logout, null); }, ban: function (until, reason, api, logout) { if (cur && cur.dataset.ban) return; open(api, logout, { until: until, reason: reason }); if (cur) cur.dataset.ban = '1'; } };
 })();
+
+/* Обновления игры (сервис-воркер): тихая загрузка в фоне, применение по кнопке в профиле */
+var UPD=(function(){
+  var s={st:'idle',ver:'',reg:null,btn:null,tm:0,busy:function(){return false}},CD=60000,LS='rm-upd-t';
+  function ls(k,v){try{if(v===undefined)return localStorage.getItem(k);localStorage.setItem(k,v)}catch(e){}return null}
+  function left(){var t=+ls(LS)||0,d=CD-(Date.now()-t);return d>0?Math.ceil(d/1000):0}
+  function draw(){
+    var b=s.btn;if(!b)return;var L=left(),t;
+    if(!('serviceWorker' in navigator)){b.style.display='none';return}
+    if(s.st=='ready')t='⬇ Обновить игру (новая версия готова)';
+    else if(s.st=='loading')t='⏳ Загружаю обновление…';
+    else if(s.st=='checking')t='⏳ Проверяю…';
+    else if(s.st=='latest')t='✅ У вас последняя версия'+(s.ver?' ('+s.ver+')':'');
+    else t='⟳ Проверить обновления'+(s.ver?' · '+s.ver:'');
+    if(L&&s.st!='ready'&&s.st!='loading'&&s.st!='checking')t+=' · через '+L+' с';
+    b.textContent=t;b.disabled=s.st=='loading'||s.st=='checking'||(!!L&&s.st!='ready')
+  }
+  function track(w){
+    if(!w)return;s.st='loading';draw();
+    w.addEventListener('statechange',function(){if(w.state=='installed'){s.st=navigator.serviceWorker.controller?'ready':'idle'}else if(w.state=='redundant'&&s.st=='loading')s.st='idle';draw()})
+  }
+  function ver(){
+    var c=navigator.serviceWorker.controller;if(!c)return;
+    try{var ch=new MessageChannel();ch.port1.onmessage=function(e){s.ver=String(e.data||'').slice(0,8);draw()};c.postMessage('VER',[ch.port2])}catch(e){}
+  }
+  function check(){
+    if(!s.reg||left()||s.st=='loading'||s.st=='checking')return;
+    ls(LS,String(Date.now()));if(s.st!='ready')s.st='checking';draw();
+    s.reg.update().then(function(){
+      if(s.reg.waiting&&navigator.serviceWorker.controller)s.st='ready';
+      else if(s.reg.installing)track(s.reg.installing);
+      else s.st='latest'
+    }).catch(function(){s.st='idle'}).then(function(){draw()})
+  }
+  function apply(){
+    if(!s.reg||!s.reg.waiting)return;
+    if(s.busy()){alert('Сначала завершите бой, потом обновите игру.');return}
+    navigator.serviceWorker.addEventListener('controllerchange',function(){location.reload()});
+    s.reg.waiting.postMessage('SKIP')
+  }
+  s.init=function(busy){
+    if(busy)s.busy=busy;
+    if(!('serviceWorker' in navigator)||!/^https?:$/.test(location.protocol))return;
+    navigator.serviceWorker.register('sw.js').then(function(r){
+      s.reg=r;ver();
+      if(r.waiting&&navigator.serviceWorker.controller)s.st='ready';
+      r.addEventListener('updatefound',function(){track(r.installing)});
+      setTimeout(function(){if(s.st=='idle'&&!s.busy()){try{r.update()}catch(e){}}},4000); // тихая проверка при запуске: файлы скачиваются в фоне, игра не подменяется
+      draw()
+    }).catch(function(){});
+    setInterval(draw,1000)
+  };
+  s.mount=function(btn){s.btn=btn;btn.onclick=function(){s.st=='ready'?apply():check()};draw()};
+  return s
+})();
