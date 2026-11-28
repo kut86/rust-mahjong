@@ -1390,7 +1390,7 @@ function adEvents(host,edit,mode){mode=mode||'n';const B=mode=='b';
 $('#adb').onclick=adOpen;
 
 
-(function(){const tr=$('#evt');if(tr)tr.addEventListener('scroll',evDots,{passive:true});setInterval(()=>{if(!$('#ov').classList.contains('h')&&!$('#evw').classList.contains('on'))evLoad()},60000)})();
+(function(){const tr=$('#evt');if(tr)tr.addEventListener('scroll',evDots,{passive:true});setInterval(()=>{if(!document.hidden&&!$('#ov').classList.contains('h')&&!$('#evw').classList.contains('on'))evLoad()},120000)})();
 function mzFit(){const z=(innerWidth>=900&&innerHeight>=600)?Math.max(1,Math.min(2.2,Math.min(innerWidth/1000,innerHeight/800))):1;document.documentElement.style.setProperty('--mz',z.toFixed(2))}
 mzFit();addEventListener('resize',mzFit);
 if(tok)api('/api/me').then(j=>{SUPR=j&&j.sup|0;renderAuth()}).catch(()=>{});tsLoad();adLoad();evLoad();invLoad();dqLoad();tinit();renderAuth();ovStat();try{const m=sessionStorage.getItem('tk-msg');if(m){sessionStorage.removeItem('tk-msg');$('#t2').textContent=m;$('#t2').style.color='#f2c14e'}}catch(e){}checkSeason().then(cloudLoad,cloudLoad);
